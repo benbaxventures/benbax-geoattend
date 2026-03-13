@@ -1,0 +1,280 @@
+const pool = require('../config/database');
+const excel4node = require('excel4node');
+const PDFDocument = require('pdfkit');
+
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const institutionId = req.user.institution_id;
+    const today = new Date().toISOString().split('T')[0];
+
+    const [totalStaff, presentToday, lateToday, absentToday] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true', [institutionId]),
+      pool.query('SELECT COUNT(DISTINCT staff_uuid) FROM attendance_records WHERE institution_id = $1 AND date = $2', [institutionId, today]),
+      pool.query('SELECT COUNT(DISTINCT staff_uuid) FROM attendance_records WHERE institution_id = $1 AND date = $2 AND is_late = true', [institutionId, today]),
+      pool.query(
+        `SELECT COUNT(*) FROM staff s
+         WHERE s.institution_id = $1 AND s.is_active = true
+         AND s.id NOT IN (SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2)`,
+        [institutionId, today]
+      ),
+    ]);
+
+    res.json({
+      totalStaff: parseInt(totalStaff.rows[0].count, 10),
+      presentToday: parseInt(presentToday.rows[0].count, 10),
+      lateToday: parseInt(lateToday.rows[0].count, 10),
+      absentToday: parseInt(absentToday.rows[0].count, 10),
+      date: today,
+    });
+  } catch (err) {
+    console.error('Dashboard stats error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getAttendanceReport = async (req, res) => {
+  try {
+    const { startDate, endDate, department, staffId, page = 1, limit = 50 } = req.query;
+    const institutionId = req.user.institution_id;
+    const offset = (page - 1) * limit;
+
+    let query = `
+      SELECT ar.*, s.staff_id, s.first_name, s.last_name, s.department, s.position
+      FROM attendance_records ar
+      JOIN staff s ON ar.staff_uuid = s.id
+      WHERE ar.institution_id = $1`;
+    const params = [institutionId];
+    let paramIndex = 2;
+
+    if (startDate) {
+      query += ` AND ar.date >= $${paramIndex}`;
+      params.push(startDate);
+      paramIndex++;
+    }
+    if (endDate) {
+      query += ` AND ar.date <= $${paramIndex}`;
+      params.push(endDate);
+      paramIndex++;
+    }
+    if (department) {
+      query += ` AND s.department = $${paramIndex}`;
+      params.push(department);
+      paramIndex++;
+    }
+    if (staffId) {
+      query += ` AND s.staff_id = $${paramIndex}`;
+      params.push(staffId);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY ar.date DESC, ar.check_in_time DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(parseInt(limit, 10), parseInt(offset, 10));
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      records: result.rows,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  } catch (err) {
+    console.error('Attendance report error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getRealTimeAttendance = async (req, res) => {
+  try {
+    const institutionId = req.user.institution_id;
+    const today = new Date().toISOString().split('T')[0];
+
+    const result = await pool.query(
+      `SELECT ar.*, s.staff_id, s.first_name, s.last_name, s.department, s.position, s.profile_photo_url
+       FROM attendance_records ar
+       JOIN staff s ON ar.staff_uuid = s.id
+       WHERE ar.institution_id = $1 AND ar.date = $2
+       ORDER BY ar.check_in_time DESC`,
+      [institutionId, today]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Real-time attendance error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getWeeklySummary = async (req, res) => {
+  try {
+    const institutionId = req.user.institution_id;
+    const result = await pool.query(
+      `SELECT
+        ar.date,
+        COUNT(DISTINCT ar.staff_uuid) as present,
+        COUNT(DISTINCT CASE WHEN ar.is_late THEN ar.staff_uuid END) as late,
+        (SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true) as total_staff
+       FROM attendance_records ar
+       WHERE ar.institution_id = $1 AND ar.date >= CURRENT_DATE - INTERVAL '7 days'
+       GROUP BY ar.date
+       ORDER BY ar.date`,
+      [institutionId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Weekly summary error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.exportExcel = async (req, res) => {
+  try {
+    const { startDate, endDate, department } = req.query;
+    const institutionId = req.user.institution_id;
+
+    let query = `
+      SELECT ar.date, s.staff_id, s.first_name, s.last_name, s.department, s.position,
+             ar.check_in_time, ar.check_out_time, ar.check_in_method, ar.is_late, ar.is_within_geofence
+      FROM attendance_records ar
+      JOIN staff s ON ar.staff_uuid = s.id
+      WHERE ar.institution_id = $1`;
+    const params = [institutionId];
+    let paramIndex = 2;
+
+    if (startDate) { query += ` AND ar.date >= $${paramIndex}`; params.push(startDate); paramIndex++; }
+    if (endDate) { query += ` AND ar.date <= $${paramIndex}`; params.push(endDate); paramIndex++; }
+    if (department) { query += ` AND s.department = $${paramIndex}`; params.push(department); paramIndex++; }
+
+    query += ' ORDER BY ar.date DESC, s.last_name';
+    const result = await pool.query(query, params);
+
+    const wb = new excel4node.Workbook();
+    const ws = wb.addWorksheet('Attendance Report');
+
+    const headerStyle = wb.createStyle({
+      font: { bold: true, size: 12, color: '#ffffff' },
+      fill: { type: 'pattern', patternType: 'solid', fgColor: '#1a5276' },
+      alignment: { horizontal: 'center' },
+    });
+
+    const headers = ['Date', 'Staff ID', 'First Name', 'Last Name', 'Department', 'Position', 'Check In', 'Check Out', 'Method', 'Late', 'Within Geofence'];
+    headers.forEach((h, i) => ws.cell(1, i + 1).string(h).style(headerStyle));
+
+    result.rows.forEach((row, i) => {
+      const r = i + 2;
+      ws.cell(r, 1).string(row.date ? new Date(row.date).toLocaleDateString() : '');
+      ws.cell(r, 2).string(row.staff_id || '');
+      ws.cell(r, 3).string(row.first_name || '');
+      ws.cell(r, 4).string(row.last_name || '');
+      ws.cell(r, 5).string(row.department || '');
+      ws.cell(r, 6).string(row.position || '');
+      ws.cell(r, 7).string(row.check_in_time ? new Date(row.check_in_time).toLocaleTimeString() : '');
+      ws.cell(r, 8).string(row.check_out_time ? new Date(row.check_out_time).toLocaleTimeString() : 'N/A');
+      ws.cell(r, 9).string(row.check_in_method || '');
+      ws.cell(r, 10).string(row.is_late ? 'Yes' : 'No');
+      ws.cell(r, 11).string(row.is_within_geofence ? 'Yes' : 'No');
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=attendance_report_${startDate || 'all'}_${endDate || 'all'}.xlsx`);
+
+    wb.write('report.xlsx', res);
+  } catch (err) {
+    console.error('Export Excel error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.exportPDF = async (req, res) => {
+  try {
+    const { startDate, endDate, department } = req.query;
+    const institutionId = req.user.institution_id;
+
+    // Get institution info
+    const instResult = await pool.query('SELECT name FROM institutions WHERE id = $1', [institutionId]);
+    const institutionName = instResult.rows[0]?.name || 'Institution';
+
+    let query = `
+      SELECT ar.date, s.staff_id, s.first_name, s.last_name, s.department,
+             ar.check_in_time, ar.check_out_time, ar.is_late
+      FROM attendance_records ar
+      JOIN staff s ON ar.staff_uuid = s.id
+      WHERE ar.institution_id = $1`;
+    const params = [institutionId];
+    let paramIndex = 2;
+
+    if (startDate) { query += ` AND ar.date >= $${paramIndex}`; params.push(startDate); paramIndex++; }
+    if (endDate) { query += ` AND ar.date <= $${paramIndex}`; params.push(endDate); paramIndex++; }
+    if (department) { query += ` AND s.department = $${paramIndex}`; params.push(department); paramIndex++; }
+
+    query += ' ORDER BY ar.date DESC, s.last_name';
+    const result = await pool.query(query, params);
+
+    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=attendance_report_${startDate || 'all'}_${endDate || 'all'}.pdf`);
+
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(18).text(institutionName, { align: 'center' });
+    doc.fontSize(14).text('Attendance Report', { align: 'center' });
+    doc.fontSize(10).text(
+      `Period: ${startDate || 'All'} to ${endDate || 'All'}${department ? ` | Department: ${department}` : ''}`,
+      { align: 'center' }
+    );
+    doc.moveDown();
+
+    // Table header
+    const tableTop = doc.y;
+    const colWidths = [65, 55, 90, 80, 65, 65, 35];
+    const colHeaders = ['Date', 'Staff ID', 'Name', 'Department', 'Check In', 'Check Out', 'Late'];
+
+    doc.fontSize(8).font('Helvetica-Bold');
+    let x = 40;
+    colHeaders.forEach((header, i) => {
+      doc.text(header, x, tableTop, { width: colWidths[i], align: 'left' });
+      x += colWidths[i] + 5;
+    });
+
+    doc.moveTo(40, tableTop + 15).lineTo(555, tableTop + 15).stroke();
+
+    // Table rows
+    doc.font('Helvetica').fontSize(7);
+    let y = tableTop + 20;
+
+    result.rows.forEach((row) => {
+      if (y > 750) {
+        doc.addPage();
+        y = 40;
+      }
+
+      x = 40;
+      const cells = [
+        row.date ? new Date(row.date).toLocaleDateString() : '',
+        row.staff_id || '',
+        `${row.first_name} ${row.last_name}`,
+        row.department || '',
+        row.check_in_time ? new Date(row.check_in_time).toLocaleTimeString() : '',
+        row.check_out_time ? new Date(row.check_out_time).toLocaleTimeString() : 'N/A',
+        row.is_late ? 'Yes' : 'No',
+      ];
+
+      cells.forEach((cell, i) => {
+        doc.text(cell, x, y, { width: colWidths[i], align: 'left' });
+        x += colWidths[i] + 5;
+      });
+
+      y += 15;
+    });
+
+    // Footer
+    doc.fontSize(8).text(`Generated on ${new Date().toLocaleString()}`, 40, 780, { align: 'center' });
+
+    doc.end();
+  } catch (err) {
+    console.error('Export PDF error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

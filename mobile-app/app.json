@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "GeoAttend",
+    "slug": "geoattend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#1a5276"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a5276"
+      },
+      "package": "com.geoattend.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      ["expo-location", { "locationAlwaysAndWhenInUsePermission": "Allow GeoAttend to use your location for attendance check-in." }],
+      ["expo-camera", { "cameraPermission": "Allow GeoAttend to access your camera for QR code scanning." }]
+    ]
+  }
+}

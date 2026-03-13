@@ -1,0 +1,150 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter } from 'react-icons/fi';
+import { getStaff, getDepartments, resetStaffPassword } from '../services/api';
+
+const styles = {
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
+  title: { fontSize: '24px', fontWeight: '700' },
+  addBtn: {
+    display: 'flex', alignItems: 'center', gap: '8px',
+    padding: '10px 20px', background: '#1a5276', color: '#fff',
+    borderRadius: '8px', fontSize: '14px', fontWeight: '500',
+  },
+  filters: {
+    display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap',
+  },
+  searchBox: {
+    display: 'flex', alignItems: 'center', gap: '8px',
+    background: '#fff', border: '1px solid #e0e0e0', borderRadius: '8px',
+    padding: '8px 14px', flex: 1, minWidth: '240px',
+  },
+  searchInput: { border: 'none', flex: 1, fontSize: '14px' },
+  select: {
+    padding: '8px 14px', border: '1px solid #e0e0e0', borderRadius: '8px',
+    background: '#fff', fontSize: '14px', minWidth: '160px',
+  },
+  table: { width: '100%', background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  th: { padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#7f8c8d', textTransform: 'uppercase', borderBottom: '2px solid #f0f0f0' },
+  td: { padding: '14px 16px', fontSize: '14px', borderBottom: '1px solid #f5f5f5' },
+  badge: (active) => ({
+    padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600',
+    background: active ? '#e8f5e9' : '#ffebee',
+    color: active ? '#27ae60' : '#e74c3c',
+  }),
+  actionBtn: { background: 'none', padding: '6px', borderRadius: '6px', color: '#7f8c8d', marginRight: '4px' },
+  pagination: { display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' },
+  pageBtn: (active) => ({
+    padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '500',
+    background: active ? '#1a5276' : '#fff', color: active ? '#fff' : '#2c3e50',
+    border: '1px solid #e0e0e0',
+  }),
+};
+
+export default function StaffManagement() {
+  const navigate = useNavigate();
+  const [staff, setStaff] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [department, setDepartment] = useState('');
+  const [departments, setDepartments] = useState([]);
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const fetchStaff = () => {
+    getStaff({ page, limit: 20, search, department, status: statusFilter })
+      .then(r => { setStaff(r.data.staff); setTotal(r.data.total); })
+      .catch(() => toast.error('Failed to load staff'));
+  };
+
+  useEffect(() => { fetchStaff(); }, [page, department, statusFilter]);
+  useEffect(() => { getDepartments().then(r => setDepartments(r.data)).catch(() => {}); }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(1);
+    fetchStaff();
+  };
+
+  const handleResetPassword = async (id, name) => {
+    const newPassword = window.prompt(`Enter new password for ${name}:`);
+    if (!newPassword) return;
+    try {
+      await resetStaffPassword(id, newPassword);
+      toast.success('Password reset successfully');
+    } catch {
+      toast.error('Failed to reset password');
+    }
+  };
+
+  const totalPages = Math.ceil(total / 20);
+
+  return (
+    <div>
+      <div style={styles.header}>
+        <h1 style={styles.title}>Staff Management</h1>
+        <button style={styles.addBtn} onClick={() => navigate('/staff/new')}>
+          <FiPlus size={16} /> Add Staff
+        </button>
+      </div>
+
+      <div style={styles.filters}>
+        <form onSubmit={handleSearch} style={styles.searchBox}>
+          <FiSearch size={16} color="#95a5a6" />
+          <input style={styles.searchInput} placeholder="Search by name, ID or email..." value={search} onChange={e => setSearch(e.target.value)} />
+        </form>
+        <select style={styles.select} value={department} onChange={e => { setDepartment(e.target.value); setPage(1); }}>
+          <option value="">All Departments</option>
+          {departments.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <select style={styles.select} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.th}>Staff ID</th>
+            <th style={styles.th}>Name</th>
+            <th style={styles.th}>Department</th>
+            <th style={styles.th}>Position</th>
+            <th style={styles.th}>Email</th>
+            <th style={styles.th}>Status</th>
+            <th style={styles.th}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {staff.map(s => (
+            <tr key={s.id}>
+              <td style={styles.td}><strong>{s.staff_id}</strong></td>
+              <td style={styles.td}>{s.first_name} {s.last_name}</td>
+              <td style={styles.td}>{s.department || '-'}</td>
+              <td style={styles.td}>{s.position || '-'}</td>
+              <td style={styles.td}>{s.email || '-'}</td>
+              <td style={styles.td}><span style={styles.badge(s.is_active)}>{s.is_active ? 'Active' : 'Inactive'}</span></td>
+              <td style={styles.td}>
+                <button style={styles.actionBtn} title="Edit" onClick={() => navigate(`/staff/${s.id}/edit`)}><FiEdit2 size={15} /></button>
+                <button style={styles.actionBtn} title="Reset Password" onClick={() => handleResetPassword(s.id, `${s.first_name} ${s.last_name}`)}><FiKey size={15} /></button>
+              </td>
+            </tr>
+          ))}
+          {staff.length === 0 && (
+            <tr><td colSpan={7} style={{ ...styles.td, textAlign: 'center', padding: '40px', color: '#95a5a6' }}>No staff members found</td></tr>
+          )}
+        </tbody>
+      </table>
+
+      {totalPages > 1 && (
+        <div style={styles.pagination}>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button key={i} style={styles.pageBtn(page === i + 1)} onClick={() => setPage(i + 1)}>{i + 1}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
