@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where psql:*)",
+      "Bash(pg_isready)",
+      "Bash(ipconfig)",
+      "Bash(npx expo:*)",
+      "Bash(npm install:*)",
+      "Bash(cmd //c \"rmdir /s /q node_modules\")"
+    ]
+  }
+}
