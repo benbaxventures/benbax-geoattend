@@ -6,7 +6,16 @@
       "Bash(ipconfig)",
       "Bash(npx expo:*)",
       "Bash(npm install:*)",
-      "Bash(cmd //c \"rmdir /s /q node_modules\")"
+      "Bash(cmd //c \"rmdir /s /q node_modules\")",
+      "Bash(eas build:view 4c8f26d7-b13d-4339-b83e-96c298496436 --json)",
+      "WebFetch(domain:job-logs.eascdn.net)",
+      "Bash(mkdir -p /c/Users/brigh/webDev/Geofence-app/mobile-app/assets)",
+      "Bash(node -e \":*)",
+      "Bash(npm list:*)",
+      "Bash(eas build:view c9c93145-4039-45fd-bef3-8368d5704665 --json)",
+      "Bash(eas build:view c9c93145-4039-45fd-bef3-8368d5704665)",
+      "WebFetch(domain:expo.dev)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

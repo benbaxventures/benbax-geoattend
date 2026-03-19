@@ -21,8 +21,23 @@
       ]
     },
     "plugins": [
-      ["expo-location", { "locationAlwaysAndWhenInUsePermission": "Allow GeoAttend to use your location for attendance check-in." }],
-      ["expo-camera", { "cameraPermission": "Allow GeoAttend to access your camera for QR code scanning." }]
-    ]
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow GeoAttend to use your location for attendance check-in."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow GeoAttend to access your camera for QR code scanning."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6835079a-9aa4-49f4-9ac0-1cff2f2a5af3"
+      }
+    }
   }
 }

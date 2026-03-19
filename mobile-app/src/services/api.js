@@ -1,8 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Replace with your ngrok URL when testing remotely, or local IP for same-WiFi testing
-const API_BASE_URL = 'http://10.201.44.236:5000/api';
+const API_BASE_URL = 'https://geofence-app-jjpa.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
