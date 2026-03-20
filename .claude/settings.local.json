@@ -15,7 +15,10 @@
       "Bash(eas build:view c9c93145-4039-45fd-bef3-8368d5704665 --json)",
       "Bash(eas build:view c9c93145-4039-45fd-bef3-8368d5704665)",
       "WebFetch(domain:expo.dev)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"\"\"staffId\"\"\"\":\"\"\"\"ADMIN001\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"Admin@123\"\"\"\"}')",
+      "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/health)",
+      "Bash(node -e \"console.log\\(require\\(''crypto''\\).randomBytes\\(64\\).toString\\(''hex''\\)\\)\")"
     ]
   }
 }
