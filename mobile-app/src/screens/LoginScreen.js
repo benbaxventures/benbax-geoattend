@@ -34,8 +34,10 @@ export default function LoginScreen({ onLogin }) {
 
       onLogin();
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Unable to connect to server';
-      Alert.alert('Login Failed', `${msg}\n\nURL: https://geofence-app-jjpa.onrender.com/api`);
+      const data = err.response?.data;
+      const msg = data?.error || err.message || 'Unable to connect to server';
+      const debug = data?.debug || 'no debug info';
+      Alert.alert('Login Failed', `${msg}\n\nDebug: ${debug}\n\nStatus: ${err.response?.status}`);
     } finally {
       setLoading(false);
     }
