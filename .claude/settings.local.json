@@ -21,7 +21,9 @@
       "Bash(node -e \"console.log\\(require\\(''crypto''\\).randomBytes\\(64\\).toString\\(''hex''\\)\\)\")",
       "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\"}')",
       "Bash(curl -sv https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"\"\"staffId\"\"\"\":\"\"\"\"ADMIN001\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"Admin@123\"\"\"\"}')",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"unknown\"\",\"\"deviceModel\"\":\"\"unknown\"\",\"\"osVersion\"\":\"\"Android 14\"\"}')",
+      "Bash(eas build:list --platform android --limit 5)"
     ]
   }
 }

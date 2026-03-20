@@ -6,7 +6,7 @@ const API_BASE_URL = 'https://geofence-app-jjpa.onrender.com/api';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
+  timeout: 60000,
 });
 
 api.interceptors.request.use(async (config) => {
