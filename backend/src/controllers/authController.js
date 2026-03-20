@@ -71,6 +71,100 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.googleLogin = async (req, res) => {
+  try {
+    const { googleId, email, firstName, lastName, profilePhoto, deviceId, deviceModel, osVersion } = req.body;
+
+    if (!googleId || !email) {
+      return res.status(400).json({ error: 'Google ID and email are required' });
+    }
+
+    // Check if user exists by google_id or email
+    let result = await pool.query(
+      `SELECT s.*, i.name as institution_name, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+       FROM staff s
+       JOIN institutions i ON s.institution_id = i.id
+       WHERE (s.google_id = $1 OR s.email = $2) AND s.is_active = true`,
+      [googleId, email]
+    );
+
+    let staff;
+
+    if (result.rows.length === 0) {
+      // Auto-register: assign to the first institution
+      const instResult = await pool.query('SELECT id FROM institutions ORDER BY created_at LIMIT 1');
+      if (instResult.rows.length === 0) {
+        return res.status(400).json({ error: 'No institution configured. Contact your administrator.' });
+      }
+
+      const institutionId = instResult.rows[0].id;
+      const staffId = 'G-' + googleId.slice(-8).toUpperCase();
+
+      const insertResult = await pool.query(
+        `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff')
+         RETURNING *`,
+        [institutionId, staffId, firstName || 'User', lastName || '', email, googleId, profilePhoto || null]
+      );
+
+      // Re-fetch with institution join
+      result = await pool.query(
+        `SELECT s.*, i.name as institution_name, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+         FROM staff s
+         JOIN institutions i ON s.institution_id = i.id
+         WHERE s.id = $1`,
+        [insertResult.rows[0].id]
+      );
+      staff = result.rows[0];
+    } else {
+      staff = result.rows[0];
+      // Link google_id if not yet linked
+      if (!staff.google_id) {
+        await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [googleId, staff.id]);
+      }
+    }
+
+    const token = jwt.sign(
+      { userId: staff.id, role: staff.role, institutionId: staff.institution_id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    if (deviceId) {
+      await pool.query(
+        `INSERT INTO device_logs (staff_uuid, device_id, device_model, os_version, action, ip_address)
+         VALUES ($1, $2, $3, $4, 'google_login', $5)`,
+        [staff.id, deviceId, deviceModel || null, osVersion || null, req.ip]
+      );
+    }
+
+    res.json({
+      token,
+      user: {
+        id: staff.id,
+        staffId: staff.staff_id,
+        firstName: staff.first_name,
+        lastName: staff.last_name,
+        email: staff.email,
+        role: staff.role,
+        department: staff.department,
+        position: staff.position,
+        institutionId: staff.institution_id,
+        institutionName: staff.institution_name,
+        profilePhoto: staff.profile_photo_url,
+      },
+      institution: {
+        latitude: parseFloat(staff.inst_lat),
+        longitude: parseFloat(staff.inst_lon),
+        geofenceRadius: staff.geofence_radius,
+      },
+    });
+  } catch (err) {
+    console.error('Google login error:', err);
+    res.status(500).json({ error: 'Server error', debug: err.message });
+  }
+};
+
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

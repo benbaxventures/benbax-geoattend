@@ -5,12 +5,67 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
-import { login } from '../services/api';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { login, googleLogin } from '../services/api';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ onLogin }) {
   const [staffId, setStaffId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '',
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    scopes: ['profile', 'email'],
+  });
+
+  React.useEffect(() => {
+    if (response?.type === 'success') {
+      handleGoogleResponse(response.authentication.accessToken);
+    }
+  }, [response]);
+
+  const handleGoogleResponse = async (accessToken) => {
+    setGoogleLoading(true);
+    try {
+      // Fetch Google user info
+      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const userInfo = await res.json();
+
+      const deviceInfo = {
+        deviceId: Device.osBuildId || Device.modelId || 'unknown',
+        deviceModel: Device.modelName || 'unknown',
+        osVersion: `${Device.osName} ${Device.osVersion}`,
+      };
+
+      const { data } = await googleLogin({
+        googleId: userInfo.id,
+        email: userInfo.email,
+        firstName: userInfo.given_name,
+        lastName: userInfo.family_name,
+        profilePhoto: userInfo.picture,
+        ...deviceInfo,
+      });
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+
+      onLogin();
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Google login failed';
+      Alert.alert('Login Failed', msg);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!staffId.trim() || !password) {
@@ -34,10 +89,8 @@ export default function LoginScreen({ onLogin }) {
 
       onLogin();
     } catch (err) {
-      const data = err.response?.data;
-      const msg = data?.error || err.message || 'Unable to connect to server';
-      const debug = data?.debug || 'no debug info';
-      Alert.alert('Login Failed', `${msg}\n\nDebug: ${debug}\n\nStatus: ${err.response?.status}`);
+      const msg = err.response?.data?.error || err.message || 'Unable to connect to server';
+      Alert.alert('Login Failed', msg);
     } finally {
       setLoading(false);
     }
@@ -69,14 +122,22 @@ export default function LoginScreen({ onLogin }) {
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              placeholderTextColor="#bdc3c7"
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholderTextColor="#bdc3c7"
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleLogin} disabled={loading}>
@@ -84,6 +145,27 @@ export default function LoginScreen({ onLogin }) {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+            onPress={() => promptAsync()}
+            disabled={googleLoading || !request}
+          >
+            {googleLoading ? (
+              <ActivityIndicator color="#333" />
+            ) : (
+              <>
+                <Text style={styles.googleIcon}>G</Text>
+                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+              </>
             )}
           </TouchableOpacity>
         </View>
@@ -116,11 +198,36 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: '#e0e0e0', borderRadius: 10,
     padding: 14, fontSize: 15, color: '#2c3e50',
   },
+  passwordContainer: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1.5, borderColor: '#e0e0e0', borderRadius: 10,
+  },
+  passwordInput: {
+    flex: 1, padding: 14, fontSize: 15, color: '#2c3e50',
+  },
+  eyeButton: {
+    padding: 14,
+  },
+  eyeIcon: { fontSize: 20 },
   button: {
     backgroundColor: '#1a5276', borderRadius: 10, padding: 16,
     alignItems: 'center', marginTop: 8,
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  divider: {
+    flexDirection: 'row', alignItems: 'center', marginVertical: 16,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#e0e0e0' },
+  dividerText: { marginHorizontal: 12, color: '#bdc3c7', fontSize: 13, fontWeight: '600' },
+  googleButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#fff', borderRadius: 10, padding: 14,
+    borderWidth: 1.5, borderColor: '#e0e0e0',
+  },
+  googleIcon: {
+    fontSize: 20, fontWeight: '700', color: '#4285F4', marginRight: 10,
+  },
+  googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
   footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
 });

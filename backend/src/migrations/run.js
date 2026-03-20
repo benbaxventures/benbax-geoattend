@@ -89,6 +89,10 @@ CREATE TABLE IF NOT EXISTS device_logs (
   timestamp TIMESTAMP DEFAULT NOW()
 );
 
+-- Google OAuth support
+ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE;
+ALTER TABLE staff ALTER COLUMN password_hash DROP NOT NULL;
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attendance_staff ON attendance_records(staff_uuid);
 CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance_records(date);

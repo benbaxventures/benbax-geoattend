@@ -30,6 +30,8 @@ api.interceptors.response.use(
 // Auth
 export const login = (staffId, password, deviceInfo) =>
   api.post('/auth/login', { staffId, password, ...deviceInfo });
+export const googleLogin = (googleData) =>
+  api.post('/auth/google-login', googleData);
 export const getProfile = () => api.get('/auth/profile');
 export const changePassword = (currentPassword, newPassword) =>
   api.put('/auth/change-password', { currentPassword, newPassword });
