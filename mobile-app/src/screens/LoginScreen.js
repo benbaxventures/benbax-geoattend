@@ -9,7 +9,8 @@ import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 import { login, googleLogin } from '../services/api';
 
-const GOOGLE_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
+const GOOGLE_WEB_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
+const GOOGLE_ANDROID_CLIENT_ID = '725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com';
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [staffId, setStaffId] = useState('');
@@ -22,9 +23,10 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     setGoogleLoading(true);
     try {
       const redirectUri = makeRedirectUri({ scheme: 'com.geoattend.app' });
+      // Use Web client ID for the auth flow (Android client ID is for native verification)
       const authUrl =
         `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${GOOGLE_CLIENT_ID}` +
+        `client_id=${GOOGLE_WEB_CLIENT_ID}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&response_type=token` +
         `&scope=${encodeURIComponent('profile email')}`;
