@@ -194,6 +194,52 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { staffId, email, newPassword } = req.body;
+
+    if (!staffId || !email || !newPassword) {
+      return res.status(400).json({ error: 'Staff ID, email, and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const result = await pool.query(
+      'SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND is_active = true',
+      [staffId.toUpperCase(), email.toLowerCase().trim()]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that Staff ID and email combination' });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 12);
+    await pool.query('UPDATE staff SET password_hash = $1, updated_at = NOW() WHERE id = $2', [hash, result.rows[0].id]);
+
+    res.json({ message: 'Password reset successfully. You can now login with your new password.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const staff = req.user;
+    const token = jwt.sign(
+      { userId: staff.userId || staff.id, role: staff.role, institutionId: staff.institutionId },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+    res.json({ token });
+  } catch (err) {
+    console.error('Refresh token error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 exports.getProfile = async (req, res) => {
   try {
     const result = await pool.query(

@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentLocation, calculateDistance } from '../services/location';
-import { checkIn, checkOut, getTodayStatus } from '../services/api';
+import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/api';
 import * as Device from 'expo-device';
 
 export default function HomeScreen() {
@@ -17,6 +17,7 @@ export default function HomeScreen() {
   const [distance, setDistance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [stats, setStats] = useState(null);
 
   const loadData = useCallback(async () => {
     const userData = JSON.parse(await AsyncStorage.getItem('user'));
@@ -39,6 +40,11 @@ export default function HomeScreen() {
       const { data } = await getTodayStatus();
       setTodayStatus(data.status);
       setRecord(data.record);
+    } catch {}
+
+    try {
+      const { data } = await getWeeklyStats();
+      setStats(data.month);
     } catch {}
   }, []);
 
@@ -160,6 +166,31 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* Monthly Summary */}
+        {stats && (
+          <View style={styles.statsContainer}>
+            <Text style={styles.statsTitle}>THIS MONTH</Text>
+            <View style={styles.statsGrid}>
+              <View style={[styles.statBox, { backgroundColor: '#eafaf1' }]}>
+                <Text style={[styles.statNumber, { color: '#27ae60' }]}>{stats.present}</Text>
+                <Text style={styles.statLabel}>Present</Text>
+              </View>
+              <View style={[styles.statBox, { backgroundColor: '#fef9e7' }]}>
+                <Text style={[styles.statNumber, { color: '#f39c12' }]}>{stats.late}</Text>
+                <Text style={styles.statLabel}>Late</Text>
+              </View>
+              <View style={[styles.statBox, { backgroundColor: '#fdedec' }]}>
+                <Text style={[styles.statNumber, { color: '#e74c3c' }]}>{stats.absent}</Text>
+                <Text style={styles.statLabel}>Absent</Text>
+              </View>
+              <View style={[styles.statBox, { backgroundColor: '#ebf5fb' }]}>
+                <Text style={[styles.statNumber, { color: '#3498db' }]}>{stats.avgHours || '0'}h</Text>
+                <Text style={styles.statLabel}>Avg Hours</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Action Button */}
         <View style={styles.actionSection}>
           {todayStatus === 'not_checked_in' && (
@@ -219,6 +250,18 @@ const styles = StyleSheet.create({
   cardLabel: { fontSize: 11, fontWeight: '700', color: '#95a5a6', letterSpacing: 0.5, marginBottom: 6 },
   cardValue: { fontSize: 18, fontWeight: '700', color: '#2c3e50' },
   cardDetail: { fontSize: 13, color: '#7f8c8d', marginTop: 4 },
+  statsContainer: {
+    backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05, shadowRadius: 8, elevation: 3,
+  },
+  statsTitle: { fontSize: 11, fontWeight: '700', color: '#95a5a6', letterSpacing: 0.5, marginBottom: 12 },
+  statsGrid: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  statBox: {
+    flex: 1, borderRadius: 10, padding: 12, alignItems: 'center',
+  },
+  statNumber: { fontSize: 22, fontWeight: '700' },
+  statLabel: { fontSize: 10, fontWeight: '600', color: '#7f8c8d', marginTop: 2 },
   actionSection: { marginTop: 20, alignItems: 'center' },
   actionBtn: {
     width: '100%', paddingVertical: 20, borderRadius: 16, alignItems: 'center',

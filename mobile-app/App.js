@@ -6,8 +6,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import LoginScreen from './src/screens/LoginScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
@@ -38,10 +40,22 @@ function MainTabs() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Check In' }} />
-      <Tab.Screen name="QRScan" component={QRScanScreen} options={{ tabBarLabel: 'QR Scan' }} />
-      <Tab.Screen name="History" component={HistoryScreen} options={{ tabBarLabel: 'History' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{
+        tabBarLabel: 'Check In',
+        tabBarIcon: ({ color, size }) => <Ionicons name="location" size={size} color={color} />,
+      }} />
+      <Tab.Screen name="QRScan" component={QRScanScreen} options={{
+        tabBarLabel: 'QR Scan',
+        tabBarIcon: ({ color, size }) => <Ionicons name="qr-code" size={size} color={color} />,
+      }} />
+      <Tab.Screen name="History" component={HistoryScreen} options={{
+        tabBarLabel: 'History',
+        tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+      }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{
+        tabBarLabel: 'Profile',
+        tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+      }} />
     </Tab.Navigator>
   );
 }
@@ -70,8 +84,15 @@ export default function App() {
             </Stack.Screen>
           ) : (
             <Stack.Screen name="Login">
-              {(props) => <LoginScreen {...props} onLogin={() => setIsLoggedIn(true)} />}
+              {(props) => (
+                <LoginScreen
+                  {...props}
+                  onLogin={() => setIsLoggedIn(true)}
+                  onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
+                />
+              )}
             </Stack.Screen>
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           )}
         </Stack.Navigator>
       </NavigationContainer>

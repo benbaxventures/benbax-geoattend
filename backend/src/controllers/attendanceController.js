@@ -244,3 +244,67 @@ exports.getTodayStatus = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.getWeeklyStats = async (req, res) => {
+  try {
+    const staffUuid = req.user.id;
+
+    // Get stats for the current month
+    const result = await pool.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE check_in_time IS NOT NULL) as total_present,
+         COUNT(*) FILTER (WHERE is_late = true) as total_late,
+         COUNT(*) FILTER (WHERE check_in_time IS NOT NULL AND is_late = false) as total_on_time,
+         ROUND(AVG(EXTRACT(EPOCH FROM (check_out_time - check_in_time)) / 3600)::numeric, 1) as avg_hours
+       FROM attendance_records
+       WHERE staff_uuid = $1
+         AND date >= date_trunc('month', CURRENT_DATE)
+         AND date <= CURRENT_DATE`,
+      [staffUuid]
+    );
+
+    // Get this week's records
+    const weekResult = await pool.query(
+      `SELECT date, check_in_time, check_out_time, is_late
+       FROM attendance_records
+       WHERE staff_uuid = $1
+         AND date >= date_trunc('week', CURRENT_DATE)
+         AND date <= CURRENT_DATE
+       ORDER BY date`,
+      [staffUuid]
+    );
+
+    // Get working days this month from rules
+    const rulesResult = await pool.query(
+      `SELECT working_days FROM attendance_rules WHERE institution_id = $1`,
+      [req.user.institutionId]
+    );
+    const workingDays = rulesResult.rows[0]?.working_days || [1, 2, 3, 4, 5];
+
+    // Count working days in current month
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    let totalWorkingDays = 0;
+    for (let d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
+      if (workingDays.includes(d.getDay())) totalWorkingDays++;
+    }
+
+    const stats = result.rows[0];
+    const totalAbsent = Math.max(0, totalWorkingDays - parseInt(stats.total_present || 0));
+
+    res.json({
+      month: {
+        present: parseInt(stats.total_present || 0),
+        late: parseInt(stats.total_late || 0),
+        onTime: parseInt(stats.total_on_time || 0),
+        absent: totalAbsent,
+        avgHours: parseFloat(stats.avg_hours || 0),
+        workingDays: totalWorkingDays,
+      },
+      week: weekResult.rows,
+    });
+  } catch (err) {
+    console.error('Get weekly stats error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

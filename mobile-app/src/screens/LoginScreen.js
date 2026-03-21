@@ -11,7 +11,7 @@ import { login, googleLogin } from '../services/api';
 
 const GOOGLE_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 
-export default function LoginScreen({ onLogin }) {
+export default function LoginScreen({ onLogin, onForgotPassword }) {
   const [staffId, setStaffId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -163,6 +163,10 @@ export default function LoginScreen({ onLogin }) {
             )}
           </TouchableOpacity>
 
+          <TouchableOpacity onPress={() => onForgotPassword && onForgotPassword()}>
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>OR</Text>
@@ -243,6 +247,7 @@ const styles = StyleSheet.create({
     fontSize: 20, fontWeight: '700', color: '#4285F4', marginRight: 10,
   },
   googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
+  forgotText: { textAlign: 'right', color: '#1a5276', fontSize: 13, fontWeight: '500', marginTop: 8 },
   footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
   powered: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 8 },
 });
