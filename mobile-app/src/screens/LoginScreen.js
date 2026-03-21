@@ -6,10 +6,10 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
 import { login, googleLogin } from '../services/api';
 
-WebBrowser.maybeCompleteAuthSession();
+const GOOGLE_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 
 export default function LoginScreen({ onLogin }) {
   const [staffId, setStaffId] = useState('');
@@ -18,46 +18,55 @@ export default function LoginScreen({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com',
-    scopes: ['profile', 'email'],
-  });
-
-  React.useEffect(() => {
-    if (response?.type === 'success') {
-      handleGoogleResponse(response.authentication.accessToken);
-    }
-  }, [response]);
-
-  const handleGoogleResponse = async (accessToken) => {
+  const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      // Fetch Google user info
-      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const userInfo = await res.json();
+      const redirectUri = makeRedirectUri({ scheme: 'com.geoattend.app' });
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${GOOGLE_CLIENT_ID}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent('profile email')}`;
 
-      const deviceInfo = {
-        deviceId: Device.osBuildId || Device.modelId || 'unknown',
-        deviceModel: Device.modelName || 'unknown',
-        osVersion: `${Device.osName} ${Device.osVersion}`,
-      };
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
-      const { data } = await googleLogin({
-        googleId: userInfo.id,
-        email: userInfo.email,
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-        profilePhoto: userInfo.picture,
-        ...deviceInfo,
-      });
+      if (result.type === 'success' && result.url) {
+        const params = new URLSearchParams(result.url.split('#')[1]);
+        const accessToken = params.get('access_token');
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-      await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+        if (accessToken) {
+          const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          const userInfo = await res.json();
 
-      onLogin();
+          let deviceInfo = {};
+          try {
+            deviceInfo = {
+              deviceId: Device.osBuildId || Device.modelId || 'unknown',
+              deviceModel: Device.modelName || 'unknown',
+              osVersion: `${Device.osName || 'Android'} ${Device.osVersion || ''}`.trim(),
+            };
+          } catch (e) {
+            deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
+          }
+
+          const { data } = await googleLogin({
+            googleId: userInfo.id,
+            email: userInfo.email,
+            firstName: userInfo.given_name,
+            lastName: userInfo.family_name,
+            profilePhoto: userInfo.picture,
+            ...deviceInfo,
+          });
+
+          await AsyncStorage.setItem('token', data.token);
+          await AsyncStorage.setItem('user', JSON.stringify(data.user));
+          await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+          onLogin();
+        }
+      }
     } catch (err) {
       const msg = err.response?.data?.error || err.message || 'Google login failed';
       Alert.alert('Login Failed', msg);
@@ -93,7 +102,6 @@ export default function LoginScreen({ onLogin }) {
 
       onLogin();
     } catch (err) {
-      const status = err.response?.status;
       const serverMsg = err.response?.data?.error;
       const debug = err.response?.data?.debug;
       const msg = serverMsg || err.message || 'Unable to connect to server';
@@ -163,8 +171,8 @@ export default function LoginScreen({ onLogin }) {
 
           <TouchableOpacity
             style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
-            onPress={() => promptAsync()}
-            disabled={googleLoading || !request}
+            onPress={handleGoogleLogin}
+            disabled={googleLoading}
           >
             {googleLoading ? (
               <ActivityIndicator color="#333" />
@@ -213,9 +221,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1, padding: 14, fontSize: 15, color: '#2c3e50',
   },
-  eyeButton: {
-    padding: 14,
-  },
+  eyeButton: { padding: 14 },
   eyeIcon: { fontSize: 20 },
   button: {
     backgroundColor: '#1a5276', borderRadius: 10, padding: 16,
