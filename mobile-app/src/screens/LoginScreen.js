@@ -178,6 +178,7 @@ export default function LoginScreen({ onLogin }) {
         </View>
 
         <Text style={styles.footer}>Geofenced Attendance System</Text>
+        <Text style={styles.powered}>Powered by Benbax software developers</Text>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -237,4 +238,5 @@ const styles = StyleSheet.create({
   },
   googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
   footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
+  powered: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 8 },
 });
