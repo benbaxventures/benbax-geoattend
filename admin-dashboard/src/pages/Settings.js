@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { FiSave, FiMapPin } from 'react-icons/fi';
+import { FiSave, FiMapPin, FiCrosshair } from 'react-icons/fi';
 import { getInstitution, updateInstitution, getAttendanceRules, updateAttendanceRules } from '../services/api';
 
 const styles = {
@@ -16,6 +16,18 @@ const styles = {
     display: 'flex', alignItems: 'center', gap: '8px',
     padding: '10px 24px', background: '#1a5276', color: '#fff',
     borderRadius: '8px', fontSize: '14px', fontWeight: '500', marginTop: '8px',
+    border: 'none', cursor: 'pointer',
+  },
+  locationBtn: {
+    display: 'flex', alignItems: 'center', gap: '6px',
+    padding: '10px 20px', background: '#27ae60', color: '#fff',
+    borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+    border: 'none', cursor: 'pointer', marginBottom: '16px',
+    transition: 'all 0.2s ease',
+  },
+  locationBtnActive: {
+    background: '#219a52', transform: 'scale(0.96)',
+    boxShadow: '0 0 0 3px rgba(39, 174, 96, 0.3)',
   },
   dayGrid: { display: 'flex', gap: '6px', flexWrap: 'wrap' },
   dayBtn: (active) => ({
@@ -30,6 +42,53 @@ const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function Settings() {
   const [inst, setInst] = useState({ name: '', address: '', city: '', region: '', latitude: '', longitude: '', geofence_radius: 200 });
   const [rules, setRules] = useState({ work_start_time: '08:00', work_end_time: '17:00', late_threshold_minutes: 15, early_departure_minutes: 30, working_days: [1,2,3,4,5] });
+  const [gettingLocation, setGettingLocation] = useState(false);
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        setInst(p => ({
+          ...p,
+          latitude: lat.toFixed(8),
+          longitude: lon.toFixed(8),
+        }));
+
+        // Reverse geocode to get address
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+            headers: { 'Accept-Language': 'en' },
+          });
+          const data = await res.json();
+          if (data.address) {
+            const addr = data.address;
+            setInst(p => ({
+              ...p,
+              address: data.display_name?.split(',').slice(0, 3).join(',').trim() || '',
+              city: addr.city || addr.town || addr.village || addr.county || '',
+              region: addr.state || addr.region || '',
+            }));
+          }
+        } catch (e) {
+          // Silently fail — coordinates are already set
+        }
+
+        toast.success(`Location detected: ${lat.toFixed(6)}, ${lon.toFixed(6)}`);
+        setGettingLocation(false);
+      },
+      (error) => {
+        toast.error('Failed to get location. Please allow location access.');
+        setGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   useEffect(() => {
     getInstitution().then(r => setInst(r.data)).catch(() => {});
@@ -94,6 +153,21 @@ export default function Settings() {
               <input style={styles.input} value={inst.region || ''} onChange={e => setInst(p => ({ ...p, region: e.target.value }))} />
             </div>
           </div>
+          <button
+            style={{
+              ...styles.locationBtn,
+              ...(gettingLocation ? styles.locationBtnActive : {}),
+              opacity: gettingLocation ? 0.85 : 1,
+            }}
+            onClick={useCurrentLocation}
+            disabled={gettingLocation}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.96)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(39, 174, 96, 0.3)'; }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+          >
+            <FiCrosshair size={14} style={gettingLocation ? { animation: 'spin 1s linear infinite' } : {}} />
+            {gettingLocation ? 'Detecting location...' : 'Use My Current Location'}
+          </button>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div style={styles.field}>
               <label style={styles.label}>Latitude</label>
@@ -109,7 +183,13 @@ export default function Settings() {
             <input style={styles.input} type="number" value={inst.geofence_radius || ''} onChange={e => setInst(p => ({ ...p, geofence_radius: e.target.value }))} />
             <span style={styles.hint}>Area within which staff can check in (recommended: 100-500m)</span>
           </div>
-          <button style={styles.saveBtn} onClick={saveInstitution}><FiSave size={14} /> Save Institution</button>
+          <button
+            style={styles.saveBtn}
+            onClick={saveInstitution}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.96)'; }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+          ><FiSave size={14} /> Save Institution</button>
         </div>
 
         <div style={styles.card}>
@@ -143,7 +223,13 @@ export default function Settings() {
               ))}
             </div>
           </div>
-          <button style={styles.saveBtn} onClick={saveRules}><FiSave size={14} /> Save Rules</button>
+          <button
+            style={styles.saveBtn}
+            onClick={saveRules}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.96)'; }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+          ><FiSave size={14} /> Save Rules</button>
         </div>
       </div>
     </div>

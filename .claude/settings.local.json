@@ -27,7 +27,8 @@
       "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"abc123\"\",\"\"deviceModel\"\":\"\"Samsung Galaxy\"\",\"\"osVersion\"\":\"\"Android 14\"\"}')",
       "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"RKQ1.211119.001\"\",\"\"deviceModel\"\":\"\"SM-A127F\"\",\"\"osVersion\"\":\"\"Android 12\"\"}')",
       "Bash(eas build:list --platform android --status finished --limit 1)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(curl -s --max-time 10 https://geofence-app-jjpa.onrender.com/api/health)"
     ]
   }
 }
