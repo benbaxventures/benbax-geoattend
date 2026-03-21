@@ -209,3 +209,49 @@ exports.getDepartments = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.bulkImport = async (req, res) => {
+  try {
+    const { staff } = req.body;
+    const institutionId = req.user.institution_id;
+
+    if (!staff || !Array.isArray(staff) || staff.length === 0) {
+      return res.status(400).json({ error: 'Please provide an array of staff members' });
+    }
+
+    if (staff.length > 500) {
+      return res.status(400).json({ error: 'Maximum 500 staff per import' });
+    }
+
+    const results = { success: 0, failed: 0, errors: [] };
+
+    for (const s of staff) {
+      try {
+        if (!s.staffId || !s.firstName || !s.lastName) {
+          results.errors.push({ staffId: s.staffId, error: 'Missing required fields' });
+          results.failed++;
+          continue;
+        }
+
+        const passwordHash = await require('bcryptjs').hash(s.password || 'Pass@123', 12);
+        const qrData = require('uuid').v4();
+
+        await pool.query(
+          `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+           ON CONFLICT (institution_id, staff_id) DO NOTHING`,
+          [institutionId, s.staffId.toUpperCase(), s.firstName, s.lastName, s.email || null, s.phone || null, s.department || null, s.position || null, passwordHash, qrData]
+        );
+        results.success++;
+      } catch (err) {
+        results.errors.push({ staffId: s.staffId, error: err.message });
+        results.failed++;
+      }
+    }
+
+    res.json({ message: `Imported ${results.success} staff, ${results.failed} failed`, ...results });
+  } catch (err) {
+    console.error('Bulk import error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

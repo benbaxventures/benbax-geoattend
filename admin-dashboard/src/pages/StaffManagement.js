@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload } from 'react-icons/fi';
 import { getStaff, getDepartments, resetStaffPassword } from '../services/api';
+import api from '../services/api';
 
 const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
@@ -51,6 +52,47 @@ export default function StaffManagement() {
   const [department, setDepartment] = useState('');
   const [departments, setDepartments] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
+  const fileInputRef = React.useRef(null);
+
+  const handleCSVUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+
+    const staffList = lines.slice(1).filter(l => l.trim()).map(line => {
+      const values = line.split(',').map(v => v.trim());
+      const row = {};
+      headers.forEach((h, i) => { row[h] = values[i]; });
+      return {
+        staffId: row['staffid'] || row['staff_id'] || row['id'],
+        firstName: row['firstname'] || row['first_name'] || row['first name'],
+        lastName: row['lastname'] || row['last_name'] || row['last name'],
+        email: row['email'] || '',
+        phone: row['phone'] || '',
+        department: row['department'] || '',
+        position: row['position'] || '',
+        password: row['password'] || 'Pass@123',
+      };
+    });
+
+    if (staffList.length === 0) {
+      toast.error('No valid rows found in CSV');
+      return;
+    }
+
+    try {
+      const { data } = await api.post('/staff/bulk-import', { staff: staffList });
+      toast.success(data.message);
+      fetchStaff();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Import failed');
+    }
+
+    e.target.value = '';
+  };
 
   const fetchStaff = () => {
     getStaff({ page, limit: 20, search, department, status: statusFilter })
@@ -84,9 +126,15 @@ export default function StaffManagement() {
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>Staff Management</h1>
-        <button style={styles.addBtn} onClick={() => navigate('/staff/new')}>
-          <FiPlus size={16} /> Add Staff
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button style={{ ...styles.addBtn, background: '#27ae60' }} onClick={() => fileInputRef.current?.click()}>
+            <FiUpload size={16} /> Import CSV
+          </button>
+          <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVUpload} style={{ display: 'none' }} />
+          <button style={styles.addBtn} onClick={() => navigate('/staff/new')}>
+            <FiPlus size={16} /> Add Staff
+          </button>
+        </div>
       </div>
 
       <div style={styles.filters}>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView,
-  ScrollView, TextInput,
+  ScrollView, TextInput, Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import * as ImagePicker from 'expo-image-picker';
 import { getProfile, changePassword } from '../services/api';
+import { useTheme } from '../services/theme';
 
 export default function ProfileScreen({ navigation, onLogout }) {
   const [profile, setProfile] = useState(null);
@@ -14,10 +15,60 @@ export default function ProfileScreen({ navigation, onLogout }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const { isDark, toggleTheme, theme } = useTheme();
 
   useEffect(() => {
-    getProfile().then(r => setProfile(r.data)).catch(() => {});
+    getProfile().then(r => {
+      setProfile(r.data);
+      if (r.data.profile_photo_url) setProfilePhoto(r.data.profile_photo_url);
+    }).catch(() => {});
   }, []);
+
+  const pickPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow access to your photos.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      setProfilePhoto(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow camera access.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      setProfilePhoto(result.assets[0].uri);
+    }
+  };
+
+  const handlePhotoOptions = () => {
+    Alert.alert('Profile Photo', 'Choose an option', [
+      { text: 'Take Photo', onPress: takePhoto },
+      { text: 'Choose from Gallery', onPress: pickPhoto },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
@@ -76,11 +127,20 @@ export default function ProfileScreen({ navigation, onLogout }) {
         {profile && (
           <>
             <View style={styles.avatarSection}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {(profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')}
-                </Text>
-              </View>
+              <TouchableOpacity onPress={handlePhotoOptions}>
+                {profilePhoto ? (
+                  <Image source={{ uri: profilePhoto }} style={styles.avatarImage} />
+                ) : (
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {(profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.cameraBadge}>
+                  <Text style={styles.cameraBadgeText}>📷</Text>
+                </View>
+              </TouchableOpacity>
               <Text style={styles.fullName}>{profile.first_name} {profile.last_name}</Text>
               <Text style={styles.staffIdText}>{profile.staff_id}</Text>
             </View>
@@ -128,6 +188,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
               </View>
             )}
 
+            <TouchableOpacity style={styles.passwordBtn} onPress={toggleTheme}>
+              <Text style={styles.passwordBtnText}>{isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
               <Text style={styles.logoutBtnText}>Sign Out</Text>
             </TouchableOpacity>
@@ -147,7 +211,14 @@ const styles = StyleSheet.create({
     width: 80, height: 80, borderRadius: 40, backgroundColor: '#1a5276',
     justifyContent: 'center', alignItems: 'center', marginBottom: 12,
   },
+  avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 12 },
   avatarText: { fontSize: 28, fontWeight: '700', color: '#fff' },
+  cameraBadge: {
+    position: 'absolute', bottom: 8, right: -4,
+    backgroundColor: '#1a5276', width: 28, height: 28, borderRadius: 14,
+    justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#fff',
+  },
+  cameraBadgeText: { fontSize: 14 },
   fullName: { fontSize: 20, fontWeight: '700', color: '#2c3e50' },
   staffIdText: { fontSize: 14, color: '#7f8c8d', marginTop: 2 },
   card: {

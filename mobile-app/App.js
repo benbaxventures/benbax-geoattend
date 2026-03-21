@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import LoginScreen from './src/screens/LoginScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import { registerForPushNotifications, scheduleCheckInReminder } from './src/services/notifications';
+import { ThemeProvider } from './src/services/theme';
 import HomeScreen from './src/screens/HomeScreen';
 import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
