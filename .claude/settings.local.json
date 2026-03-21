@@ -25,7 +25,8 @@
       "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"unknown\"\",\"\"deviceModel\"\":\"\"unknown\"\",\"\"osVersion\"\":\"\"Android 14\"\"}')",
       "Bash(eas build:list --platform android --limit 5)",
       "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"abc123\"\",\"\"deviceModel\"\":\"\"Samsung Galaxy\"\",\"\"osVersion\"\":\"\"Android 14\"\"}')",
-      "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"RKQ1.211119.001\"\",\"\"deviceModel\"\":\"\"SM-A127F\"\",\"\"osVersion\"\":\"\"Android 12\"\"}')"
+      "Bash(curl -s https://geofence-app-jjpa.onrender.com/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"staffId\"\":\"\"ADMIN001\"\",\"\"password\"\":\"\"Admin@123\"\",\"\"deviceId\"\":\"\"RKQ1.211119.001\"\",\"\"deviceModel\"\":\"\"SM-A127F\"\",\"\"osVersion\"\":\"\"Android 12\"\"}')",
+      "Bash(eas build:list --platform android --status finished --limit 1)"
     ]
   }
 }

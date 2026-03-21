@@ -19,8 +19,7 @@ export default function LoginScreen({ onLogin }) {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '',
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    webClientId: '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com',
     scopes: ['profile', 'email'],
   });
 

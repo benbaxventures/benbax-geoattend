@@ -10,6 +10,7 @@ import StaffForm from './pages/StaffForm';
 import AttendanceMonitor from './pages/AttendanceMonitor';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import GoogleCallback from './pages/GoogleCallback';
 import Sidebar from './components/Sidebar';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/auth/google/callback" element={<GoogleCallback onLogin={handleLogin} />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </Router>

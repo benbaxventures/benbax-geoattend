@@ -31,6 +31,7 @@ api.interceptors.response.use(
 
 // Auth
 export const login = (staffId, password) => api.post('/auth/login', { staffId, password });
+export const googleLogin = (googleData) => api.post('/auth/google-login', googleData);
 export const getProfile = () => api.get('/auth/profile');
 
 // Staff
