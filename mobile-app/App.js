@@ -12,6 +12,8 @@ import LoginScreen from './src/screens/LoginScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import { registerForPushNotifications, scheduleCheckInReminder } from './src/services/notifications';
 import { ThemeProvider } from './src/services/theme';
+import { I18nProvider } from './src/services/i18n';
+import { isBiometricAvailable, authenticateWithBiometric, isBiometricEnabled } from './src/services/biometric';
 import HomeScreen from './src/screens/HomeScreen';
 import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
@@ -69,8 +71,20 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem('token').then((token) => {
+    AsyncStorage.getItem('token').then(async (token) => {
       if (token) {
+        // Check if biometric is enabled
+        const bioEnabled = await isBiometricEnabled();
+        const bioAvailable = await isBiometricAvailable();
+
+        if (bioEnabled && bioAvailable) {
+          const success = await authenticateWithBiometric();
+          if (!success) {
+            setLoading(false);
+            return; // Stay on login screen
+          }
+        }
+
         setIsLoggedIn(true);
         registerForPushNotifications();
         scheduleCheckInReminder();
@@ -82,6 +96,8 @@ export default function App() {
   if (loading) return null;
 
   return (
+    <I18nProvider>
+    <ThemeProvider>
     <SafeAreaProvider>
       <StatusBar style="light" />
       <NavigationContainer>
@@ -107,5 +123,7 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
+    </ThemeProvider>
+    </I18nProvider>
   );
 }

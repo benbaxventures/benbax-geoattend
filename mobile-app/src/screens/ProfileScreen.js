@@ -8,6 +8,8 @@ import * as Updates from 'expo-updates';
 import * as ImagePicker from 'expo-image-picker';
 import { getProfile, changePassword } from '../services/api';
 import { useTheme } from '../services/theme';
+import { isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from '../services/biometric';
+import { useI18n } from '../services/i18n';
 
 export default function ProfileScreen({ navigation, onLogout }) {
   const [profile, setProfile] = useState(null);
@@ -17,6 +19,14 @@ export default function ProfileScreen({ navigation, onLogout }) {
   const [loading, setLoading] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const { isDark, toggleTheme, theme } = useTheme();
+  const { t, lang, switchLanguage } = useI18n();
+  const [bioAvailable, setBioAvailable] = useState(false);
+  const [bioEnabled, setBioEnabled] = useState(false);
+
+  useEffect(() => {
+    isBiometricAvailable().then(setBioAvailable);
+    isBiometricEnabled().then(setBioEnabled);
+  }, []);
 
   useEffect(() => {
     getProfile().then(r => {
@@ -187,6 +197,21 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 </TouchableOpacity>
               </View>
             )}
+
+            {bioAvailable && (
+              <TouchableOpacity style={styles.passwordBtn} onPress={async () => {
+                const newVal = !bioEnabled;
+                await setBiometricEnabled(newVal);
+                setBioEnabled(newVal);
+                Alert.alert(newVal ? 'Enabled' : 'Disabled', `Fingerprint login ${newVal ? 'enabled' : 'disabled'}`);
+              }}>
+                <Text style={styles.passwordBtnText}>{bioEnabled ? '🔓 Disable Fingerprint Login' : '🔐 Enable Fingerprint Login'}</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity style={styles.passwordBtn} onPress={() => switchLanguage(lang === 'en' ? 'tw' : 'en')}>
+              <Text style={styles.passwordBtnText}>{lang === 'en' ? '🇬🇭 Switch to Twi' : '🇬🇧 Switch to English'}</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.passwordBtn} onPress={toggleTheme}>
               <Text style={styles.passwordBtnText}>{isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}</Text>

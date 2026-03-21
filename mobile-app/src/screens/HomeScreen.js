@@ -8,6 +8,7 @@ import { getCurrentLocation, calculateDistance } from '../services/location';
 import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/api';
 import { addToQueue, syncQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 import * as Device from 'expo-device';
+import MapView, { Circle, Marker } from 'react-native-maps';
 
 export default function HomeScreen() {
   const [user, setUser] = useState(null);
@@ -21,6 +22,7 @@ export default function HomeScreen() {
   const [stats, setStats] = useState(null);
   const [pendingSync, setPendingSync] = useState(0);
   const [online, setOnline] = useState(true);
+  const [showMap, setShowMap] = useState(false);
 
   const loadData = useCallback(async () => {
     const userData = JSON.parse(await AsyncStorage.getItem('user'));
@@ -190,6 +192,54 @@ export default function HomeScreen() {
             <Text style={styles.cardDetail}>Getting location...</Text>
           )}
         </View>
+
+        {/* Map Toggle */}
+        {institution && location && (
+          <>
+            <TouchableOpacity
+              style={[styles.card, { borderLeftColor: '#8e44ad', alignItems: 'center', paddingVertical: 12 }]}
+              onPress={() => setShowMap(!showMap)}
+            >
+              <Text style={{ color: '#8e44ad', fontWeight: '600', fontSize: 14 }}>
+                {showMap ? '🗺 Hide Map' : '🗺 Show Geofence Map'}
+              </Text>
+            </TouchableOpacity>
+
+            {showMap && (
+              <View style={{ height: 250, borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
+                <MapView
+                  style={{ flex: 1 }}
+                  initialRegion={{
+                    latitude: institution.latitude,
+                    longitude: institution.longitude,
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005,
+                  }}
+                >
+                  <Circle
+                    center={{ latitude: institution.latitude, longitude: institution.longitude }}
+                    radius={institution.geofenceRadius}
+                    fillColor="rgba(26, 82, 118, 0.15)"
+                    strokeColor="rgba(26, 82, 118, 0.5)"
+                    strokeWidth={2}
+                  />
+                  <Marker
+                    coordinate={{ latitude: institution.latitude, longitude: institution.longitude }}
+                    title="Institution"
+                    pinColor="#1a5276"
+                  />
+                  {location && (
+                    <Marker
+                      coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+                      title="You"
+                      pinColor={isWithin ? '#27ae60' : '#e74c3c'}
+                    />
+                  )}
+                </MapView>
+              </View>
+            )}
+          </>
+        )}
 
         {/* Today's Status */}
         <View style={[styles.card, { borderLeftColor: '#3498db' }]}>
