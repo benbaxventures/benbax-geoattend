@@ -22,8 +22,8 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      const redirectUri = makeRedirectUri({ scheme: 'com.geoattend.app' });
-      // Use Web client ID for the auth flow (Android client ID is for native verification)
+      // Use Expo auth proxy to avoid custom scheme issues
+      const redirectUri = 'https://auth.expo.io/@a03/geoattend';
       const authUrl =
         `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${GOOGLE_WEB_CLIENT_ID}` +
