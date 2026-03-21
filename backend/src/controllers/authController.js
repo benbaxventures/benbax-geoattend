@@ -11,7 +11,7 @@ exports.login = async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT s.*, i.name as institution_name, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+      `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
        FROM staff s
        JOIN institutions i ON s.institution_id = i.id
        WHERE s.staff_id = $1 AND s.is_active = true`,
@@ -60,6 +60,10 @@ exports.login = async (req, res) => {
         profilePhoto: staff.profile_photo_url,
       },
       institution: {
+        name: staff.institution_name,
+        address: staff.inst_address,
+        city: staff.inst_city,
+        region: staff.inst_region,
         latitude: parseFloat(staff.inst_lat),
         longitude: parseFloat(staff.inst_lon),
         geofenceRadius: staff.geofence_radius,
@@ -68,6 +72,54 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error', debug: err.message });
+  }
+};
+
+exports.register = async (req, res) => {
+  try {
+    const { staffId, firstName, lastName, email, phone, password, department, position } = req.body;
+
+    if (!staffId || !firstName || !lastName || !password) {
+      return res.status(400).json({ error: 'Staff ID, first name, last name, and password are required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Get the first institution (default)
+    const instResult = await pool.query('SELECT id FROM institutions ORDER BY created_at LIMIT 1');
+    if (instResult.rows.length === 0) {
+      return res.status(400).json({ error: 'No institution configured. Contact your administrator.' });
+    }
+    const institutionId = instResult.rows[0].id;
+
+    // Check if staff ID already exists
+    const existing = await pool.query(
+      'SELECT id FROM staff WHERE staff_id = $1 AND institution_id = $2',
+      [staffId.toUpperCase(), institutionId]
+    );
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'Staff ID already registered. Please login or contact admin.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const qrData = `STAFF-${institutionId}-${staffId.toUpperCase()}`;
+
+    const result = await pool.query(
+      `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data, role)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'staff')
+       RETURNING id`,
+      [institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null, department || null, position || null, passwordHash, qrData]
+    );
+
+    res.status(201).json({ message: 'Registration successful. You can now login with your Staff ID and password.' });
+  } catch (err) {
+    console.error('Register error:', err);
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Staff ID or email already exists' });
+    }
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -81,7 +133,7 @@ exports.googleLogin = async (req, res) => {
 
     // Check if user exists by google_id or email
     let result = await pool.query(
-      `SELECT s.*, i.name as institution_name, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+      `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
        FROM staff s
        JOIN institutions i ON s.institution_id = i.id
        WHERE (s.google_id = $1 OR s.email = $2) AND s.is_active = true`,
@@ -109,7 +161,7 @@ exports.googleLogin = async (req, res) => {
 
       // Re-fetch with institution join
       result = await pool.query(
-        `SELECT s.*, i.name as institution_name, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
          FROM staff s
          JOIN institutions i ON s.institution_id = i.id
          WHERE s.id = $1`,
@@ -154,6 +206,10 @@ exports.googleLogin = async (req, res) => {
         profilePhoto: staff.profile_photo_url,
       },
       institution: {
+        name: staff.institution_name,
+        address: staff.inst_address,
+        city: staff.inst_city,
+        region: staff.inst_region,
         latitude: parseFloat(staff.inst_lat),
         longitude: parseFloat(staff.inst_lon),
         geofenceRadius: staff.geofence_radius,

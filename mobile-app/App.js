@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import LoginScreen from './src/screens/LoginScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
 import { registerForPushNotifications, scheduleCheckInReminder } from './src/services/notifications';
 import { ThemeProvider } from './src/services/theme';
 import { I18nProvider } from './src/services/i18n';
@@ -73,21 +74,26 @@ export default function App() {
   useEffect(() => {
     AsyncStorage.getItem('token').then(async (token) => {
       if (token) {
-        // Check if biometric is enabled
-        const bioEnabled = await isBiometricEnabled();
-        const bioAvailable = await isBiometricAvailable();
-
-        if (bioEnabled && bioAvailable) {
-          const success = await authenticateWithBiometric();
-          if (!success) {
-            setLoading(false);
-            return; // Stay on login screen
+        // Check biometric — but always keep user logged in
+        try {
+          const bioEnabled = await isBiometricEnabled();
+          const bioAvailable = await isBiometricAvailable();
+          if (bioEnabled && bioAvailable) {
+            const success = await authenticateWithBiometric();
+            if (!success) {
+              // Biometric failed — still logged in but show login screen for security
+              // Don't clear token — they can retry or use password
+              setLoading(false);
+              return;
+            }
           }
-        }
+        } catch {}
 
         setIsLoggedIn(true);
-        registerForPushNotifications();
-        scheduleCheckInReminder();
+        try {
+          registerForPushNotifications();
+          scheduleCheckInReminder();
+        } catch {}
       }
       setLoading(false);
     });
@@ -114,10 +120,12 @@ export default function App() {
                     {...props}
                     onLogin={() => setIsLoggedIn(true)}
                     onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
+                    onRegister={() => props.navigation.navigate('Register')}
                   />
                 )}
               </Stack.Screen>
               <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
             </>
           )}
         </Stack.Navigator>

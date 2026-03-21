@@ -8,7 +8,7 @@ import { getCurrentLocation, calculateDistance } from '../services/location';
 import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/api';
 import { addToQueue, syncQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 import * as Device from 'expo-device';
-import MapView, { Circle, Marker } from 'react-native-maps';
+import { WebView } from 'react-native-webview';
 
 export default function HomeScreen() {
   const [user, setUser] = useState(null);
@@ -176,6 +176,19 @@ export default function HomeScreen() {
           </View>
         )}
 
+        {/* Institution Info */}
+        {institution?.name && (
+          <View style={[styles.card, { borderLeftColor: '#1a5276' }]}>
+            <Text style={styles.cardLabel}>INSTITUTION</Text>
+            <Text style={styles.cardValue}>{institution.name}</Text>
+            {(institution.address || institution.city) && (
+              <Text style={styles.cardDetail}>
+                {[institution.address, institution.city, institution.region].filter(Boolean).join(', ')}
+              </Text>
+            )}
+          </View>
+        )}
+
         {/* Geofence Status */}
         <View style={[styles.card, { borderLeftColor: isWithin ? '#27ae60' : '#e74c3c' }]}>
           <Text style={styles.cardLabel}>LOCATION STATUS</Text>
@@ -185,7 +198,7 @@ export default function HomeScreen() {
                 {isWithin ? 'Within Geofence' : 'Outside Geofence'}
               </Text>
               <Text style={styles.cardDetail}>
-                {distance}m from institution ({institution?.geofenceRadius}m radius)
+                {distance}m from {institution?.name || 'institution'} ({institution?.geofenceRadius}m radius)
               </Text>
             </>
           ) : (
@@ -206,36 +219,34 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
             {showMap && (
-              <View style={{ height: 250, borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
-                <MapView
+              <View style={{ height: 280, borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
+                <WebView
                   style={{ flex: 1 }}
-                  initialRegion={{
-                    latitude: institution.latitude,
-                    longitude: institution.longitude,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
-                  }}
-                >
-                  <Circle
-                    center={{ latitude: institution.latitude, longitude: institution.longitude }}
-                    radius={institution.geofenceRadius}
-                    fillColor="rgba(26, 82, 118, 0.15)"
-                    strokeColor="rgba(26, 82, 118, 0.5)"
-                    strokeWidth={2}
-                  />
-                  <Marker
-                    coordinate={{ latitude: institution.latitude, longitude: institution.longitude }}
-                    title="Institution"
-                    pinColor="#1a5276"
-                  />
-                  {location && (
-                    <Marker
-                      coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-                      title="You"
-                      pinColor={isWithin ? '#27ae60' : '#e74c3c'}
-                    />
-                  )}
-                </MapView>
+                  originWhitelist={['*']}
+                  source={{ html: `
+                    <!DOCTYPE html>
+                    <html><head>
+                    <meta name="viewport" content="width=device-width,initial-scale=1">
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                    <style>body{margin:0}#map{width:100%;height:100vh}</style>
+                    </head><body>
+                    <div id="map"></div>
+                    <script>
+                      var map=L.map('map').setView([${institution.latitude},${institution.longitude}],16);
+                      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+                      L.circle([${institution.latitude},${institution.longitude}],{
+                        radius:${institution.geofenceRadius},color:'#1a5276',fillColor:'#1a5276',fillOpacity:0.15
+                      }).addTo(map).bindPopup('${(institution.name || 'Institution').replace(/'/g, "\\'")} - ${institution.geofenceRadius}m radius');
+                      L.marker([${institution.latitude},${institution.longitude}]).addTo(map)
+                        .bindPopup('<b>${(institution.name || 'Institution').replace(/'/g, "\\'")}</b>').openPopup();
+                      ${location ? `L.marker([${location.latitude},${location.longitude}],{
+                        icon:L.divIcon({html:'<div style="background:${isWithin ? '#27ae60' : '#e74c3c'};width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>',iconSize:[20,20],iconAnchor:[10,10]})
+                      }).addTo(map).bindPopup('Your Location');` : ''}
+                    </script>
+                    </body></html>
+                  ` }}
+                />
               </View>
             )}
           </>

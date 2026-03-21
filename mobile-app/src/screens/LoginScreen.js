@@ -11,7 +11,7 @@ import { login, googleLogin } from '../services/api';
 
 const GOOGLE_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 
-export default function LoginScreen({ onLogin, onForgotPassword }) {
+export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [staffId, setStaffId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -189,6 +189,10 @@ export default function LoginScreen({ onLogin, onForgotPassword }) {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity onPress={() => onRegister && onRegister()}>
+          <Text style={styles.registerLink}>Don't have an account? Sign Up</Text>
+        </TouchableOpacity>
+
         <Text style={styles.footer}>Geofenced Attendance System</Text>
         <Text style={styles.powered}>Powered by Benbax software developers</Text>
       </KeyboardAvoidingView>
@@ -249,5 +253,6 @@ const styles = StyleSheet.create({
   googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
   forgotText: { textAlign: 'right', color: '#1a5276', fontSize: 13, fontWeight: '500', marginTop: 8 },
   footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
+  registerLink: { textAlign: 'center', color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 20 },
   powered: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 8 },
 });
