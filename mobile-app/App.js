@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import LoginScreen from './src/screens/LoginScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import { registerForPushNotifications, scheduleCheckInReminder } from './src/services/notifications';
 import HomeScreen from './src/screens/HomeScreen';
 import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
@@ -18,7 +19,7 @@ import ProfileScreen from './src/screens/ProfileScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function MainTabs() {
+function MainTabs({ onLogout }) {
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 10);
 
@@ -52,10 +53,12 @@ function MainTabs() {
         tabBarLabel: 'History',
         tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
       }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{
+      <Tab.Screen name="Profile" options={{
         tabBarLabel: 'Profile',
         tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-      }} />
+      }}>
+        {(props) => <ProfileScreen {...props} onLogout={onLogout} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
@@ -66,7 +69,11 @@ export default function App() {
 
   useEffect(() => {
     AsyncStorage.getItem('token').then((token) => {
-      setIsLoggedIn(!!token);
+      if (token) {
+        setIsLoggedIn(true);
+        registerForPushNotifications();
+        scheduleCheckInReminder();
+      }
       setLoading(false);
     });
   }, []);
@@ -80,19 +87,21 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isLoggedIn ? (
             <Stack.Screen name="Main">
-              {() => <MainTabs />}
+              {() => <MainTabs onLogout={() => setIsLoggedIn(false)} />}
             </Stack.Screen>
           ) : (
-            <Stack.Screen name="Login">
-              {(props) => (
-                <LoginScreen
-                  {...props}
-                  onLogin={() => setIsLoggedIn(true)}
-                  onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
-                />
-              )}
-            </Stack.Screen>
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <>
+              <Stack.Screen name="Login">
+                {(props) => (
+                  <LoginScreen
+                    {...props}
+                    onLogin={() => setIsLoggedIn(true)}
+                    onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
+                  />
+                )}
+              </Stack.Screen>
+              <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            </>
           )}
         </Stack.Navigator>
       </NavigationContainer>

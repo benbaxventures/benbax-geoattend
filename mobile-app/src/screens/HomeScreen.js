@@ -6,6 +6,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentLocation, calculateDistance } from '../services/location';
 import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/api';
+import { addToQueue, syncQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 import * as Device from 'expo-device';
 
 export default function HomeScreen() {
@@ -18,6 +19,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState(null);
+  const [pendingSync, setPendingSync] = useState(0);
+  const [online, setOnline] = useState(true);
 
   const loadData = useCallback(async () => {
     const userData = JSON.parse(await AsyncStorage.getItem('user'));
@@ -46,6 +49,18 @@ export default function HomeScreen() {
       const { data } = await getWeeklyStats();
       setStats(data.month);
     } catch {}
+
+    // Check offline queue
+    const connected = await isOnline();
+    setOnline(connected);
+    if (connected) {
+      const result = await syncQueue();
+      if (result.synced > 0) {
+        Alert.alert('Synced', `${result.synced} offline check-in(s) synced successfully.`);
+      }
+    }
+    const qLen = await getQueueLength();
+    setPendingSync(qLen);
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
@@ -71,14 +86,24 @@ export default function HomeScreen() {
     }
 
     setLoading(true);
-    try {
-      const { data } = await checkIn({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        method: 'gps',
-        deviceId: Device.osBuildId || 'unknown',
-      });
+    const checkInData = {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      method: 'gps',
+      deviceId: Device.osBuildId || 'unknown',
+    };
 
+    try {
+      const connected = await isOnline();
+      if (!connected) {
+        await addToQueue('check-in', checkInData);
+        setPendingSync(await getQueueLength());
+        Alert.alert('Saved Offline', 'Check-in saved. It will sync when you are back online.');
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await checkIn(checkInData);
       setTodayStatus('checked_in');
       setRecord(data.record);
 
@@ -87,7 +112,14 @@ export default function HomeScreen() {
         data.isLate ? 'You have been marked as LATE.' : 'You have been checked in on time.'
       );
     } catch (err) {
-      Alert.alert('Check-In Failed', err.response?.data?.error || 'Please try again');
+      // If network error, queue offline
+      if (!err.response) {
+        await addToQueue('check-in', checkInData);
+        setPendingSync(await getQueueLength());
+        Alert.alert('Saved Offline', 'Check-in saved. It will sync when you are back online.');
+      } else {
+        Alert.alert('Check-In Failed', err.response?.data?.error || 'Please try again');
+      }
     } finally {
       setLoading(false);
     }
@@ -132,6 +164,15 @@ export default function HomeScreen() {
             {now.toLocaleDateString('en-GH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </Text>
         </View>
+
+        {/* Offline / Pending Sync Banner */}
+        {(!online || pendingSync > 0) && (
+          <View style={[styles.card, { borderLeftColor: '#f39c12', backgroundColor: '#fef9e7' }]}>
+            <Text style={[styles.cardValue, { color: '#f39c12', fontSize: 14 }]}>
+              {!online ? '⚠ You are offline' : `⏳ ${pendingSync} check-in(s) pending sync`}
+            </Text>
+          </View>
+        )}
 
         {/* Geofence Status */}
         <View style={[styles.card, { borderLeftColor: isWithin ? '#27ae60' : '#e74c3c' }]}>

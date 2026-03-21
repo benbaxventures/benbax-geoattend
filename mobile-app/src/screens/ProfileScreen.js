@@ -4,9 +4,11 @@ import {
   ScrollView, TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Updates from 'expo-updates';
+import * as ImagePicker from 'expo-image-picker';
 import { getProfile, changePassword } from '../services/api';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation, onLogout }) {
   const [profile, setProfile] = useState(null);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -49,9 +51,10 @@ export default function ProfileScreen({ navigation }) {
         style: 'destructive',
         onPress: async () => {
           await AsyncStorage.multiRemove(['token', 'user', 'institution']);
-          // Force reload to trigger login screen
-          if (navigation?.reset) {
-            navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+          if (onLogout) {
+            onLogout();
+          } else {
+            try { await Updates.reloadAsync(); } catch { }
           }
         },
       },
