@@ -1,0 +1,22 @@
+{
+  "short_name": "GeoAttend",
+  "name": "GeoAttend Admin Dashboard",
+  "description": "Geofenced Attendance Management System",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a5276",
+  "background_color": "#1a5276",
+  "orientation": "any"
+}
