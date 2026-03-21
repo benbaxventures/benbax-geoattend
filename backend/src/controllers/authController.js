@@ -35,13 +35,13 @@ exports.login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
-    // Log device info
+    // Log device info (non-blocking — don't fail login if this errors)
     if (deviceId) {
-      await pool.query(
+      pool.query(
         `INSERT INTO device_logs (staff_uuid, device_id, device_model, os_version, action, ip_address)
          VALUES ($1, $2, $3, $4, 'login', $5)`,
         [staff.id, deviceId, deviceModel || null, osVersion || null, req.ip]
-      );
+      ).catch(err => console.error('Device log error:', err.message));
     }
 
     res.json({

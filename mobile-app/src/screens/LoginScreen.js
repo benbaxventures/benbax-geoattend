@@ -74,11 +74,16 @@ export default function LoginScreen({ onLogin }) {
 
     setLoading(true);
     try {
-      const deviceInfo = {
-        deviceId: Device.osBuildId || Device.modelId || 'unknown',
-        deviceModel: Device.modelName || 'unknown',
-        osVersion: `${Device.osName} ${Device.osVersion}`,
-      };
+      let deviceInfo = {};
+      try {
+        deviceInfo = {
+          deviceId: Device.osBuildId || Device.modelId || 'unknown',
+          deviceModel: Device.modelName || 'unknown',
+          osVersion: `${Device.osName || 'Android'} ${Device.osVersion || ''}`.trim(),
+        };
+      } catch (e) {
+        deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
+      }
 
       const { data } = await login(staffId.trim().toUpperCase(), password, deviceInfo);
 
@@ -88,8 +93,11 @@ export default function LoginScreen({ onLogin }) {
 
       onLogin();
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Unable to connect to server';
-      Alert.alert('Login Failed', msg);
+      const status = err.response?.status;
+      const serverMsg = err.response?.data?.error;
+      const debug = err.response?.data?.debug;
+      const msg = serverMsg || err.message || 'Unable to connect to server';
+      Alert.alert('Login Failed', debug ? `${msg} (${debug})` : msg);
     } finally {
       setLoading(false);
     }
