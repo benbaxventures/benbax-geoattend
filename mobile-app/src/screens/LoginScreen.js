@@ -61,8 +61,9 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         Alert.alert('Error', 'Google Play Services is not available on this device');
       } else {
-        const msg = err.response?.data?.error || err.message || 'Google login failed';
-        Alert.alert('Login Failed', msg);
+        const serverError = err.response?.data?.error || err.message || 'Google login failed';
+        const debug = err.response?.data?.debug;
+        Alert.alert('Login Failed', debug ? `${serverError} (${debug})` : serverError);
       }
     } finally {
       setGoogleLoading(false);
