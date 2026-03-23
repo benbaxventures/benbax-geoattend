@@ -23,7 +23,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     setGoogleLoading(true);
     try {
       // Use Expo auth proxy to avoid custom scheme issues
-      const redirectUri = 'https://auth.expo.io/@a03/geoattend';
+      const redirectUri = 'https://auth.expo.io/@A16-0/geoattend';
       const authUrl =
         `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${GOOGLE_WEB_CLIENT_ID}` +
