@@ -26,6 +26,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     setGoogleLoading(true);
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
       const { data: userData } = userInfo;
 

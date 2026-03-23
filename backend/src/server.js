@@ -48,20 +48,6 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Diagnostic: show actual column types for debugging
-app.get('/api/debug/schema', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT table_name, column_name, data_type, character_maximum_length
-      FROM information_schema.columns
-      WHERE table_name IN ('staff', 'device_logs')
-      ORDER BY table_name, ordinal_position
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // Routes
 app.use('/api/auth', authRoutes);
