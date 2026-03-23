@@ -147,7 +147,7 @@ export default function Login({ onLogin }) {
   };
 
   const handleGoogleLogin = () => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
     if (!clientId) {
       toast.error('Google login not configured');
       return;
