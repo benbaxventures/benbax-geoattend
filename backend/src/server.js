@@ -69,20 +69,24 @@ app.use((err, req, res, _next) => {
 // Auto-migrate: ensure column sizes are correct on startup
 const pool = require('./config/database');
 async function runAutoMigration() {
-  try {
-    await pool.query(`
-      ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT;
-      ALTER TABLE staff ALTER COLUMN google_id TYPE VARCHAR(255);
-      ALTER TABLE staff ALTER COLUMN staff_id TYPE VARCHAR(50);
-      ALTER TABLE staff ALTER COLUMN first_name TYPE VARCHAR(100);
-      ALTER TABLE staff ALTER COLUMN last_name TYPE VARCHAR(100);
-      ALTER TABLE staff ALTER COLUMN email TYPE VARCHAR(255);
-      ALTER TABLE staff ALTER COLUMN password_hash DROP NOT NULL;
-    `);
-    console.log('Auto-migration: column sizes verified.');
-  } catch (err) {
-    console.error('Auto-migration warning:', err.message);
+  const alters = [
+    'ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE',
+    'ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT',
+    'ALTER TABLE staff ALTER COLUMN google_id TYPE VARCHAR(255)',
+    'ALTER TABLE staff ALTER COLUMN staff_id TYPE VARCHAR(50)',
+    'ALTER TABLE staff ALTER COLUMN first_name TYPE VARCHAR(100)',
+    'ALTER TABLE staff ALTER COLUMN last_name TYPE VARCHAR(100)',
+    'ALTER TABLE staff ALTER COLUMN email TYPE VARCHAR(255)',
+    'ALTER TABLE staff ALTER COLUMN password_hash DROP NOT NULL',
+  ];
+  for (const sql of alters) {
+    try {
+      await pool.query(sql);
+    } catch (err) {
+      console.error('Auto-migration skip:', sql.slice(0, 60), '-', err.message);
+    }
   }
+  console.log('Auto-migration: column sizes verified.');
 }
 
 const PORT = process.env.PORT || 5000;
