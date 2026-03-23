@@ -127,20 +127,22 @@ exports.googleLogin = async (req, res) => {
   try {
     const { googleId, email, firstName, lastName, profilePhoto, deviceId, deviceModel, osVersion } = req.body;
 
-    console.log('Google login request values:', JSON.stringify({
-      googleId: googleId?.length,
-      email: email?.length,
-      firstName: firstName?.length,
-      lastName: lastName?.length,
-      profilePhoto: profilePhoto?.length,
-      deviceId: deviceId?.length,
-      deviceModel: deviceModel?.length,
-      osVersion: osVersion?.length,
-    }));
-
     if (!googleId || !email) {
       return res.status(400).json({ error: 'Google ID and email are required' });
     }
+
+    // Truncate values to fit column limits safely
+    const safe = {
+      googleId: String(googleId).slice(0, 255),
+      email: String(email).slice(0, 255),
+      firstName: (firstName || 'User').slice(0, 100),
+      lastName: (lastName || '').slice(0, 100),
+      profilePhoto: profilePhoto || null,
+      staffId: ('G-' + String(googleId).slice(-8)).toUpperCase().slice(0, 50),
+      deviceId: deviceId ? String(deviceId).slice(0, 255) : null,
+      deviceModel: deviceModel ? String(deviceModel).slice(0, 255) : null,
+      osVersion: osVersion ? String(osVersion).slice(0, 50) : null,
+    };
 
     // Check if user exists by google_id or email
     let result = await pool.query(
@@ -148,7 +150,7 @@ exports.googleLogin = async (req, res) => {
        FROM staff s
        JOIN institutions i ON s.institution_id = i.id
        WHERE (s.google_id = $1 OR s.email = $2) AND s.is_active = true`,
-      [googleId, email]
+      [safe.googleId, safe.email]
     );
 
     let staff;
@@ -161,13 +163,12 @@ exports.googleLogin = async (req, res) => {
       }
 
       const institutionId = instResult.rows[0].id;
-      const staffId = 'G-' + googleId.slice(-8).toUpperCase();
 
       const insertResult = await pool.query(
         `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role)
          VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff')
          RETURNING *`,
-        [institutionId, staffId, firstName || 'User', lastName || '', email, googleId, profilePhoto || null]
+        [institutionId, safe.staffId, safe.firstName, safe.lastName, safe.email, safe.googleId, safe.profilePhoto]
       );
 
       // Re-fetch with institution join
@@ -183,7 +184,7 @@ exports.googleLogin = async (req, res) => {
       staff = result.rows[0];
       // Link google_id if not yet linked
       if (!staff.google_id) {
-        await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [googleId, staff.id]);
+        await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [safe.googleId, staff.id]);
       }
     }
 
@@ -193,12 +194,13 @@ exports.googleLogin = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
-    if (deviceId) {
-      await pool.query(
+    // Device log — non-blocking so it can't crash login
+    if (safe.deviceId) {
+      pool.query(
         `INSERT INTO device_logs (staff_uuid, device_id, device_model, os_version, action, ip_address)
          VALUES ($1, $2, $3, $4, 'google_login', $5)`,
-        [staff.id, deviceId, deviceModel || null, osVersion || null, req.ip]
-      );
+        [staff.id, safe.deviceId, safe.deviceModel, safe.osVersion, req.ip]
+      ).catch(err => console.error('Device log error:', err.message));
     }
 
     res.json({
@@ -228,8 +230,7 @@ exports.googleLogin = async (req, res) => {
     });
   } catch (err) {
     console.error('Google login error:', err);
-    console.error('Google login request body:', JSON.stringify(req.body));
-    res.status(500).json({ error: 'Server error', debug: err.message, detail: err.detail || null, column: err.column || null });
+    res.status(500).json({ error: 'Server error', debug: err.message });
   }
 };
 
