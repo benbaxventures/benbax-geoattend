@@ -140,7 +140,8 @@ export default function Login({ onLogin }) {
       onLogin(data.user);
       toast.success('Login successful');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed');
+      const msg = err.response?.data?.error || err.message || 'Login failed';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
