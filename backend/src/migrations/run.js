@@ -93,6 +93,14 @@ CREATE TABLE IF NOT EXISTS device_logs (
 ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE;
 ALTER TABLE staff ALTER COLUMN password_hash DROP NOT NULL;
 
+-- Ensure column sizes are correct (in case table was created with smaller sizes)
+ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT;
+ALTER TABLE staff ALTER COLUMN staff_id TYPE VARCHAR(50);
+ALTER TABLE staff ALTER COLUMN first_name TYPE VARCHAR(100);
+ALTER TABLE staff ALTER COLUMN last_name TYPE VARCHAR(100);
+ALTER TABLE staff ALTER COLUMN email TYPE VARCHAR(255);
+ALTER TABLE staff ALTER COLUMN google_id TYPE VARCHAR(255);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attendance_staff ON attendance_records(staff_uuid);
 CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance_records(date);
