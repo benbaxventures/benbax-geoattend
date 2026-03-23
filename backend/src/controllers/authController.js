@@ -127,16 +127,20 @@ exports.googleLogin = async (req, res) => {
   try {
     const { googleId, email, firstName, lastName, profilePhoto, deviceId, deviceModel, osVersion } = req.body;
 
+    console.log('Google login request values:', JSON.stringify({
+      googleId: googleId?.length,
+      email: email?.length,
+      firstName: firstName?.length,
+      lastName: lastName?.length,
+      profilePhoto: profilePhoto?.length,
+      deviceId: deviceId?.length,
+      deviceModel: deviceModel?.length,
+      osVersion: osVersion?.length,
+    }));
+
     if (!googleId || !email) {
       return res.status(400).json({ error: 'Google ID and email are required' });
     }
-
-    // Ensure columns can handle Google data
-    await pool.query(`
-      ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE;
-      ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT;
-      ALTER TABLE staff ALTER COLUMN password_hash DROP NOT NULL;
-    `).catch(() => {});
 
     // Check if user exists by google_id or email
     let result = await pool.query(
@@ -224,7 +228,8 @@ exports.googleLogin = async (req, res) => {
     });
   } catch (err) {
     console.error('Google login error:', err);
-    res.status(500).json({ error: 'Server error', debug: err.message });
+    console.error('Google login request body:', JSON.stringify(req.body));
+    res.status(500).json({ error: 'Server error', debug: err.message, detail: err.detail || null, column: err.column || null });
   }
 };
 
