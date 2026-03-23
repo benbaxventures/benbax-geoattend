@@ -90,11 +90,46 @@ async function runAutoMigration() {
   console.log('Auto-migration: column sizes verified.');
 }
 
+async function ensureAdminExists() {
+  try {
+    const existing = await pool.query("SELECT id FROM staff WHERE staff_id = 'ADMIN001'");
+    if (existing.rows.length > 0) return;
+
+    const bcrypt = require('bcryptjs');
+    const instResult = await pool.query('SELECT id FROM institutions ORDER BY created_at LIMIT 1');
+    let institutionId;
+
+    if (instResult.rows.length === 0) {
+      const ins = await pool.query(
+        `INSERT INTO institutions (name, address, city, region, latitude, longitude, geofence_radius)
+         VALUES ('Sample Institution Ghana', '123 Independence Avenue', 'Accra', 'Greater Accra', 5.6037, -0.1870, 200)
+         RETURNING id`
+      );
+      institutionId = ins.rows[0].id;
+      await pool.query('INSERT INTO attendance_rules (institution_id) VALUES ($1)', [institutionId]);
+    } else {
+      institutionId = instResult.rows[0].id;
+    }
+
+    const passwordHash = await bcrypt.hash(process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123', 12);
+    await pool.query(
+      `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, password_hash, role, department, position, qr_code_data)
+       VALUES ($1, 'ADMIN001', 'System', 'Administrator', $2, $3, 'super_admin', 'Administration', 'System Administrator', $4)
+       ON CONFLICT DO NOTHING`,
+      [institutionId, process.env.DEFAULT_ADMIN_EMAIL || 'admin@institution.edu.gh', passwordHash, `STAFF-${institutionId}-ADMIN001`]
+    );
+    console.log('Admin account created: ADMIN001');
+  } catch (err) {
+    console.error('Ensure admin error:', err.message);
+  }
+}
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   await runAutoMigration();
+  await ensureAdminExists();
 });
 
 module.exports = app;
