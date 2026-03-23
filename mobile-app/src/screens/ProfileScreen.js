@@ -255,8 +255,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f5f5f5',
   },
-  infoLabel: { fontSize: 14, color: '#7f8c8d' },
-  infoValue: { fontSize: 14, fontWeight: '600', color: '#2c3e50' },
+  infoLabel: { fontSize: 14, color: '#7f8c8d', width: 100 },
+  infoValue: { fontSize: 14, fontWeight: '600', color: '#2c3e50', flex: 1, textAlign: 'right' },
   passwordBtn: {
     backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
