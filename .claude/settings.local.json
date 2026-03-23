@@ -34,7 +34,9 @@
       "Read(//c/Program Files/**)",
       "Bash(find /c/Users/brigh/webDev/Geofence-app -type f -name *staff*)",
       "Bash(grep -r \"deleteStaff\\\\|delete.*staff\\\\|DELETE\" /c/Users/brigh/webDev/Geofence-app/backend/src --include=*.js)",
-      "Bash(node src/migrations/run.js)"
+      "Bash(node src/migrations/run.js)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
