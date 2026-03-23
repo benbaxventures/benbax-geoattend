@@ -9,8 +9,12 @@ import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/a
 import { addToQueue, syncQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 import * as Device from 'expo-device';
 import { WebView } from 'react-native-webview';
+import { useTheme } from '../services/theme';
+import { useI18n } from '../services/i18n';
 
 export default function HomeScreen() {
+  const { theme } = useTheme();
+  const { t } = useI18n();
   const [user, setUser] = useState(null);
   const [institution, setInstitution] = useState(null);
   const [todayStatus, setTodayStatus] = useState('not_checked_in');
@@ -151,18 +155,18 @@ export default function HomeScreen() {
 
   const isWithin = institution && distance !== null && distance <= institution.geofenceRadius;
   const now = new Date();
-  const greeting = now.getHours() < 12 ? 'Good Morning' : now.getHours() < 17 ? 'Good Afternoon' : 'Good Evening';
+  const greeting = now.getHours() < 12 ? t('goodMorning') : now.getHours() < 17 ? t('goodAfternoon') : t('goodEvening');
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
       <ScrollView
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a5276" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />}
       >
         <View style={styles.header}>
-          <Text style={styles.greeting}>{greeting},</Text>
-          <Text style={styles.name}>{user?.firstName || 'Staff'}</Text>
-          <Text style={styles.date}>
+          <Text style={[styles.greeting, { color: theme.textSecondary }]}>{greeting},</Text>
+          <Text style={[styles.name, { color: theme.text }]}>{user?.firstName || 'Staff'}</Text>
+          <Text style={[styles.date, { color: theme.textMuted }]}>
             {now.toLocaleDateString('en-GH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </Text>
         </View>
@@ -178,9 +182,9 @@ export default function HomeScreen() {
 
         {/* Institution Info */}
         {institution?.name && (
-          <View style={[styles.card, { borderLeftColor: '#1a5276' }]}>
-            <Text style={styles.cardLabel}>INSTITUTION</Text>
-            <Text style={styles.cardValue}>{institution.name}</Text>
+          <View style={[styles.card, { borderLeftColor: theme.primary, backgroundColor: theme.card }]}>
+            <Text style={[styles.cardLabel, { color: theme.textMuted }]}>INSTITUTION</Text>
+            <Text style={[styles.cardValue, { color: theme.text }]}>{institution.name}</Text>
             {(institution.address || institution.city) && (
               <Text style={styles.cardDetail}>
                 {[institution.address, institution.city, institution.region].filter(Boolean).join(', ')}
@@ -190,19 +194,19 @@ export default function HomeScreen() {
         )}
 
         {/* Geofence Status */}
-        <View style={[styles.card, { borderLeftColor: isWithin ? '#27ae60' : '#e74c3c' }]}>
-          <Text style={styles.cardLabel}>LOCATION STATUS</Text>
+        <View style={[styles.card, { borderLeftColor: isWithin ? '#27ae60' : '#e74c3c', backgroundColor: theme.card }]}>
+          <Text style={[styles.cardLabel, { color: theme.textMuted }]}>{t('locationStatus')}</Text>
           {distance !== null ? (
             <>
               <Text style={[styles.cardValue, { color: isWithin ? '#27ae60' : '#e74c3c' }]}>
-                {isWithin ? 'Within Geofence' : 'Outside Geofence'}
+                {isWithin ? t('withinGeofence') : t('outsideGeofence')}
               </Text>
-              <Text style={styles.cardDetail}>
+              <Text style={[styles.cardDetail, { color: theme.textSecondary }]}>
                 {distance}m from {institution?.name || 'institution'} ({institution?.geofenceRadius}m radius)
               </Text>
             </>
           ) : (
-            <Text style={styles.cardDetail}>Getting location...</Text>
+            <Text style={[styles.cardDetail, { color: theme.textSecondary }]}>{t('gettingLocation')}</Text>
           )}
         </View>
 
@@ -214,7 +218,7 @@ export default function HomeScreen() {
               onPress={() => setShowMap(!showMap)}
             >
               <Text style={{ color: '#8e44ad', fontWeight: '600', fontSize: 14 }}>
-                {showMap ? '🗺 Hide Map' : '🗺 Show Geofence Map'}
+                {showMap ? `🗺 ${t('hideMap')}` : `🗺 ${t('showMap')}`}
               </Text>
             </TouchableOpacity>
 
@@ -253,11 +257,11 @@ export default function HomeScreen() {
         )}
 
         {/* Today's Status */}
-        <View style={[styles.card, { borderLeftColor: '#3498db' }]}>
-          <Text style={styles.cardLabel}>TODAY'S STATUS</Text>
-          <Text style={styles.cardValue}>
-            {todayStatus === 'checked_in' ? 'Checked In' :
-             todayStatus === 'checked_out' ? 'Checked Out' : 'Not Checked In'}
+        <View style={[styles.card, { borderLeftColor: '#3498db', backgroundColor: theme.card }]}>
+          <Text style={[styles.cardLabel, { color: theme.textMuted }]}>{t('todayStatus')}</Text>
+          <Text style={[styles.cardValue, { color: theme.text }]}>
+            {todayStatus === 'checked_in' ? t('checkedIn') :
+             todayStatus === 'checked_out' ? t('checkedOut') : t('notCheckedIn')}
           </Text>
           {record?.check_in_time && (
             <Text style={styles.cardDetail}>
@@ -270,24 +274,24 @@ export default function HomeScreen() {
 
         {/* Monthly Summary */}
         {stats && (
-          <View style={styles.statsContainer}>
-            <Text style={styles.statsTitle}>THIS MONTH</Text>
+          <View style={[styles.statsContainer, { backgroundColor: theme.card }]}>
+            <Text style={[styles.statsTitle, { color: theme.textMuted }]}>{t('thisMonth')}</Text>
             <View style={styles.statsGrid}>
-              <View style={[styles.statBox, { backgroundColor: '#eafaf1' }]}>
+              <View style={[styles.statBox, { backgroundColor: theme.dark ? '#1a3a2a' : '#eafaf1' }]}>
                 <Text style={[styles.statNumber, { color: '#27ae60' }]}>{stats.present}</Text>
-                <Text style={styles.statLabel}>Present</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('present')}</Text>
               </View>
-              <View style={[styles.statBox, { backgroundColor: '#fef9e7' }]}>
+              <View style={[styles.statBox, { backgroundColor: theme.dark ? '#3a3420' : '#fef9e7' }]}>
                 <Text style={[styles.statNumber, { color: '#f39c12' }]}>{stats.late}</Text>
-                <Text style={styles.statLabel}>Late</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('late')}</Text>
               </View>
-              <View style={[styles.statBox, { backgroundColor: '#fdedec' }]}>
+              <View style={[styles.statBox, { backgroundColor: theme.dark ? '#3a2020' : '#fdedec' }]}>
                 <Text style={[styles.statNumber, { color: '#e74c3c' }]}>{stats.absent}</Text>
-                <Text style={styles.statLabel}>Absent</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('absent')}</Text>
               </View>
-              <View style={[styles.statBox, { backgroundColor: '#ebf5fb' }]}>
+              <View style={[styles.statBox, { backgroundColor: theme.dark ? '#1a2a3a' : '#ebf5fb' }]}>
                 <Text style={[styles.statNumber, { color: '#3498db' }]}>{stats.avgHours || '0'}h</Text>
-                <Text style={styles.statLabel}>Avg Hours</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('avgHours')}</Text>
               </View>
             </View>
           </View>
@@ -303,8 +307,8 @@ export default function HomeScreen() {
             >
               {loading ? <ActivityIndicator color="#fff" /> : (
                 <>
-                  <Text style={styles.actionBtnText}>Check In</Text>
-                  <Text style={styles.actionBtnSub}>GPS Verification</Text>
+                  <Text style={styles.actionBtnText}>{t('checkIn')}</Text>
+                  <Text style={styles.actionBtnSub}>{t('gpsVerification')}</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -318,8 +322,8 @@ export default function HomeScreen() {
             >
               {loading ? <ActivityIndicator color="#fff" /> : (
                 <>
-                  <Text style={styles.actionBtnText}>Check Out</Text>
-                  <Text style={styles.actionBtnSub}>End your shift</Text>
+                  <Text style={styles.actionBtnText}>{t('checkOut')}</Text>
+                  <Text style={styles.actionBtnSub}>{t('endShift') || 'End your shift'}</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -327,8 +331,8 @@ export default function HomeScreen() {
 
           {todayStatus === 'checked_out' && (
             <View style={[styles.actionBtn, styles.doneBtn]}>
-              <Text style={styles.actionBtnText}>All Done!</Text>
-              <Text style={styles.actionBtnSub}>See you tomorrow</Text>
+              <Text style={styles.actionBtnText}>{t('allDone')}</Text>
+              <Text style={styles.actionBtnSub}>{t('seeYouTomorrow')}</Text>
             </View>
           )}
         </View>

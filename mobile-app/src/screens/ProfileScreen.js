@@ -123,16 +123,16 @@ export default function ProfileScreen({ navigation, onLogout }) {
   };
 
   const InfoRow = ({ label, value }) => (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value || '-'}</Text>
+    <View style={[styles.infoRow, { borderBottomColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+      <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>{label}</Text>
+      <Text style={[styles.infoValue, { color: theme.text }]}>{value || '-'}</Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={[styles.title, { color: theme.text }]}>{t('profile')}</Text>
 
         {profile && (
           <>
@@ -151,11 +151,11 @@ export default function ProfileScreen({ navigation, onLogout }) {
                   <Text style={styles.cameraBadgeText}>📷</Text>
                 </View>
               </TouchableOpacity>
-              <Text style={styles.fullName}>{profile.first_name} {profile.last_name}</Text>
-              <Text style={styles.staffIdText}>{profile.staff_id}</Text>
+              <Text style={[styles.fullName, { color: theme.text }]}>{profile.first_name} {profile.last_name}</Text>
+              <Text style={[styles.staffIdText, { color: theme.textSecondary }]}>{profile.staff_id}</Text>
             </View>
 
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: theme.card }]}>
               <InfoRow label="Email" value={profile.email} />
               <InfoRow label="Phone" value={profile.phone} />
               <InfoRow label="Department" value={profile.department} />
@@ -164,8 +164,8 @@ export default function ProfileScreen({ navigation, onLogout }) {
               <InfoRow label="Role" value={profile.role} />
             </View>
 
-            <TouchableOpacity style={styles.passwordBtn} onPress={() => setShowPasswordForm(!showPasswordForm)}>
-              <Text style={styles.passwordBtnText}>Change Password</Text>
+            <TouchableOpacity style={[styles.passwordBtn, { backgroundColor: theme.card }]} onPress={() => setShowPasswordForm(!showPasswordForm)}>
+              <Text style={[styles.passwordBtnText, { color: theme.primary }]}>{t('changePassword')}</Text>
             </TouchableOpacity>
 
             {showPasswordForm && (

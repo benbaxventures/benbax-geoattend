@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView,
@@ -6,11 +6,13 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
 import { login, googleLogin } from '../services/api';
 
 const GOOGLE_WEB_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 const GOOGLE_ANDROID_CLIENT_ID = '725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [staffId, setStaffId] = useState('');
@@ -19,60 +21,70 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    try {
-      // Use Expo auth proxy to avoid custom scheme issues
-      const redirectUri = 'https://auth.expo.io/@A16-0/geoattend';
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${GOOGLE_WEB_CLIENT_ID}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=token` +
-        `&scope=${encodeURIComponent('profile email')}`;
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+  });
 
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-
-      if (result.type === 'success' && result.url) {
-        const params = new URLSearchParams(result.url.split('#')[1]);
-        const accessToken = params.get('access_token');
-
-        if (accessToken) {
-          const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          });
-          const userInfo = await res.json();
-
-          let deviceInfo = {};
-          try {
-            deviceInfo = {
-              deviceId: Device.osBuildId || Device.modelId || 'unknown',
-              deviceModel: Device.modelName || 'unknown',
-              osVersion: `${Device.osName || 'Android'} ${Device.osVersion || ''}`.trim(),
-            };
-          } catch (e) {
-            deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
-          }
-
-          const { data } = await googleLogin({
-            googleId: userInfo.id,
-            email: userInfo.email,
-            firstName: userInfo.given_name,
-            lastName: userInfo.family_name,
-            profilePhoto: userInfo.picture,
-            ...deviceInfo,
-          });
-
-          await AsyncStorage.setItem('token', data.token);
-          await AsyncStorage.setItem('user', JSON.stringify(data.user));
-          await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
-          onLogin();
-        }
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      if (authentication?.accessToken) {
+        handleGoogleToken(authentication.accessToken);
       }
+    } else if (response?.type === 'error') {
+      Alert.alert('Login Failed', response.error?.message || 'Google login failed');
+      setGoogleLoading(false);
+    } else if (response?.type === 'dismiss') {
+      setGoogleLoading(false);
+    }
+  }, [response]);
+
+  const handleGoogleToken = async (accessToken) => {
+    try {
+      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const userInfo = await res.json();
+
+      let deviceInfo = {};
+      try {
+        deviceInfo = {
+          deviceId: Device.osBuildId || Device.modelId || 'unknown',
+          deviceModel: Device.modelName || 'unknown',
+          osVersion: `${Device.osName || 'Android'} ${Device.osVersion || ''}`.trim(),
+        };
+      } catch (e) {
+        deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
+      }
+
+      const { data } = await googleLogin({
+        googleId: userInfo.id,
+        email: userInfo.email,
+        firstName: userInfo.given_name,
+        lastName: userInfo.family_name,
+        profilePhoto: userInfo.picture,
+        ...deviceInfo,
+      });
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+      onLogin();
     } catch (err) {
       const msg = err.response?.data?.error || err.message || 'Google login failed';
       Alert.alert('Login Failed', msg);
     } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      await promptAsync();
+    } catch (err) {
+      Alert.alert('Login Failed', err.message || 'Google login failed');
       setGoogleLoading(false);
     }
   };

@@ -26,20 +26,21 @@ const Tab = createBottomTabNavigator();
 function MainTabs({ onLogout }) {
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 10);
+  const { theme } = require('./src/services/theme').useTheme();
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#1a5276',
-        tabBarInactiveTintColor: '#95a5a6',
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.textMuted,
         tabBarStyle: {
           paddingBottom: bottomPadding,
           paddingTop: 8,
           height: 60 + bottomPadding,
           borderTopWidth: 1,
-          borderTopColor: '#f0f0f0',
-          backgroundColor: '#fff',
+          borderTopColor: theme.border,
+          backgroundColor: theme.tabBar,
           elevation: 10,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
