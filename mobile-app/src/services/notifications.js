@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
+import api from './api';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -32,6 +33,12 @@ export async function registerForPushNotifications() {
   }
 
   const token = (await Notifications.getExpoPushTokenAsync()).data;
+
+  // Send token to backend for server-side push notifications
+  try {
+    await api.post('/auth/push-token', { pushToken: token });
+  } catch {}
+
   return token;
 }
 

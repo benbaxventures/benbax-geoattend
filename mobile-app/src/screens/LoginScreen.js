@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { login, googleLogin } from '../services/api';
+import { useToast } from '../services/Toast';
 
 const GOOGLE_WEB_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 
@@ -16,6 +17,7 @@ GoogleSignin.configure({
 });
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
+  const toast = useToast();
   const [staffId, setStaffId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -60,11 +62,11 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       } else if (err.code === statusCodes.IN_PROGRESS) {
         // already in progress
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        Alert.alert('Error', 'Google Play Services is not available on this device');
+        toast.error('Google Play Services is not available on this device');
       } else {
         const serverError = err.response?.data?.error || err.message || 'Google login failed';
         const debug = err.response?.data?.debug;
-        Alert.alert('Login Failed', debug ? `${serverError} (${debug})` : serverError);
+        toast.error(debug ? `${serverError} (${debug})` : serverError, 'Login Failed');
       }
     } finally {
       setGoogleLoading(false);
@@ -73,7 +75,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
 
   const handleLogin = async () => {
     if (!staffId.trim() || !password) {
-      Alert.alert('Error', 'Please enter your Staff ID and password');
+      toast.error('Please enter your Staff ID and password');
       return;
     }
 
@@ -101,7 +103,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       const serverMsg = err.response?.data?.error;
       const debug = err.response?.data?.debug;
       const msg = serverMsg || err.message || 'Unable to connect to server';
-      Alert.alert('Login Failed', debug ? `${msg} (${debug})` : msg);
+      toast.error(debug ? `${msg} (${debug})` : msg, 'Login Failed');
     } finally {
       setLoading(false);
     }

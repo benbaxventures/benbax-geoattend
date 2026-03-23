@@ -8,6 +8,7 @@ import * as Updates from 'expo-updates';
 import * as ImagePicker from 'expo-image-picker';
 import { getProfile, changePassword } from '../services/api';
 import { useTheme } from '../services/theme';
+import { useToast } from '../services/Toast';
 import { isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from '../services/biometric';
 import { useI18n } from '../services/i18n';
 
@@ -20,6 +21,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const { isDark, toggleTheme, theme } = useTheme();
   const { t, lang, switchLanguage } = useI18n();
+  const toast = useToast();
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioEnabled, setBioEnabled] = useState(false);
 
@@ -82,23 +84,23 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
-      Alert.alert('Error', 'Please fill in both fields');
+      toast.error('Please fill in both fields');
       return;
     }
     if (newPassword.length < 6) {
-      Alert.alert('Error', 'New password must be at least 6 characters');
+      toast.error('New password must be at least 6 characters');
       return;
     }
 
     setLoading(true);
     try {
       await changePassword(currentPassword, newPassword);
-      Alert.alert('Success', 'Password changed successfully');
+      toast.success('Password changed successfully');
       setShowPasswordForm(false);
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.error || 'Failed to change password');
+      toast.error(err.response?.data?.error || 'Failed to change password');
     } finally {
       setLoading(false);
     }
@@ -203,7 +205,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 const newVal = !bioEnabled;
                 await setBiometricEnabled(newVal);
                 setBioEnabled(newVal);
-                Alert.alert(newVal ? 'Enabled' : 'Disabled', `Fingerprint login ${newVal ? 'enabled' : 'disabled'}`);
+                toast.success(`Fingerprint login ${newVal ? 'enabled' : 'disabled'}`);
               }}>
                 <Text style={styles.passwordBtnText}>{bioEnabled ? '🔓 Disable Fingerprint Login' : '🔐 Enable Fingerprint Login'}</Text>
               </TouchableOpacity>

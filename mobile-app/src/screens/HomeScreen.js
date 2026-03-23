@@ -8,13 +8,16 @@ import { getCurrentLocation, calculateDistance } from '../services/location';
 import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/api';
 import { addToQueue, syncQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 import { WebView } from 'react-native-webview';
 import { useTheme } from '../services/theme';
 import { useI18n } from '../services/i18n';
+import { useToast } from '../services/Toast';
 
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useI18n();
+  const toast = useToast();
   const [user, setUser] = useState(null);
   const [institution, setInstitution] = useState(null);
   const [todayStatus, setTodayStatus] = useState('not_checked_in');
@@ -62,7 +65,7 @@ export default function HomeScreen() {
     if (connected) {
       const result = await syncQueue();
       if (result.synced > 0) {
-        Alert.alert('Synced', `${result.synced} offline check-in(s) synced successfully.`);
+        toast.success(`${result.synced} offline check-in(s) synced successfully.`, 'Synced');
       }
     }
     const qLen = await getQueueLength();
@@ -79,15 +82,12 @@ export default function HomeScreen() {
 
   const handleCheckIn = async () => {
     if (!location) {
-      Alert.alert('Location Required', 'Unable to get your location. Please enable GPS.');
+      toast.error('Unable to get your location. Please enable GPS.', 'Location Required');
       return;
     }
 
     if (institution && distance > institution.geofenceRadius) {
-      Alert.alert(
-        'Outside Geofence',
-        `You are ${distance}m from the institution. You must be within ${institution.geofenceRadius}m to check in.`
-      );
+      toast.warning(`You are ${distance}m away. Must be within ${institution.geofenceRadius}m.`, 'Outside Geofence');
       return;
     }
 
@@ -104,7 +104,7 @@ export default function HomeScreen() {
       if (!connected) {
         await addToQueue('check-in', checkInData);
         setPendingSync(await getQueueLength());
-        Alert.alert('Saved Offline', 'Check-in saved. It will sync when you are back online.');
+        toast.warning('Check-in saved. Will sync when back online.', 'Saved Offline');
         setLoading(false);
         return;
       }
@@ -113,18 +113,20 @@ export default function HomeScreen() {
       setTodayStatus('checked_in');
       setRecord(data.record);
 
-      Alert.alert(
-        'Check-In Successful',
-        data.isLate ? 'You have been marked as LATE.' : 'You have been checked in on time.'
-      );
+      const lateMsg = data.isLate ? 'You have been marked as LATE.' : 'Checked in on time!';
+      toast.success(lateMsg, 'Check-In Successful');
+      Notifications.scheduleNotificationAsync({
+        content: { title: 'Check-In Confirmed', body: lateMsg, sound: true },
+        trigger: null,
+      });
     } catch (err) {
       // If network error, queue offline
       if (!err.response) {
         await addToQueue('check-in', checkInData);
         setPendingSync(await getQueueLength());
-        Alert.alert('Saved Offline', 'Check-in saved. It will sync when you are back online.');
+        toast.warning('Check-in saved. Will sync when back online.', 'Saved Offline');
       } else {
-        Alert.alert('Check-In Failed', err.response?.data?.error || 'Please try again');
+        toast.error(err.response?.data?.error || 'Please try again', 'Check-In Failed');
       }
     } finally {
       setLoading(false);
@@ -145,9 +147,13 @@ export default function HomeScreen() {
       });
 
       setTodayStatus('checked_out');
-      Alert.alert('Check-Out Successful', 'You have been checked out. See you tomorrow!');
+      toast.success('You have been checked out. See you tomorrow!', 'Check-Out Successful');
+      Notifications.scheduleNotificationAsync({
+        content: { title: 'Check-Out Confirmed', body: 'See you tomorrow!', sound: true },
+        trigger: null,
+      });
     } catch (err) {
-      Alert.alert('Check-Out Failed', err.response?.data?.error || 'Please try again');
+      toast.error(err.response?.data?.error || 'Please try again', 'Check-Out Failed');
     } finally {
       setLoading(false);
     }

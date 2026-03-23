@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { ToastProvider } from './src/services/Toast';
 
 import LoginScreen from './src/screens/LoginScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
@@ -106,6 +107,7 @@ export default function App() {
     <I18nProvider>
     <ThemeProvider>
     <SafeAreaProvider>
+      <ToastProvider>
       <StatusBar style="light" />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -131,6 +133,7 @@ export default function App() {
           )}
         </Stack.Navigator>
       </NavigationContainer>
+      </ToastProvider>
     </SafeAreaProvider>
     </ThemeProvider>
     </I18nProvider>

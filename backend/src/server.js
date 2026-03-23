@@ -75,6 +75,7 @@ const pool = require('./config/database');
 async function runAutoMigration() {
   const alters = [
     'ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE',
+    'ALTER TABLE staff ADD COLUMN IF NOT EXISTS push_token TEXT',
     'ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT',
     'ALTER TABLE staff ALTER COLUMN google_id TYPE VARCHAR(255)',
     'ALTER TABLE staff ALTER COLUMN staff_id TYPE VARCHAR(50)',

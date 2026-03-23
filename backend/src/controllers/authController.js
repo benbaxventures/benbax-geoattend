@@ -309,6 +309,22 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
+exports.savePushToken = async (req, res) => {
+  try {
+    const { pushToken } = req.body;
+    if (!pushToken) return res.status(400).json({ error: 'Push token is required' });
+
+    await pool.query(
+      `UPDATE staff SET push_token = $1, updated_at = NOW() WHERE id = $2`,
+      [pushToken, req.user.id]
+    );
+    res.json({ message: 'Push token saved' });
+  } catch (err) {
+    console.error('Save push token error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 exports.getProfile = async (req, res) => {
   try {
     const result = await pool.query(
