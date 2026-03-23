@@ -255,3 +255,33 @@ exports.bulkImport = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.deleteStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const institutionId = req.user.institutionId;
+
+    // Verify staff belongs to the same institution
+    const staff = await pool.query(
+      'SELECT id, staff_id, first_name, last_name FROM staff WHERE id = $1 AND institution_id = $2',
+      [id, institutionId]
+    );
+
+    if (staff.rows.length === 0) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
+
+    // Prevent admins from deleting themselves
+    if (id === req.user.id) {
+      return res.status(400).json({ error: 'You cannot delete your own account' });
+    }
+
+    // Delete staff (attendance_records and device_logs cascade automatically)
+    await pool.query('DELETE FROM staff WHERE id = $1', [id]);
+
+    res.json({ message: `Staff member ${staff.rows[0].first_name} ${staff.rows[0].last_name} deleted successfully` });
+  } catch (err) {
+    console.error('Delete staff error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

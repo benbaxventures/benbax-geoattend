@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload } from 'react-icons/fi';
-import { getStaff, getDepartments, resetStaffPassword } from '../services/api';
+import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload, FiTrash2 } from 'react-icons/fi';
+import { getStaff, getDepartments, resetStaffPassword, deleteStaff } from '../services/api';
 import api from '../services/api';
 
 const styles = {
@@ -41,6 +41,23 @@ const styles = {
     background: active ? '#1a5276' : '#fff', color: active ? '#fff' : '#2c3e50',
     border: '1px solid #e0e0e0',
   }),
+  modalOverlay: {
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    background: 'rgba(0,0,0,0.5)', display: 'flex',
+    alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+  },
+  modal: {
+    background: '#fff', borderRadius: '12px', padding: '24px',
+    width: '400px', maxWidth: '90vw', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+  },
+  cancelBtn: {
+    padding: '8px 20px', borderRadius: '6px', fontSize: '14px',
+    background: '#f0f0f0', color: '#333', border: 'none', cursor: 'pointer',
+  },
+  deleteBtn: {
+    padding: '8px 20px', borderRadius: '6px', fontSize: '14px',
+    background: '#e74c3c', color: '#fff', border: 'none', cursor: 'pointer',
+  },
 };
 
 export default function StaffManagement() {
@@ -109,6 +126,8 @@ export default function StaffManagement() {
     fetchStaff();
   };
 
+  const [deleteModal, setDeleteModal] = useState(null);
+
   const handleResetPassword = async (id, name) => {
     const newPassword = window.prompt(`Enter new password for ${name}:`);
     if (!newPassword) return;
@@ -117,6 +136,18 @@ export default function StaffManagement() {
       toast.success('Password reset successfully');
     } catch {
       toast.error('Failed to reset password');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModal) return;
+    try {
+      const { data } = await deleteStaff(deleteModal.id);
+      toast.success(data.message);
+      setDeleteModal(null);
+      fetchStaff();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to delete staff');
     }
   };
 
@@ -177,6 +208,7 @@ export default function StaffManagement() {
               <td style={styles.td}>
                 <button style={styles.actionBtn} title="Edit" onClick={() => navigate(`/staff/${s.id}/edit`)}><FiEdit2 size={15} /></button>
                 <button style={styles.actionBtn} title="Reset Password" onClick={() => handleResetPassword(s.id, `${s.first_name} ${s.last_name}`)}><FiKey size={15} /></button>
+                <button style={{ ...styles.actionBtn, color: '#e74c3c' }} title="Delete" onClick={() => setDeleteModal({ id: s.id, name: `${s.first_name} ${s.last_name}`, staffId: s.staff_id })}><FiTrash2 size={15} /></button>
               </td>
             </tr>
           ))}
@@ -191,6 +223,24 @@ export default function StaffManagement() {
           {Array.from({ length: totalPages }, (_, i) => (
             <button key={i} style={styles.pageBtn(page === i + 1)} onClick={() => setPage(i + 1)}>{i + 1}</button>
           ))}
+        </div>
+      )}
+
+      {deleteModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3 style={{ margin: '0 0 12px', fontSize: '18px', color: '#2c3e50' }}>Delete Staff Member</h3>
+            <p style={{ margin: '0 0 8px', color: '#555', fontSize: '14px' }}>
+              Are you sure you want to delete <strong>{deleteModal.name}</strong> ({deleteModal.staffId})?
+            </p>
+            <p style={{ margin: '0 0 20px', color: '#e74c3c', fontSize: '13px' }}>
+              This will permanently remove all their attendance records and cannot be undone.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button onClick={() => setDeleteModal(null)} style={styles.cancelBtn}>Cancel</button>
+              <button onClick={handleDelete} style={styles.deleteBtn}>Delete</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

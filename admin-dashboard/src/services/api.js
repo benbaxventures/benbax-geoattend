@@ -42,6 +42,7 @@ export const updateStaff = (id, data) => api.put(`/staff/${id}`, data);
 export const resetStaffPassword = (id, newPassword) => api.put(`/staff/${id}/reset-password`, { newPassword });
 export const getStaffQRCode = (id) => api.get(`/staff/${id}/qr-code`);
 export const getDepartments = () => api.get('/staff/departments');
+export const deleteStaff = (id) => api.delete(`/staff/${id}`);
 
 // Institution
 export const getInstitution = () => api.get('/institutions/current');

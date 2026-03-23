@@ -1,4 +1,3 @@
-const pool = require('../config/database');
 require('dotenv').config();
 
 const migration = `
@@ -112,7 +111,27 @@ CREATE INDEX IF NOT EXISTS idx_device_logs_staff ON device_logs(staff_uuid);
 `;
 
 async function runMigration() {
-  const client = await pool.connect();
+  // Allow extra time for Neon cold-start wake-up
+  const migrationPool = new (require('pg').Pool)({
+    ...(() => {
+      require('dotenv').config();
+      const ssl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
+      return process.env.DATABASE_URL
+        ? { connectionString: process.env.DATABASE_URL, ssl }
+        : {
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT, 10) || 5432,
+            database: process.env.DB_NAME || 'geofence_attendance',
+            user: process.env.DB_USER || 'postgres',
+            password: process.env.DB_PASSWORD || '',
+            ssl,
+          };
+    })(),
+    max: 1,
+    connectionTimeoutMillis: 30000,
+  });
+
+  const client = await migrationPool.connect();
   try {
     console.log('Running migrations...');
     await client.query(migration);
@@ -122,7 +141,7 @@ async function runMigration() {
     process.exit(1);
   } finally {
     client.release();
-    await pool.end();
+    await migrationPool.end();
   }
 }
 

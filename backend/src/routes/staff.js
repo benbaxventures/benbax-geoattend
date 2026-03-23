@@ -12,5 +12,6 @@ router.post('/bulk-import', staffController.bulkImport);
 router.put('/:id', staffController.updateStaff);
 router.put('/:id/reset-password', staffController.resetPassword);
 router.get('/:id/qr-code', staffController.getStaffQRCode);
+router.delete('/:id', staffController.deleteStaff);
 
 module.exports = router;
