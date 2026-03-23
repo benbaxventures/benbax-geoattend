@@ -127,7 +127,14 @@ export default function Login({ onLogin }) {
 
     setLoading(true);
     try {
-      const { data } = await login(staffId, password);
+      // Use fetch directly to bypass any axios interceptor issues
+      const resp = await fetch('https://geofence-app-jjpa.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ staffId, password }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw { response: { data } };
       localStorage.setItem('token', data.token);
 
       if (data.user.role !== 'admin' && data.user.role !== 'super_admin') {
@@ -140,7 +147,8 @@ export default function Login({ onLogin }) {
       onLogin(data.user);
       toast.success('Login successful');
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Login failed';
+      console.error('Login error:', err);
+      const msg = err.response?.data?.error || err.message || 'Network error - check console';
       toast.error(msg);
     } finally {
       setLoading(false);
