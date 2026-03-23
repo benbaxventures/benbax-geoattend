@@ -131,6 +131,13 @@ exports.googleLogin = async (req, res) => {
       return res.status(400).json({ error: 'Google ID and email are required' });
     }
 
+    // Ensure columns can handle Google data
+    await pool.query(`
+      ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE;
+      ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT;
+      ALTER TABLE staff ALTER COLUMN password_hash DROP NOT NULL;
+    `).catch(() => {});
+
     // Check if user exists by google_id or email
     let result = await pool.query(
       `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
