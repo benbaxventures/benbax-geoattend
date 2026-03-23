@@ -31,7 +31,9 @@
       "Bash(curl -s --max-time 10 https://geofence-app-jjpa.onrender.com/api/health)",
       "Bash(eas credentials:*)",
       "Bash(where java:*)",
-      "Read(//c/Program Files/**)"
+      "Read(//c/Program Files/**)",
+      "Bash(find /c/Users/brigh/webDev/Geofence-app -type f -name *staff*)",
+      "Bash(grep -r \"deleteStaff\\\\|delete.*staff\\\\|DELETE\" /c/Users/brigh/webDev/Geofence-app/backend/src --include=*.js)"
     ]
   }
 }
