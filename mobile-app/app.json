@@ -45,7 +45,13 @@
           "cameraPermission": "Allow GeoAttend to access your camera for QR code scanning."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8"
+        }
+      ]
     ],
     "extra": {
       "eas": {

@@ -5,14 +5,15 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { login, googleLogin } from '../services/api';
 
 const GOOGLE_WEB_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
-const GOOGLE_ANDROID_CLIENT_ID = '725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com';
 
-WebBrowser.maybeCompleteAuthSession();
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+  offlineAccess: true,
+});
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [staffId, setStaffId] = useState('');
@@ -21,31 +22,12 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-  });
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      if (authentication?.accessToken) {
-        handleGoogleToken(authentication.accessToken);
-      }
-    } else if (response?.type === 'error') {
-      Alert.alert('Login Failed', response.error?.message || 'Google login failed');
-      setGoogleLoading(false);
-    } else if (response?.type === 'dismiss') {
-      setGoogleLoading(false);
-    }
-  }, [response]);
-
-  const handleGoogleToken = async (accessToken) => {
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
     try {
-      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const userInfo = await res.json();
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const { data: userData } = userInfo;
 
       let deviceInfo = {};
       try {
@@ -59,11 +41,11 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       }
 
       const { data } = await googleLogin({
-        googleId: userInfo.id,
-        email: userInfo.email,
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-        profilePhoto: userInfo.picture,
+        googleId: userData.user.id,
+        email: userData.user.email,
+        firstName: userData.user.givenName,
+        lastName: userData.user.familyName,
+        profilePhoto: userData.user.photo,
         ...deviceInfo,
       });
 
@@ -72,19 +54,17 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
       onLogin();
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Google login failed';
-      Alert.alert('Login Failed', msg);
+      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled
+      } else if (err.code === statusCodes.IN_PROGRESS) {
+        // already in progress
+      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert('Error', 'Google Play Services is not available on this device');
+      } else {
+        const msg = err.response?.data?.error || err.message || 'Google login failed';
+        Alert.alert('Login Failed', msg);
+      }
     } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    try {
-      await promptAsync();
-    } catch (err) {
-      Alert.alert('Login Failed', err.message || 'Google login failed');
       setGoogleLoading(false);
     }
   };
