@@ -48,6 +48,7 @@ export const deleteStaff = (id) => api.delete(`/staff/${id}`);
 // Institution
 export const getInstitution = () => api.get('/institutions/current');
 export const updateInstitution = (data) => api.put('/institutions/current', data);
+export const getInstitutionQR = () => api.get('/institutions/qr-code');
 export const getAttendanceRules = () => api.get('/institutions/rules');
 export const updateAttendanceRules = (data) => api.put('/institutions/rules', data);
 

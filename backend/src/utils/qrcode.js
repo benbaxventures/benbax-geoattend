@@ -37,4 +37,25 @@ async function generateQRCodeBuffer(staffData) {
   });
 }
 
-module.exports = { generateQRCode, generateQRCodeBuffer };
+/**
+ * Generate a single institution-wide check-in QR code.
+ * Staff scan this at the entrance to check in.
+ */
+async function generateInstitutionQR(institution) {
+  const qrData = JSON.stringify({
+    type: 'institution_checkin',
+    institutionId: institution.id,
+    name: institution.name,
+    code: `INST-${institution.id}`,
+  });
+
+  const qrDataUrl = await QRCode.toDataURL(qrData, {
+    width: 400,
+    margin: 2,
+    color: { dark: '#1a5276', light: '#ffffff' },
+  });
+
+  return qrDataUrl;
+}
+
+module.exports = { generateQRCode, generateQRCodeBuffer, generateInstitutionQR };

@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
+const { generateInstitutionQR } = require('../utils/qrcode');
 
 exports.getInstitution = async (req, res) => {
   try {
@@ -119,6 +120,31 @@ exports.updateAttendanceRules = async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Update attendance rules error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getInstitutionQR = async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM institutions WHERE id = $1',
+      [req.user.institution_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
+    }
+
+    const institution = result.rows[0];
+    const qrCode = await generateInstitutionQR(institution);
+
+    res.json({
+      qrCode,
+      institutionName: institution.name,
+      institutionId: institution.id,
+    });
+  } catch (err) {
+    console.error('Get institution QR error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

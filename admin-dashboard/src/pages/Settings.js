@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { FiSave, FiMapPin, FiCrosshair } from 'react-icons/fi';
-import { getInstitution, updateInstitution, getAttendanceRules, updateAttendanceRules } from '../services/api';
+import { FiSave, FiMapPin, FiCrosshair, FiPrinter } from 'react-icons/fi';
+import { getInstitution, updateInstitution, getAttendanceRules, updateAttendanceRules, getInstitutionQR } from '../services/api';
 
 const styles = {
   title: { fontSize: '24px', fontWeight: '700', marginBottom: '24px' },

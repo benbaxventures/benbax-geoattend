@@ -6,6 +6,7 @@ router.use(authenticate);
 
 router.get('/current', institutionController.getInstitution);
 router.put('/current', requireAdmin, institutionController.updateInstitution);
+router.get('/qr-code', requireAdmin, institutionController.getInstitutionQR);
 router.get('/rules', institutionController.getAttendanceRules);
 router.put('/rules', requireAdmin, institutionController.updateAttendanceRules);
 
