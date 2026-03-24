@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, Alert, TouchableOpacity, SafeAreaView, ActivityIndicator,
 } from 'react-native';
@@ -23,7 +23,7 @@ export default function QRScanScreen() {
         <View style={styles.permissionBox}>
           <Text style={styles.permissionTitle}>Camera Permission Required</Text>
           <Text style={styles.permissionText}>
-            We need camera access to scan QR codes from staff ID cards.
+            We need camera access to scan QR codes for check-in.
           </Text>
           <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission}>
             <Text style={styles.permissionBtnText}>Grant Permission</Text>
@@ -33,7 +33,7 @@ export default function QRScanScreen() {
     );
   }
 
-  const handleBarCodeScanned = async ({ type, data }) => {
+  const handleBarCodeScanned = async ({ data }) => {
     if (scanned || loading) return;
     setScanned(true);
     setLoading(true);
@@ -41,9 +41,32 @@ export default function QRScanScreen() {
     try {
       const qrData = JSON.parse(data);
       const user = JSON.parse(await AsyncStorage.getItem('user'));
+      const institution = JSON.parse(await AsyncStorage.getItem('institution'));
 
-      if (qrData.staffId !== user?.staffId) {
-        Alert.alert('Invalid QR Code', 'This QR code does not match your staff ID.');
+      let qrCode = null;
+      let method = 'qr_code';
+
+      if (qrData.type === 'institution_checkin') {
+        // Institution-wide QR code (posted at entrance)
+        if (institution && qrData.institutionId !== institution.institutionId && qrData.institutionId !== user?.institutionId) {
+          Alert.alert('Wrong Institution', 'This QR code is for a different institution.');
+          setScanned(false);
+          setLoading(false);
+          return;
+        }
+        qrCode = qrData.code;
+        method = 'qr_code';
+      } else if (qrData.staffId) {
+        // Individual staff QR code
+        if (qrData.staffId !== user?.staffId) {
+          Alert.alert('Invalid QR Code', 'This QR code does not match your staff ID.');
+          setScanned(false);
+          setLoading(false);
+          return;
+        }
+        qrCode = qrData.code;
+      } else {
+        Alert.alert('Invalid QR Code', 'This is not a valid GeoAttend QR code.');
         setScanned(false);
         setLoading(false);
         return;
@@ -52,21 +75,30 @@ export default function QRScanScreen() {
       let location = null;
       try { location = await getCurrentLocation(); } catch {}
 
+      let deviceId = 'unknown';
+      try { deviceId = Device.osBuildId || Device.modelId || 'unknown'; } catch {}
+
       const { data: result } = await checkIn({
         latitude: location?.latitude,
         longitude: location?.longitude,
-        method: 'qr_code',
-        qrCode: qrData.code,
-        deviceId: Device.osBuildId || 'unknown',
+        method,
+        qrCode,
+        deviceId,
       });
 
       Alert.alert(
         'Check-In Successful',
-        result.isLate ? 'Checked in via QR code. You are marked as LATE.' : 'Checked in via QR code successfully!'
+        result.isLate
+          ? 'Checked in via QR code. You are marked as LATE.'
+          : 'Checked in via QR code successfully!'
       );
     } catch (err) {
-      const message = err.response?.data?.error || 'Invalid QR code or check-in failed';
-      Alert.alert('Error', message);
+      if (err instanceof SyntaxError) {
+        Alert.alert('Invalid QR Code', 'This is not a valid GeoAttend QR code.');
+      } else {
+        const message = err.response?.data?.error || 'Check-in failed. Please try again.';
+        Alert.alert('Error', message);
+      }
     } finally {
       setLoading(false);
       setTimeout(() => setScanned(false), 3000);
@@ -77,7 +109,7 @@ export default function QRScanScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>QR Code Check-In</Text>
-        <Text style={styles.subtitle}>Scan your staff ID card QR code</Text>
+        <Text style={styles.subtitle}>Scan the institution QR code or your staff ID card</Text>
       </View>
 
       <View style={styles.cameraContainer}>
@@ -92,14 +124,14 @@ export default function QRScanScreen() {
         {loading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#fff" />
-            <Text style={styles.loadingText}>Processing...</Text>
+            <Text style={styles.loadingText}>Checking in...</Text>
           </View>
         )}
       </View>
 
       <View style={styles.instructions}>
         <Text style={styles.instructionText}>
-          Position the QR code from your staff ID card within the frame above
+          Point your camera at the QR code posted at the entrance or on your staff ID card
         </Text>
       </View>
     </SafeAreaView>

@@ -232,6 +232,109 @@ export default function Settings() {
           ><FiSave size={14} /> Save Rules</button>
         </div>
       </div>
+
+      {/* Institution Check-In QR Code */}
+      <div style={{ ...styles.card, marginTop: '24px', maxWidth: '900px', textAlign: 'center' }}>
+        <h3 style={styles.cardTitle}><FiPrinter size={16} /> Institution Check-In QR Code</h3>
+        <p style={{ fontSize: '13px', color: '#7f8c8d', marginBottom: '16px' }}>
+          Generate a single QR code for your institution. Print and post it at entrances — staff scan it to check in.
+        </p>
+        <InstitutionQR />
+      </div>
+    </div>
+  );
+}
+
+function InstitutionQR() {
+  const [qrCode, setQrCode] = React.useState(null);
+  const [institutionName, setInstitutionName] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const generateQR = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getInstitutionQR();
+      setQrCode(data.qrCode);
+      setInstitutionName(data.institutionName);
+    } catch {
+      toast.error('Failed to generate QR code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const printQR = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html><head><title>Check-In QR - ${institutionName}</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+        .card { border: 3px solid #1a5276; border-radius: 16px; padding: 32px; display: inline-block; max-width: 400px; }
+        .logo { font-size: 24px; font-weight: bold; color: #1a5276; margin-bottom: 4px; }
+        .subtitle { font-size: 12px; color: #7f8c8d; margin-bottom: 16px; }
+        .name { font-size: 18px; font-weight: bold; color: #2c3e50; margin-top: 16px; }
+        img { width: 300px; height: 300px; }
+        .instruction { font-size: 14px; color: #555; margin-top: 12px; padding: 8px 16px; background: #f0f2f5; border-radius: 8px; }
+        .footer { font-size: 11px; color: #999; margin-top: 16px; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <div class="card">
+        <div class="logo">GeoAttend</div>
+        <div class="subtitle">Attendance Check-In</div>
+        <img src="${qrCode}" />
+        <div class="name">${institutionName}</div>
+        <div class="instruction">Open GeoAttend app → QR Scan → Scan this code</div>
+        <div class="footer">Powered by Benbax Software Developers</div>
+      </div>
+      <script>window.print();</script>
+      </body></html>
+    `);
+  };
+
+  return (
+    <div>
+      {!qrCode ? (
+        <button
+          onClick={generateQR}
+          disabled={loading}
+          style={{
+            padding: '12px 32px', background: '#1a5276', color: '#fff',
+            borderRadius: '8px', fontSize: '14px', fontWeight: '600',
+            border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? 'Generating...' : 'Generate Check-In QR Code'}
+        </button>
+      ) : (
+        <div>
+          <img src={qrCode} alt="Institution QR" style={{ width: '250px', border: '2px solid #e0e0e0', borderRadius: '12px', padding: '8px' }} />
+          <p style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50', marginTop: '12px' }}>{institutionName}</p>
+          <p style={{ fontSize: '12px', color: '#95a5a6' }}>Staff scan this QR code to check in</p>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px' }}>
+            <button
+              onClick={printQR}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '10px 24px', background: '#8e44ad', color: '#fff',
+                borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                border: 'none', cursor: 'pointer',
+              }}
+            >
+              <FiPrinter size={14} /> Print QR Code
+            </button>
+            <button
+              onClick={generateQR}
+              style={{
+                padding: '10px 24px', background: '#fff', color: '#1a5276',
+                borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                border: '1px solid #e0e0e0', cursor: 'pointer',
+              }}
+            >
+              Regenerate
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
