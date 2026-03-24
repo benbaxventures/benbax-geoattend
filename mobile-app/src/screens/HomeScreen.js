@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator,
-  SafeAreaView, RefreshControl, ScrollView,
+  SafeAreaView, RefreshControl, ScrollView, Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentLocation, calculateDistance } from '../services/location';
@@ -96,7 +96,7 @@ export default function HomeScreen() {
       latitude: location.latitude,
       longitude: location.longitude,
       method: 'gps',
-      deviceId: Device.osBuildId || 'unknown',
+      deviceId: Device.osBuildId || Device.modelId || Device.modelName || 'unknown',
     };
 
     try {
@@ -143,7 +143,7 @@ export default function HomeScreen() {
         latitude: loc?.latitude,
         longitude: loc?.longitude,
         method: 'gps',
-        deviceId: Device.osBuildId || 'unknown',
+        deviceId: Device.osBuildId || Device.modelId || Device.modelName || 'unknown',
       });
 
       setTodayStatus('checked_out');

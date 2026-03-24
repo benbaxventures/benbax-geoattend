@@ -14,6 +14,13 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "simulator": true
+      },
+      "channel": "preview"
+    },
+    "preview:device": {
+      "distribution": "internal",
       "channel": "preview"
     },
     "production": {

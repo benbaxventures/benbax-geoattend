@@ -76,7 +76,7 @@ export default function QRScanScreen() {
       try { location = await getCurrentLocation(); } catch {}
 
       let deviceId = 'unknown';
-      try { deviceId = Device.osBuildId || Device.modelId || 'unknown'; } catch {}
+      try { deviceId = Device.osBuildId || Device.modelId || Device.modelName || 'unknown'; } catch {}
 
       const { data: result } = await checkIn({
         latitude: location?.latitude,

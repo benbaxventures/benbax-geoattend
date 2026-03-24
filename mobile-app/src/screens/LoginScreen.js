@@ -27,7 +27,9 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      await GoogleSignin.hasPlayServices();
+      if (Platform.OS === 'android') {
+        await GoogleSignin.hasPlayServices();
+      }
       await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
       const { data: userData } = userInfo;
@@ -35,9 +37,9 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       let deviceInfo = {};
       try {
         deviceInfo = {
-          deviceId: Device.osBuildId || Device.modelId || 'unknown',
+          deviceId: Device.osBuildId || Device.modelId || Device.modelName || 'unknown',
           deviceModel: Device.modelName || 'unknown',
-          osVersion: `${Device.osName || 'Android'} ${Device.osVersion || ''}`.trim(),
+          osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim(),
         };
       } catch (e) {
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
@@ -62,7 +64,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       } else if (err.code === statusCodes.IN_PROGRESS) {
         // already in progress
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        toast.error('Google Play Services is not available on this device');
+        toast.error(Platform.OS === 'ios' ? 'Google Sign-In is not available' : 'Google Play Services is not available on this device');
       } else {
         const serverError = err.response?.data?.error || err.message || 'Google login failed';
         const debug = err.response?.data?.debug;
@@ -84,9 +86,9 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       let deviceInfo = {};
       try {
         deviceInfo = {
-          deviceId: Device.osBuildId || Device.modelId || 'unknown',
+          deviceId: Device.osBuildId || Device.modelId || Device.modelName || 'unknown',
           deviceModel: Device.modelName || 'unknown',
-          osVersion: `${Device.osName || 'Android'} ${Device.osVersion || ''}`.trim(),
+          osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim(),
         };
       } catch (e) {
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
