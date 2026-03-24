@@ -38,36 +38,41 @@ exports.getAttendanceReport = async (req, res) => {
     const institutionId = req.user.institution_id;
     const offset = (page - 1) * limit;
 
-    let query = `
-      SELECT ar.*, s.staff_id, s.first_name, s.last_name, s.department, s.position
-      FROM attendance_records ar
-      JOIN staff s ON ar.staff_uuid = s.id
-      WHERE ar.institution_id = $1`;
+    // Build LEFT JOIN so all active staff appear, even those with no attendance records
+    let joinConditions = `ar.staff_uuid = s.id AND ar.institution_id = s.institution_id`;
     const params = [institutionId];
     let paramIndex = 2;
 
     if (startDate) {
-      query += ` AND ar.date >= $${paramIndex}`;
+      joinConditions += ` AND ar.date >= $${paramIndex}`;
       params.push(startDate);
       paramIndex++;
     }
     if (endDate) {
-      query += ` AND ar.date <= $${paramIndex}`;
+      joinConditions += ` AND ar.date <= $${paramIndex}`;
       params.push(endDate);
       paramIndex++;
     }
+
+    let query = `
+      SELECT ar.id, ar.date, ar.check_in_time, ar.check_out_time, ar.check_in_method, ar.is_late,
+             s.staff_id, s.first_name, s.last_name, s.department, s.position
+      FROM staff s
+      LEFT JOIN attendance_records ar ON ${joinConditions}
+      WHERE s.institution_id = $1 AND s.is_active = true`;
+
     if (department) {
       query += ` AND s.department = $${paramIndex}`;
       params.push(department);
       paramIndex++;
     }
     if (staffId) {
-      query += ` AND s.staff_id = $${paramIndex}`;
-      params.push(staffId);
+      query += ` AND s.staff_id ILIKE $${paramIndex}`;
+      params.push(`%${staffId}%`);
       paramIndex++;
     }
 
-    query += ` ORDER BY ar.date DESC, ar.check_in_time DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    query += ` ORDER BY ar.date DESC NULLS LAST, s.last_name, s.first_name, ar.check_in_time DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(parseInt(limit, 10), parseInt(offset, 10));
 
     const result = await pool.query(query, params);

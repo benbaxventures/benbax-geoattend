@@ -5,13 +5,13 @@ const { generateQRCode } = require('../utils/qrcode');
 
 exports.getAllStaff = async (req, res) => {
   try {
-    const { page = 1, limit = 50, search, department, status } = req.query;
+    const { page = 1, limit = 50, search, department, status, memberType } = req.query;
     const offset = (page - 1) * limit;
     const institutionId = req.user.institution_id;
 
     let query = `
       SELECT s.id, s.staff_id, s.first_name, s.last_name, s.email, s.phone,
-             s.department, s.position, s.role, s.is_active, s.profile_photo_url, s.created_at
+             s.department, s.position, s.role, s.is_active, s.profile_photo_url, s.member_type, s.created_at
       FROM staff s WHERE s.institution_id = $1`;
     const params = [institutionId];
     let paramIndex = 2;
@@ -30,6 +30,11 @@ exports.getAllStaff = async (req, res) => {
       query += ' AND s.is_active = true';
     } else if (status === 'inactive') {
       query += ' AND s.is_active = false';
+    }
+    if (memberType) {
+      query += ` AND s.member_type = $${paramIndex}`;
+      params.push(memberType);
+      paramIndex++;
     }
 
     const countQuery = query.replace(/SELECT .* FROM/, 'SELECT COUNT(*) FROM');
@@ -75,11 +80,11 @@ exports.getStaffById = async (req, res) => {
 
 exports.createStaff = async (req, res) => {
   try {
-    const { staffId, firstName, lastName, email, phone, department, position, role, password } = req.body;
+    const { staffId, firstName, lastName, email, phone, department, position, role, password, memberType } = req.body;
     const institutionId = req.user.institution_id;
 
     if (!staffId || !firstName || !lastName || !password) {
-      return res.status(400).json({ error: 'Staff ID, first name, last name, and password are required' });
+      return res.status(400).json({ error: 'ID, first name, last name, and password are required' });
     }
 
     // Check if staff ID already exists
@@ -97,11 +102,11 @@ exports.createStaff = async (req, res) => {
     const qrCodeData = `STAFF-${institutionId}-${staffId.toUpperCase()}`;
 
     const result = await pool.query(
-      `INSERT INTO staff (id, institution_id, staff_id, first_name, last_name, email, phone, department, position, role, password_hash, qr_code_data)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-       RETURNING id, staff_id, first_name, last_name, email, phone, department, position, role, qr_code_data, created_at`,
+      `INSERT INTO staff (id, institution_id, staff_id, first_name, last_name, email, phone, department, position, role, password_hash, qr_code_data, member_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       RETURNING id, staff_id, first_name, last_name, email, phone, department, position, role, qr_code_data, member_type, created_at`,
       [id, institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null,
-       department || null, position || null, role || 'staff', passwordHash, qrCodeData]
+       department || null, position || null, role || 'staff', passwordHash, qrCodeData, memberType || 'staff']
     );
 
     res.status(201).json(result.rows[0]);
@@ -237,10 +242,10 @@ exports.bulkImport = async (req, res) => {
         const qrData = require('uuid').v4();
 
         await pool.query(
-          `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data, member_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
            ON CONFLICT (institution_id, staff_id) DO NOTHING`,
-          [institutionId, s.staffId.toUpperCase(), s.firstName, s.lastName, s.email || null, s.phone || null, s.department || null, s.position || null, passwordHash, qrData]
+          [institutionId, s.staffId.toUpperCase(), s.firstName, s.lastName, s.email || null, s.phone || null, s.department || null, s.position || null, passwordHash, qrData, s.memberType || 'staff']
         );
         results.success++;
       } catch (err) {
@@ -259,7 +264,7 @@ exports.bulkImport = async (req, res) => {
 exports.deleteStaff = async (req, res) => {
   try {
     const { id } = req.params;
-    const institutionId = req.user.institutionId;
+    const institutionId = req.user.institution_id;
 
     // Verify staff belongs to the same institution
     const staff = await pool.query(

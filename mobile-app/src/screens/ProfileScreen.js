@@ -163,6 +163,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
               <InfoRow label="Department" value={profile.department} />
               <InfoRow label="Position" value={profile.position} />
               <InfoRow label="Institution" value={profile.institution_name} />
+              <InfoRow label="Type" value={(profile.member_type || 'staff').charAt(0).toUpperCase() + (profile.member_type || 'staff').slice(1)} />
               <InfoRow label="Role" value={profile.role} />
             </View>
 

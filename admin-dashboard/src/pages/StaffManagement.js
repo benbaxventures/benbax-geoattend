@@ -69,6 +69,7 @@ export default function StaffManagement() {
   const [department, setDepartment] = useState('');
   const [departments, setDepartments] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
+  const [memberTypeFilter, setMemberTypeFilter] = useState('');
   const fileInputRef = React.useRef(null);
 
   const handleCSVUpload = async (e) => {
@@ -112,12 +113,12 @@ export default function StaffManagement() {
   };
 
   const fetchStaff = () => {
-    getStaff({ page, limit: 20, search, department, status: statusFilter })
+    getStaff({ page, limit: 20, search, department, status: statusFilter, memberType: memberTypeFilter })
       .then(r => { setStaff(r.data.staff); setTotal(r.data.total); })
-      .catch(() => toast.error('Failed to load staff'));
+      .catch(() => toast.error('Failed to load members'));
   };
 
-  useEffect(() => { fetchStaff(); }, [page, department, statusFilter]);
+  useEffect(() => { fetchStaff(); }, [page, department, statusFilter, memberTypeFilter]);
   useEffect(() => { getDepartments().then(r => setDepartments(r.data)).catch(() => {}); }, []);
 
   const handleSearch = (e) => {
@@ -231,7 +232,7 @@ export default function StaffManagement() {
   return (
     <div>
       <div style={styles.header}>
-        <h1 style={styles.title}>Staff Management</h1>
+        <h1 style={styles.title}>Members Management</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button style={{ ...styles.addBtn, background: '#8e44ad' }} onClick={handleBulkPrintQR}>
             <FiPrinter size={16} /> Print All QR
@@ -241,7 +242,7 @@ export default function StaffManagement() {
           </button>
           <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVUpload} style={{ display: 'none' }} />
           <button style={styles.addBtn} onClick={() => navigate('/staff/new')}>
-            <FiPlus size={16} /> Add Staff
+            <FiPlus size={16} /> Add Member
           </button>
         </div>
       </div>
@@ -255,6 +256,11 @@ export default function StaffManagement() {
           <option value="">All Departments</option>
           {departments.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
+        <select style={styles.select} value={memberTypeFilter} onChange={e => { setMemberTypeFilter(e.target.value); setPage(1); }}>
+          <option value="">All Types</option>
+          <option value="staff">Staff</option>
+          <option value="student">Student</option>
+        </select>
         <select style={styles.select} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
           <option value="">All Status</option>
           <option value="active">Active</option>
@@ -265,8 +271,9 @@ export default function StaffManagement() {
       <table style={styles.table}>
         <thead>
           <tr>
-            <th style={styles.th}>Staff ID</th>
+            <th style={styles.th}>ID</th>
             <th style={styles.th}>Name</th>
+            <th style={styles.th}>Type</th>
             <th style={styles.th}>Department</th>
             <th style={styles.th}>Position</th>
             <th style={styles.th}>Email</th>
@@ -279,6 +286,15 @@ export default function StaffManagement() {
             <tr key={s.id}>
               <td style={styles.td}><strong>{s.staff_id}</strong></td>
               <td style={styles.td}>{s.first_name} {s.last_name}</td>
+              <td style={styles.td}>
+                <span style={{
+                  padding: '3px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: '600',
+                  background: s.member_type === 'student' ? '#e3f2fd' : '#f3e5f5',
+                  color: s.member_type === 'student' ? '#1565c0' : '#7b1fa2',
+                }}>
+                  {(s.member_type || 'staff').toUpperCase()}
+                </span>
+              </td>
               <td style={styles.td}>{s.department || '-'}</td>
               <td style={styles.td}>{s.position || '-'}</td>
               <td style={styles.td}>{s.email || '-'}</td>

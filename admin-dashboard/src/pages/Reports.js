@@ -30,6 +30,8 @@ const styles = {
   th: { padding: '12px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7f8c8d', textTransform: 'uppercase', borderBottom: '2px solid #f0f0f0' },
   td: { padding: '12px 14px', fontSize: '13px', borderBottom: '1px solid #f5f5f5' },
   lateBadge: { color: '#f39c12', fontWeight: '600' },
+  absentBadge: { color: '#e74c3c', fontWeight: '600' },
+  onTimeBadge: { color: '#27ae60', fontWeight: '600' },
 };
 
 export default function Reports() {
@@ -121,18 +123,27 @@ export default function Reports() {
           </tr>
         </thead>
         <tbody>
-          {records.map(r => (
-            <tr key={r.id}>
-              <td style={styles.td}>{new Date(r.date).toLocaleDateString()}</td>
-              <td style={styles.td}><strong>{r.staff_id}</strong></td>
-              <td style={styles.td}>{r.first_name} {r.last_name}</td>
-              <td style={styles.td}>{r.department || '-'}</td>
-              <td style={styles.td}>{new Date(r.check_in_time).toLocaleTimeString()}</td>
-              <td style={styles.td}>{r.check_out_time ? new Date(r.check_out_time).toLocaleTimeString() : '-'}</td>
-              <td style={styles.td}>{r.check_in_method}</td>
-              <td style={styles.td}>{r.is_late ? <span style={styles.lateBadge}>Late</span> : 'On Time'}</td>
-            </tr>
-          ))}
+          {records.map((r, idx) => {
+            const isAbsent = !r.check_in_time;
+            return (
+              <tr key={r.id || `absent-${r.staff_id}-${idx}`}>
+                <td style={styles.td}>{r.date ? new Date(r.date).toLocaleDateString() : '-'}</td>
+                <td style={styles.td}><strong>{r.staff_id}</strong></td>
+                <td style={styles.td}>{r.first_name} {r.last_name}</td>
+                <td style={styles.td}>{r.department || '-'}</td>
+                <td style={styles.td}>{isAbsent ? '-' : new Date(r.check_in_time).toLocaleTimeString()}</td>
+                <td style={styles.td}>{isAbsent ? '-' : (r.check_out_time ? new Date(r.check_out_time).toLocaleTimeString() : '-')}</td>
+                <td style={styles.td}>{r.check_in_method || '-'}</td>
+                <td style={styles.td}>
+                  {isAbsent
+                    ? <span style={styles.absentBadge}>Absent</span>
+                    : r.is_late
+                      ? <span style={styles.lateBadge}>Late</span>
+                      : <span style={styles.onTimeBadge}>On Time</span>}
+                </td>
+              </tr>
+            );
+          })}
           {records.length === 0 && (
             <tr><td colSpan={8} style={{ ...styles.td, textAlign: 'center', padding: '40px', color: '#95a5a6' }}>No records found</td></tr>
           )}
