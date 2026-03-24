@@ -10,7 +10,7 @@ const styles = {
     padding: '10px 20px', background: '#fff', border: '1px solid #e0e0e0',
     borderRadius: '8px', fontSize: '14px', color: '#2c3e50',
   },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '12px' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))', gap: '12px' },
   card: {
     background: '#fff', borderRadius: '12px', padding: '16px 20px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '16px',

@@ -9,6 +9,7 @@ body {
   background-color: #f0f2f5;
   color: #2c3e50;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -33,3 +34,9 @@ input, select, textarea {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+@media (max-width: 768px) {
+  main { overflow-x: hidden; }
+  main table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+

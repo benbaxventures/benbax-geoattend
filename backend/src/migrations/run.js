@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS device_logs (
   staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
   device_id VARCHAR(255) NOT NULL,
   device_model VARCHAR(255),
-  os_version VARCHAR(50),
+  os_version VARCHAR(255),
   app_version VARCHAR(20),
   action VARCHAR(50) NOT NULL,
   ip_address VARCHAR(45),
@@ -99,6 +99,11 @@ ALTER TABLE staff ALTER COLUMN first_name TYPE VARCHAR(100);
 ALTER TABLE staff ALTER COLUMN last_name TYPE VARCHAR(100);
 ALTER TABLE staff ALTER COLUMN email TYPE VARCHAR(255);
 ALTER TABLE staff ALTER COLUMN google_id TYPE VARCHAR(255);
+
+-- Widen device_logs columns for long values
+ALTER TABLE device_logs ALTER COLUMN device_id TYPE VARCHAR(255);
+ALTER TABLE device_logs ALTER COLUMN device_model TYPE VARCHAR(255);
+ALTER TABLE device_logs ALTER COLUMN os_version TYPE VARCHAR(255);
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attendance_staff ON attendance_records(staff_uuid);

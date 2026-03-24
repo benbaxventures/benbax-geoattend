@@ -1,6 +1,6 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { FiHome, FiUsers, FiClock, FiBarChart2, FiSettings, FiLogOut, FiMapPin } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { FiHome, FiUsers, FiClock, FiBarChart2, FiSettings, FiLogOut, FiMapPin, FiMenu, FiX } from 'react-icons/fi';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: FiHome },
@@ -9,6 +9,16 @@ const navItems = [
   { path: '/reports', label: 'Reports', icon: FiBarChart2 },
   { path: '/settings', label: 'Settings', icon: FiSettings },
 ];
+
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 const styles = {
   sidebar: {
@@ -22,6 +32,31 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     zIndex: 1000,
+    transition: 'transform 0.3s ease',
+  },
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.5)',
+    zIndex: 999,
+  },
+  hamburger: {
+    position: 'fixed',
+    top: '12px',
+    left: '12px',
+    zIndex: 1001,
+    background: '#1a5276',
+    color: '#fff',
+    width: '40px',
+    height: '40px',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
   },
   logo: {
     padding: '24px 20px',
@@ -70,37 +105,61 @@ const styles = {
 };
 
 export default function Sidebar({ user, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const location = useLocation();
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    if (isMobile) setOpen(false);
+  }, [location.pathname, isMobile]);
+
+  const sidebarStyle = {
+    ...styles.sidebar,
+    ...(isMobile ? { transform: open ? 'translateX(0)' : 'translateX(-100%)' } : {}),
+  };
+
   return (
-    <aside style={styles.sidebar}>
-      <div style={styles.logo}>
-        <FiMapPin style={styles.logoIcon} />
-        <span style={styles.logoText}>GeoAttend</span>
-      </div>
-
-      <nav style={styles.nav}>
-        {navItems.map(({ path, label, icon: Icon }) => (
-          <NavLink
-            key={path}
-            to={path}
-            end={path === '/'}
-            style={({ isActive }) => ({
-              ...styles.link,
-              ...(isActive ? styles.activeLink : {}),
-            })}
-          >
-            <Icon size={18} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
-
-      <div style={styles.userSection}>
-        <div style={styles.userName}>{user.firstName} {user.lastName}</div>
-        <div style={styles.userRole}>{user.role}</div>
-        <button style={styles.logoutBtn} onClick={onLogout}>
-          <FiLogOut size={14} /> Sign Out
+    <>
+      {isMobile && (
+        <button style={styles.hamburger} onClick={() => setOpen(!open)}>
+          {open ? <FiX size={22} /> : <FiMenu size={22} />}
         </button>
-      </div>
-    </aside>
+      )}
+
+      {isMobile && open && <div style={styles.overlay} onClick={() => setOpen(false)} />}
+
+      <aside style={sidebarStyle}>
+        <div style={styles.logo}>
+          <FiMapPin style={styles.logoIcon} />
+          <span style={styles.logoText}>GeoAttend</span>
+        </div>
+
+        <nav style={styles.nav}>
+          {navItems.map(({ path, label, icon: Icon }) => (
+            <NavLink
+              key={path}
+              to={path}
+              end={path === '/'}
+              style={({ isActive }) => ({
+                ...styles.link,
+                ...(isActive ? styles.activeLink : {}),
+              })}
+            >
+              <Icon size={18} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div style={styles.userSection}>
+          <div style={styles.userName}>{user.firstName} {user.lastName}</div>
+          <div style={styles.userRole}>{user.role}</div>
+          <button style={styles.logoutBtn} onClick={onLogout}>
+            <FiLogOut size={14} /> Sign Out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

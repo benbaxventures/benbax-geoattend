@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload, FiTrash2 } from 'react-icons/fi';
-import { getStaff, getDepartments, resetStaffPassword, deleteStaff } from '../services/api';
+import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload, FiTrash2, FiPrinter } from 'react-icons/fi';
+import { getStaff, getDepartments, resetStaffPassword, deleteStaff, getStaffQRCode } from '../services/api';
 import api from '../services/api';
 
 const styles = {
@@ -151,6 +151,81 @@ export default function StaffManagement() {
     }
   };
 
+  const handlePrintQR = async (id, name, staffId) => {
+    try {
+      const { data } = await getStaffQRCode(id);
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html><head><title>QR Code - ${name}</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+          .card { border: 2px solid #333; border-radius: 12px; padding: 24px; display: inline-block; width: 280px; }
+          .logo { font-size: 18px; font-weight: bold; color: #1a5276; margin-bottom: 8px; }
+          .name { font-size: 16px; font-weight: bold; margin: 8px 0 4px; }
+          .staff-id { font-size: 14px; color: #555; margin-bottom: 12px; }
+          img { width: 180px; height: 180px; }
+          .footer { font-size: 11px; color: #999; margin-top: 8px; }
+          @media print { body { padding: 0; } }
+        </style></head><body>
+        <div class="card">
+          <div class="logo">GeoAttend</div>
+          <img src="${data.qrCode}" />
+          <div class="name">${name}</div>
+          <div class="staff-id">${staffId}</div>
+          <div class="footer">Scan to check in</div>
+        </div>
+        <script>window.print();</script>
+        </body></html>
+      `);
+    } catch {
+      toast.error('Failed to generate QR code');
+    }
+  };
+
+  const handleBulkPrintQR = async () => {
+    toast.info('Generating QR codes...');
+    try {
+      const cards = [];
+      for (const s of staff) {
+        try {
+          const { data } = await getStaffQRCode(s.id);
+          cards.push({ name: `${s.first_name} ${s.last_name}`, staffId: s.staff_id, qr: data.qrCode });
+        } catch {}
+      }
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html><head><title>QR Codes - All Staff</title>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px; }
+          .card { border: 2px solid #333; border-radius: 12px; padding: 16px; text-align: center; page-break-inside: avoid; }
+          .logo { font-size: 14px; font-weight: bold; color: #1a5276; margin-bottom: 4px; }
+          .name { font-size: 13px; font-weight: bold; margin: 6px 0 2px; }
+          .staff-id { font-size: 12px; color: #555; }
+          img { width: 140px; height: 140px; }
+          .footer { font-size: 10px; color: #999; margin-top: 4px; }
+          @media print { .grid { gap: 8px; padding: 10px; } }
+        </style></head><body>
+        <div class="grid">
+          ${cards.map(c => `
+            <div class="card">
+              <div class="logo">GeoAttend</div>
+              <img src="${c.qr}" />
+              <div class="name">${c.name}</div>
+              <div class="staff-id">${c.staffId}</div>
+              <div class="footer">Scan to check in</div>
+            </div>
+          `).join('')}
+        </div>
+        <script>window.print();</script>
+        </body></html>
+      `);
+    } catch {
+      toast.error('Failed to generate QR codes');
+    }
+  };
+
   const totalPages = Math.ceil(total / 20);
 
   return (
@@ -158,6 +233,9 @@ export default function StaffManagement() {
       <div style={styles.header}>
         <h1 style={styles.title}>Staff Management</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <button style={{ ...styles.addBtn, background: '#8e44ad' }} onClick={handleBulkPrintQR}>
+            <FiPrinter size={16} /> Print All QR
+          </button>
           <button style={{ ...styles.addBtn, background: '#27ae60' }} onClick={() => fileInputRef.current?.click()}>
             <FiUpload size={16} /> Import CSV
           </button>
@@ -206,6 +284,7 @@ export default function StaffManagement() {
               <td style={styles.td}>{s.email || '-'}</td>
               <td style={styles.td}><span style={styles.badge(s.is_active)}>{s.is_active ? 'Active' : 'Inactive'}</span></td>
               <td style={styles.td}>
+                <button style={styles.actionBtn} title="Print QR Code" onClick={() => handlePrintQR(s.id, `${s.first_name} ${s.last_name}`, s.staff_id)}><FiPrinter size={15} /></button>
                 <button style={styles.actionBtn} title="Edit" onClick={() => navigate(`/staff/${s.id}/edit`)}><FiEdit2 size={15} /></button>
                 <button style={styles.actionBtn} title="Reset Password" onClick={() => handleResetPassword(s.id, `${s.first_name} ${s.last_name}`)}><FiKey size={15} /></button>
                 <button style={{ ...styles.actionBtn, color: '#e74c3c' }} title="Delete" onClick={() => setDeleteModal({ id: s.id, name: `${s.first_name} ${s.last_name}`, staffId: s.staff_id })}><FiTrash2 size={15} /></button>

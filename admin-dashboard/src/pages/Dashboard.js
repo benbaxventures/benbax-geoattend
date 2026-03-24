@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Line, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { FiUsers, FiUserCheck, FiClock, FiUserX } from 'react-icons/fi';
@@ -14,7 +14,7 @@ const styles = {
   header: { marginBottom: '24px' },
   title: { fontSize: '24px', fontWeight: '700', color: '#2c3e50' },
   date: { fontSize: '13px', color: '#95a5a6', marginTop: '4px' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' },
   statCard: {
     background: '#fff',
     borderRadius: '12px',
@@ -33,9 +33,9 @@ const styles = {
     justifyContent: 'center',
     color: '#fff',
   },
-  statValue: { fontSize: '28px', fontWeight: '700', lineHeight: 1 },
+  statValue: { fontSize: '24px', fontWeight: '700', lineHeight: 1 },
   statLabel: { fontSize: '13px', color: '#95a5a6', marginTop: '4px' },
-  chartsGrid: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' },
+  chartsGrid: { display: 'grid', gap: '16px' },
   chartCard: {
     background: '#fff',
     borderRadius: '12px',
@@ -45,9 +45,20 @@ const styles = {
   chartTitle: { fontSize: '16px', fontWeight: '600', marginBottom: '16px' },
 };
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState({ totalStaff: 0, presentToday: 0, lateToday: 0, absentToday: 0 });
   const [weekly, setWeekly] = useState([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     getDashboardStats().then(r => setStats(r.data)).catch(() => {});
@@ -111,7 +122,7 @@ export default function Dashboard() {
         })}
       </div>
 
-      <div style={styles.chartsGrid}>
+      <div style={{ ...styles.chartsGrid, gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr' }}>
         <div style={styles.chartCard}>
           <h3 style={styles.chartTitle}>Weekly Attendance Trend</h3>
           <Line data={lineData} options={{ responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }} />

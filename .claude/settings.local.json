@@ -44,7 +44,9 @@
       "Bash(curl -s https://geofence-app-1.onrender.com/)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://geofence-app-1.onrender.com/login)",
       "Bash(curl -s -X POST https://geofence-app-jjpa.onrender.com/api/auth/login -H \"Content-Type: application/json\" -H \"Origin: https://geofence-app-1.onrender.com\" -d '{\"\"\"\"staffId\"\"\"\":\"\"\"\"ADMIN001\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"Admin@123\"\"\"\"}' -w \"\\\\n%{http_code}\")",
-      "Bash(grep -o 'geofence-app[^\"\"\"\"'\"''''\"'\\\\\\\\]*')"
+      "Bash(grep -o 'geofence-app[^\"\"\"\"'\"''''\"'\\\\\\\\]*')",
+      "Read(//c/Users/brigh/AppData/Local/Temp/claude/c--Users-brigh-webDev-Geofence-app/fb7e54fa-18e3-400d-9447-d32990a450f0/tasks/**)",
+      "Bash(node -e \"require\\(''bcryptjs''\\).hash\\(''GeoAttend$2026!'', 12\\).then\\(h => console.log\\(h\\)\\)\")"
     ]
   }
 }

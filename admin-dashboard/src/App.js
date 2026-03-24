@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,6 +16,7 @@ import Sidebar from './components/Sidebar';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -23,6 +24,12 @@ function App() {
       setUser(JSON.parse(stored));
     }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
   }, []);
 
   const handleLogin = (userData) => {
@@ -35,6 +42,15 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
+
+  const mainStyle = useMemo(() => ({
+    flex: 1,
+    padding: isMobile ? '60px 12px 16px' : '24px',
+    marginLeft: isMobile ? 0 : '250px',
+    minHeight: '100vh',
+    width: isMobile ? '100%' : undefined,
+    overflow: 'hidden',
+  }), [isMobile]);
 
   if (loading) return null;
 
@@ -57,7 +73,7 @@ function App() {
     <Router>
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar user={user} onLogout={handleLogout} />
-        <main style={{ flex: 1, padding: '24px', marginLeft: '250px', minHeight: '100vh' }}>
+        <main style={mainStyle}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/staff" element={<StaffManagement />} />
