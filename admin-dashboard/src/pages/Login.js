@@ -127,14 +127,7 @@ export default function Login({ onLogin }) {
 
     setLoading(true);
     try {
-      // Use fetch directly to bypass any axios interceptor issues
-      const resp = await fetch('https://geofence-app-jjpa.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ staffId, password }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw { response: { data } };
+      const { data } = await login(staffId, password);
       localStorage.setItem('token', data.token);
 
       if (data.user.role !== 'admin' && data.user.role !== 'super_admin') {
@@ -156,7 +149,7 @@ export default function Login({ onLogin }) {
   };
 
   const handleGoogleLogin = () => {
-    const clientId = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
     const redirectUri = encodeURIComponent(window.location.origin + '/auth/google/callback');
     const scope = encodeURIComponent('profile email');
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
