@@ -38,6 +38,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
         scopes: ['openid', 'profile', 'email'],
         redirectUri,
         responseType: AuthSession.ResponseType.Token,
+        usePKCE: false,
       });
 
       const result = await request.promptAsync(discovery);

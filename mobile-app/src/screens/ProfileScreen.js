@@ -143,10 +143,24 @@ export default function ProfileScreen({ navigation, onLogout }) {
     ]);
   };
 
-  const InfoRow = ({ label, value }) => (
+  const truncateValue = (val, maxLen = 24) => {
+    if (!val || val.length <= maxLen) return val || '-';
+    // For emails: show first 4 chars + ... + domain
+    if (val.includes('@')) {
+      const [local, domain] = val.split('@');
+      if (local.length > 6) {
+        return `${local.slice(0, 4)}...@${domain}`;
+      }
+    }
+    return val.slice(0, maxLen - 3) + '...';
+  };
+
+  const InfoRow = ({ label, value, truncate = false }) => (
     <View style={[styles.infoRow, { borderBottomColor: theme.dark ? '#333' : '#f5f5f5' }]}>
       <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>{label}</Text>
-      <Text style={[styles.infoValue, { color: theme.text }]}>{value || '-'}</Text>
+      <Text style={[styles.infoValue, { color: theme.text }]} numberOfLines={1} ellipsizeMode="tail">
+        {truncate ? truncateValue(value) : (value || '-')}
+      </Text>
     </View>
   );
 
@@ -177,7 +191,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
             </View>
 
             <View style={[styles.card, { backgroundColor: theme.card }]}>
-              <InfoRow label="Email" value={profile.email} />
+              <InfoRow label="Email" value={profile.email} truncate />
               <InfoRow label="Phone" value={profile.phone} />
               <InfoRow label="Department" value={profile.department} />
               <InfoRow label="Position" value={profile.position} />

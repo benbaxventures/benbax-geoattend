@@ -92,10 +92,9 @@ export default function App() {
         } catch {}
 
         setIsLoggedIn(true);
-        try {
-          registerForPushNotifications();
-          scheduleCheckInReminder();
-        } catch {}
+        // These may fail in Expo Go (SDK 53+) but are non-blocking
+        registerForPushNotifications().catch(() => {});
+        scheduleCheckInReminder().catch(() => {});
       }
       setLoading(false);
     });
