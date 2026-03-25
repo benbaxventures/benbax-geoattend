@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
 import { login, googleLogin } from '../services/api';
 import { useToast } from '../services/Toast';
 
+WebBrowser.maybeCompleteAuthSession();
+
 const GOOGLE_WEB_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 
-GoogleSignin.configure({
-  webClientId: GOOGLE_WEB_CLIENT_ID,
-  offlineAccess: true,
-});
+const discovery = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+};
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const toast = useToast();
@@ -24,52 +28,61 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const redirectUri = AuthSession.makeRedirectUri({ preferLocalhost: false });
+
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      if (Platform.OS === 'android') {
-        await GoogleSignin.hasPlayServices();
-      }
-      await GoogleSignin.signOut();
-      const userInfo = await GoogleSignin.signIn();
-      const { data: userData } = userInfo;
-
-      let deviceInfo = {};
-      try {
-        deviceInfo = {
-          deviceId: Device.osBuildId || Device.modelId || Device.modelName || 'unknown',
-          deviceModel: Device.modelName || 'unknown',
-          osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim(),
-        };
-      } catch (e) {
-        deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
-      }
-
-      const { data } = await googleLogin({
-        googleId: userData.user.id,
-        email: userData.user.email,
-        firstName: userData.user.givenName,
-        lastName: userData.user.familyName,
-        profilePhoto: userData.user.photo,
-        ...deviceInfo,
+      const request = new AuthSession.AuthRequest({
+        clientId: GOOGLE_WEB_CLIENT_ID,
+        scopes: ['openid', 'profile', 'email'],
+        redirectUri,
+        responseType: AuthSession.ResponseType.Token,
       });
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-      await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
-      onLogin();
-    } catch (err) {
-      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled
-      } else if (err.code === statusCodes.IN_PROGRESS) {
-        // already in progress
-      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        toast.error(Platform.OS === 'ios' ? 'Google Sign-In is not available' : 'Google Play Services is not available on this device');
+      const result = await request.promptAsync(discovery);
+
+      if (result.type === 'success') {
+        const { access_token } = result.params;
+
+        // Get user info from Google
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+        const userInfo = await userInfoResponse.json();
+
+        let deviceInfo = {};
+        try {
+          deviceInfo = {
+            deviceId: (Device.osBuildId || Device.modelId || Device.modelName || 'unknown').substring(0, 100),
+            deviceModel: (Device.modelName || 'unknown').substring(0, 100),
+            osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim().substring(0, 100),
+          };
+        } catch (e) {
+          deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
+        }
+
+        const { data } = await googleLogin({
+          googleId: userInfo.id,
+          email: userInfo.email,
+          firstName: userInfo.given_name,
+          lastName: userInfo.family_name,
+          profilePhoto: userInfo.picture,
+          ...deviceInfo,
+        });
+
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+        onLogin();
+      } else if (result.type === 'cancel') {
+        // User cancelled
       } else {
-        const serverError = err.response?.data?.error || err.message || 'Google login failed';
-        const debug = err.response?.data?.debug;
-        toast.error(debug ? `${serverError} (${debug})` : serverError, 'Login Failed');
+        toast.error('Google login failed. Please try again.', 'Login Failed');
       }
+    } catch (err) {
+      const serverError = err.response?.data?.error || err.message || 'Google login failed';
+      toast.error(serverError, 'Login Failed');
     } finally {
       setGoogleLoading(false);
     }
@@ -86,9 +99,9 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       let deviceInfo = {};
       try {
         deviceInfo = {
-          deviceId: Device.osBuildId || Device.modelId || Device.modelName || 'unknown',
-          deviceModel: Device.modelName || 'unknown',
-          osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim(),
+          deviceId: (Device.osBuildId || Device.modelId || Device.modelName || 'unknown').substring(0, 100),
+          deviceModel: (Device.modelName || 'unknown').substring(0, 100),
+          osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim().substring(0, 100),
         };
       } catch (e) {
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };

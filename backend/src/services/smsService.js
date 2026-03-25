@@ -1,8 +1,4 @@
-const axios = require('axios');
-
-// SMS provider configuration
-// Supports: Hubtel, Arkesel, or any HTTP-based SMS API used in Ghana
-// Set SMS_PROVIDER, SMS_API_KEY, SMS_SENDER_ID in your .env
+const https = require('https');
 
 const sendSMS = async (to, message) => {
   const provider = process.env.SMS_PROVIDER || 'none';
@@ -16,23 +12,51 @@ const sendSMS = async (to, message) => {
 
   try {
     if (provider === 'arkesel') {
-      // Arkesel SMS API (popular in Ghana)
-      await axios.post('https://sms.arkesel.com/api/v2/sms/send', {
-        sender: senderId,
-        message,
-        recipients: [to],
-      }, {
-        headers: { 'api-key': apiKey },
+      return await new Promise((resolve, reject) => {
+        const postData = JSON.stringify({
+          sender: senderId,
+          message,
+          recipients: [to],
+        });
+
+        const req = https.request({
+          hostname: 'sms.arkesel.com',
+          path: '/api/v2/sms/send',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': apiKey,
+          },
+        }, (res) => {
+          let data = '';
+          res.on('data', chunk => { data += chunk; });
+          res.on('end', () => resolve({ success: true, data }));
+        });
+        req.on('error', reject);
+        req.write(postData);
+        req.end();
       });
     } else if (provider === 'hubtel') {
-      // Hubtel SMS API
-      await axios.get(`https://smsc.hubtel.com/v1/messages/send`, {
-        params: { From: senderId, To: to, Content: message },
-        auth: { username: process.env.SMS_CLIENT_ID, password: apiKey },
+      return await new Promise((resolve, reject) => {
+        const clientId = process.env.SMS_CLIENT_ID;
+        const params = new URLSearchParams({ From: senderId, To: to, Content: message });
+
+        const req = https.get({
+          hostname: 'smsc.hubtel.com',
+          path: `/v1/messages/send?${params.toString()}`,
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(`${clientId}:${apiKey}`).toString('base64'),
+          },
+        }, (res) => {
+          let data = '';
+          res.on('data', chunk => { data += chunk; });
+          res.on('end', () => resolve({ success: true, data }));
+        });
+        req.on('error', reject);
       });
     }
 
-    return { success: true };
+    return { success: false, error: `Unknown provider: ${provider}` };
   } catch (err) {
     console.error('SMS send error:', err.message);
     return { success: false, error: err.message };

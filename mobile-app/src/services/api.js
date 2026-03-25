@@ -72,4 +72,9 @@ export const getTodayStatus = () => api.get('/attendance/today');
 export const getMyAttendance = (params) => api.get('/attendance/my-attendance', { params });
 export const getWeeklyStats = () => api.get('/attendance/weekly-stats');
 
+// Leave Management
+export const requestLeave = (data) => api.post('/leave', data);
+export const getMyLeaves = () => api.get('/leave/my');
+export const cancelLeave = (id) => api.put(`/leave/${id}/cancel`);
+
 export default api;

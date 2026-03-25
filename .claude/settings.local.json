@@ -49,7 +49,9 @@
       "Bash(node -e \"require\\(''bcryptjs''\\).hash\\(''GeoAttend$2026!'', 12\\).then\\(h => console.log\\(h\\)\\)\")",
       "Bash(grep -E \"\\\\.\\(json|js\\)$\")",
       "Bash(curl -s --max-time 120 https://geofence-app-jjpa.onrender.com/api/health)",
-      "Bash(curl -sv https://geofence-app-jjpa.onrender.com/)"
+      "Bash(curl -sv https://geofence-app-jjpa.onrender.com/)",
+      "Bash(timeout 15 node src/server.js)",
+      "Bash(npx react-scripts:*)"
     ]
   }
 }

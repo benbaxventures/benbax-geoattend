@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiClock, FiBarChart2, FiSettings, FiLogOut, FiMapPin, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiUsers, FiClock, FiBarChart2, FiSettings, FiLogOut, FiMapPin, FiMenu, FiX, FiCalendar, FiTrendingUp, FiShield } from 'react-icons/fi';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: FiHome },
   { path: '/staff', label: 'Students', icon: FiUsers },
   { path: '/attendance', label: 'Attendance', icon: FiClock },
   { path: '/reports', label: 'Reports', icon: FiBarChart2 },
+  { path: '/leave', label: 'Leave', icon: FiCalendar },
+  { path: '/analytics', label: 'Analytics', icon: FiTrendingUp },
+  { path: '/audit', label: 'Audit Log', icon: FiShield },
   { path: '/settings', label: 'Settings', icon: FiSettings },
 ];
 

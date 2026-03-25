@@ -160,6 +160,33 @@ exports.checkOut = async (req, res) => {
       [latitude || null, longitude || null, method || 'gps', active.rows[0].id]
     );
 
+    // Track overtime if checking out after work end time
+    try {
+      const rules = await pool.query(
+        'SELECT work_end_time FROM attendance_rules WHERE institution_id = $1',
+        [req.user.institution_id]
+      );
+      if (rules.rows.length > 0) {
+        const now = new Date();
+        const [endHour, endMin] = rules.rows[0].work_end_time.split(':').map(Number);
+        const endTime = new Date(now);
+        endTime.setHours(endHour, endMin, 0, 0);
+        if (now > endTime) {
+          const overtimeMinutes = Math.round((now - endTime) / 60000);
+          if (overtimeMinutes > 0) {
+            await pool.query(
+              `INSERT INTO overtime_records (staff_uuid, institution_id, date, overtime_minutes, reason)
+               VALUES ($1, $2, $3, $4, 'manual_checkout')
+               ON CONFLICT DO NOTHING`,
+              [staffUuid, req.user.institution_id, today, overtimeMinutes]
+            );
+          }
+        }
+      }
+    } catch (otErr) {
+      console.error('Overtime tracking error:', otErr.message);
+    }
+
     if (deviceId) {
       await pool.query(
         `INSERT INTO device_logs (staff_uuid, device_id, action, ip_address)

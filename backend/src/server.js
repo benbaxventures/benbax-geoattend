@@ -10,6 +10,8 @@ const attendanceRoutes = require('./routes/attendance');
 const staffRoutes = require('./routes/staff');
 const institutionRoutes = require('./routes/institution');
 const reportRoutes = require('./routes/reports');
+const leaveRoutes = require('./routes/leave');
+const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 
@@ -58,6 +60,8 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/institutions', institutionRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/leave', leaveRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -89,6 +93,40 @@ async function runAutoMigration() {
       await pool.query(sql);
     } catch (err) {
       console.error('Auto-migration skip:', sql.slice(0, 60), '-', err.message);
+    }
+  }
+  // New tables for automation features
+  const newTables = [
+    `CREATE TABLE IF NOT EXISTS leave_requests (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+      institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+      leave_type VARCHAR(30) NOT NULL DEFAULT 'personal',
+      start_date DATE NOT NULL, end_date DATE NOT NULL,
+      reason TEXT, status VARCHAR(20) DEFAULT 'pending',
+      reviewed_by UUID REFERENCES staff(id), reviewed_at TIMESTAMP, review_note TEXT,
+      created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS overtime_records (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+      institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+      date DATE NOT NULL, overtime_minutes INTEGER NOT NULL DEFAULT 0,
+      reason VARCHAR(50) DEFAULT 'auto_checkout', created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS audit_logs (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      institution_id UUID REFERENCES institutions(id) ON DELETE CASCADE,
+      action VARCHAR(100) NOT NULL, entity_type VARCHAR(50) NOT NULL,
+      entity_id VARCHAR(255), details JSONB, performed_by VARCHAR(255) NOT NULL,
+      ip_address VARCHAR(45), created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotation_token VARCHAR(255)`,
+    `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotated_at TIMESTAMP`,
+  ];
+  for (const sql of newTables) {
+    try { await pool.query(sql); } catch (err) {
+      if (!err.message.includes('already exists')) console.error('Auto-migration skip:', err.message);
     }
   }
   console.log('Auto-migration: column sizes verified.');
@@ -134,6 +172,10 @@ app.listen(PORT, async () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   await runAutoMigration();
   await ensureAdminExists();
+
+  // Start scheduled jobs
+  const { startScheduler } = require('./services/scheduler');
+  startScheduler();
 });
 
 module.exports = app;

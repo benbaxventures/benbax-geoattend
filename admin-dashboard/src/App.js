@@ -10,6 +10,9 @@ import StaffForm from './pages/StaffForm';
 import AttendanceMonitor from './pages/AttendanceMonitor';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import LeaveManagement from './pages/LeaveManagement';
+import Analytics from './pages/Analytics';
+import AuditLog from './pages/AuditLog';
 import GoogleCallback from './pages/GoogleCallback';
 import Sidebar from './components/Sidebar';
 
@@ -81,6 +84,9 @@ function App() {
             <Route path="/staff/:id/edit" element={<StaffForm />} />
             <Route path="/attendance" element={<AttendanceMonitor />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/leave" element={<LeaveManagement />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/audit" element={<AuditLog />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

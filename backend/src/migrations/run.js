@@ -108,6 +108,51 @@ ALTER TABLE device_logs ALTER COLUMN os_version TYPE VARCHAR(255);
 -- Add member_type column (staff or student)
 ALTER TABLE staff ADD COLUMN IF NOT EXISTS member_type VARCHAR(20) DEFAULT 'staff' CHECK (member_type IN ('staff', 'student'));
 
+-- Leave requests table
+CREATE TABLE IF NOT EXISTS leave_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+  institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  leave_type VARCHAR(30) NOT NULL DEFAULT 'personal' CHECK (leave_type IN ('sick', 'personal', 'vacation', 'maternity', 'paternity', 'bereavement', 'other')),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  reason TEXT,
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+  reviewed_by UUID REFERENCES staff(id),
+  reviewed_at TIMESTAMP,
+  review_note TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Overtime records table
+CREATE TABLE IF NOT EXISTS overtime_records (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+  institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  overtime_minutes INTEGER NOT NULL DEFAULT 0,
+  reason VARCHAR(50) DEFAULT 'auto_checkout',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Audit logs table
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  institution_id UUID REFERENCES institutions(id) ON DELETE CASCADE,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  entity_id VARCHAR(255),
+  details JSONB,
+  performed_by VARCHAR(255) NOT NULL,
+  ip_address VARCHAR(45),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- QR code rotation support
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotation_token VARCHAR(255);
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotated_at TIMESTAMP;
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attendance_staff ON attendance_records(staff_uuid);
 CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance_records(date);
@@ -116,6 +161,14 @@ CREATE INDEX IF NOT EXISTS idx_attendance_staff_date ON attendance_records(staff
 CREATE INDEX IF NOT EXISTS idx_staff_institution ON staff(institution_id);
 CREATE INDEX IF NOT EXISTS idx_staff_qr ON staff(qr_code_data);
 CREATE INDEX IF NOT EXISTS idx_device_logs_staff ON device_logs(staff_uuid);
+CREATE INDEX IF NOT EXISTS idx_leave_staff ON leave_requests(staff_uuid);
+CREATE INDEX IF NOT EXISTS idx_leave_institution ON leave_requests(institution_id);
+CREATE INDEX IF NOT EXISTS idx_leave_dates ON leave_requests(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_overtime_staff ON overtime_records(staff_uuid);
+CREATE INDEX IF NOT EXISTS idx_overtime_date ON overtime_records(date);
+CREATE INDEX IF NOT EXISTS idx_audit_institution ON audit_logs(institution_id);
+CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
 `;
 
 async function runMigration() {

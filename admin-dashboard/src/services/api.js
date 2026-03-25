@@ -68,4 +68,17 @@ export const getPdfExportUrl = (params) => {
   return `${API_BASE_URL}/reports/export/pdf?${query}`;
 };
 
+// Leave Management
+export const getAllLeaves = (params) => api.get('/leave', { params });
+export const getLeaveStats = () => api.get('/leave/stats');
+export const reviewLeave = (id, data) => api.put(`/leave/${id}/review`, data);
+
+// Analytics
+export const getAttendanceTrends = (params) => api.get('/analytics/trends', { params });
+export const getTopAbsentees = (params) => api.get('/analytics/top-absentees', { params });
+export const getDepartmentAnalytics = (params) => api.get('/analytics/departments', { params });
+export const getOvertimeSummary = (params) => api.get('/analytics/overtime', { params });
+export const getAuditLogs = (params) => api.get('/analytics/audit-logs', { params });
+export const getSchedulerStatus = () => api.get('/analytics/scheduler');
+
 export default api;
