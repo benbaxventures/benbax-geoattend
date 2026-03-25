@@ -13,7 +13,7 @@ async function seed() {
     await client.query(`
       INSERT INTO institutions (id, name, address, city, region, latitude, longitude, geofence_radius)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      ON CONFLICT DO NOTHING
+      ON CONFLICT (institution_id, staff_id) DO NOTHING
     `, [
       institutionId,
       'Sample Institution Ghana',
@@ -29,7 +29,7 @@ async function seed() {
     await client.query(`
       INSERT INTO attendance_rules (institution_id)
       VALUES ($1)
-      ON CONFLICT DO NOTHING
+      ON CONFLICT (institution_id, staff_id) DO NOTHING
     `, [institutionId]);
 
     // Create default admin user
@@ -41,7 +41,7 @@ async function seed() {
     await client.query(`
       INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, password_hash, role, department, position, qr_code_data)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      ON CONFLICT DO NOTHING
+      ON CONFLICT (institution_id, staff_id) DO NOTHING
     `, [
       institutionId,
       'ADMIN001',
