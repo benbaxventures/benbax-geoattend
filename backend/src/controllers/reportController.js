@@ -199,20 +199,24 @@ exports.exportPDF = async (req, res) => {
     const instResult = await pool.query('SELECT name FROM institutions WHERE id = $1', [institutionId]);
     const institutionName = instResult.rows[0]?.name || 'Institution';
 
-    let query = `
-      SELECT ar.date, s.staff_id, s.first_name, s.last_name, s.department,
-             ar.check_in_time, ar.check_out_time, ar.is_late
-      FROM attendance_records ar
-      JOIN staff s ON ar.staff_uuid = s.id
-      WHERE ar.institution_id = $1`;
+    // Use LEFT JOIN so absent students also appear in PDF
+    let joinConditions = `ar.staff_uuid = s.id AND ar.institution_id = s.institution_id`;
     const params = [institutionId];
     let paramIndex = 2;
 
-    if (startDate) { query += ` AND ar.date >= $${paramIndex}`; params.push(startDate); paramIndex++; }
-    if (endDate) { query += ` AND ar.date <= $${paramIndex}`; params.push(endDate); paramIndex++; }
+    if (startDate) { joinConditions += ` AND ar.date >= $${paramIndex}`; params.push(startDate); paramIndex++; }
+    if (endDate) { joinConditions += ` AND ar.date <= $${paramIndex}`; params.push(endDate); paramIndex++; }
+
+    let query = `
+      SELECT ar.date, s.staff_id, s.first_name, s.last_name, s.department,
+             ar.check_in_time, ar.check_out_time, ar.is_late, ar.check_in_method
+      FROM staff s
+      LEFT JOIN attendance_records ar ON ${joinConditions}
+      WHERE s.institution_id = $1 AND s.is_active = true`;
+
     if (department) { query += ` AND s.department = $${paramIndex}`; params.push(department); paramIndex++; }
 
-    query += ' ORDER BY ar.date DESC, s.last_name';
+    query += ' ORDER BY ar.date DESC NULLS LAST, s.last_name';
     const result = await pool.query(query, params);
 
     const doc = new PDFDocument({ margin: 40, size: 'A4' });
@@ -233,8 +237,8 @@ exports.exportPDF = async (req, res) => {
 
     // Table header
     const tableTop = doc.y;
-    const colWidths = [65, 55, 90, 80, 65, 65, 35];
-    const colHeaders = ['Date', 'Staff ID', 'Name', 'Department', 'Check In', 'Check Out', 'Late'];
+    const colWidths = [55, 55, 85, 70, 55, 55, 45, 40];
+    const colHeaders = ['Date', 'Student ID', 'Name', 'Programme', 'Check In', 'Check Out', 'Method', 'Status'];
 
     doc.fontSize(8).font('Helvetica-Bold');
     let x = 40;
@@ -256,14 +260,16 @@ exports.exportPDF = async (req, res) => {
       }
 
       x = 40;
+      const status = !row.check_in_time ? 'Absent' : row.is_late ? 'Late' : 'Present';
       const cells = [
-        row.date ? new Date(row.date).toLocaleDateString() : '',
+        row.date ? new Date(row.date).toLocaleDateString() : '-',
         row.staff_id || '',
         `${row.first_name} ${row.last_name}`,
-        row.department || '',
-        row.check_in_time ? new Date(row.check_in_time).toLocaleTimeString() : '',
-        row.check_out_time ? new Date(row.check_out_time).toLocaleTimeString() : 'N/A',
-        row.is_late ? 'Yes' : 'No',
+        row.department || '-',
+        row.check_in_time ? new Date(row.check_in_time).toLocaleTimeString() : '-',
+        row.check_out_time ? new Date(row.check_out_time).toLocaleTimeString() : '-',
+        row.check_in_method || '-',
+        status,
       ];
 
       cells.forEach((cell, i) => {
