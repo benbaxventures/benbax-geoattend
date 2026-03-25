@@ -34,7 +34,26 @@ export default function ProfileScreen({ navigation, onLogout }) {
     getProfile().then(r => {
       setProfile(r.data);
       if (r.data.profile_photo_url) setProfilePhoto(r.data.profile_photo_url);
-    }).catch(() => {});
+    }).catch(async () => {
+      // Fallback: load from local storage
+      try {
+        const userData = await AsyncStorage.getItem('user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          setProfile({
+            first_name: user.firstName,
+            last_name: user.lastName,
+            staff_id: user.staffId,
+            email: user.email,
+            role: user.role,
+            department: user.department || '-',
+            position: user.position || '-',
+            institution_name: user.institutionName || '-',
+            member_type: user.memberType || 'student',
+          });
+        }
+      } catch {}
+    });
   }, []);
 
   const pickPhoto = async () => {

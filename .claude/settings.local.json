@@ -51,7 +51,10 @@
       "Bash(curl -s --max-time 120 https://geofence-app-jjpa.onrender.com/api/health)",
       "Bash(curl -sv https://geofence-app-jjpa.onrender.com/)",
       "Bash(timeout 15 node src/server.js)",
-      "Bash(npx react-scripts:*)"
+      "Bash(npx react-scripts:*)",
+      "Bash(eas update:*)",
+      "Bash(curl -s --max-time 30 https://geofence-app-jjpa.onrender.com/api/health)",
+      "Bash(curl -s --max-time 15 https://geofence-app-jjpa.onrender.com/api/auth/profile -H \"Authorization: Bearer test\")"
     ]
   }
 }
