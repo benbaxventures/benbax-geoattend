@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView,
@@ -27,8 +27,15 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [recentAccounts, setRecentAccounts] = useState([]);
 
   const redirectUri = AuthSession.makeRedirectUri({ preferLocalhost: false });
+
+  useEffect(() => {
+    AsyncStorage.getItem('recentAccounts').then(stored => {
+      if (stored) setRecentAccounts(JSON.parse(stored));
+    }).catch(() => {});
+  }, []);
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -135,6 +142,31 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
           <Text style={styles.appName}>GeoAttend</Text>
           <Text style={styles.subtitle}>Student Attendance System</Text>
         </View>
+
+        {recentAccounts.length > 0 && (
+          <View style={styles.recentSection}>
+            <Text style={styles.recentTitle}>Recent Accounts</Text>
+            <View style={styles.recentList}>
+              {recentAccounts.map((acc) => (
+                <TouchableOpacity
+                  key={acc.staffId}
+                  style={[styles.recentItem, staffId === acc.staffId && styles.recentItemActive]}
+                  onPress={() => setStaffId(acc.staffId)}
+                >
+                  <View style={styles.recentAvatar}>
+                    <Text style={styles.recentAvatarText}>
+                      {(acc.firstName?.[0] || '') + (acc.lastName?.[0] || '')}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.recentName} numberOfLines={1}>{acc.firstName} {acc.lastName}</Text>
+                    <Text style={styles.recentId}>{acc.staffId}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
@@ -265,6 +297,22 @@ const styles = StyleSheet.create({
     fontSize: 20, fontWeight: '700', color: '#4285F4', marginRight: 10,
   },
   googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
+  recentSection: { marginBottom: 16 },
+  recentTitle: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  recentList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  recentItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 10, padding: 10,
+    minWidth: '45%', flex: 1,
+  },
+  recentItemActive: { backgroundColor: 'rgba(255,255,255,0.25)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)' },
+  recentAvatar: {
+    width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  recentAvatarText: { fontSize: 12, fontWeight: '700', color: '#fff' },
+  recentName: { fontSize: 12, fontWeight: '600', color: '#fff' },
+  recentId: { fontSize: 10, color: 'rgba(255,255,255,0.6)' },
   forgotText: { textAlign: 'right', color: '#1a5276', fontSize: 13, fontWeight: '500', marginTop: 8 },
   footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
   registerLink: { textAlign: 'center', color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 20 },

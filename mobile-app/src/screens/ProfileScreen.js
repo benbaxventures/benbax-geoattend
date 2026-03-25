@@ -125,6 +125,39 @@ export default function ProfileScreen({ navigation, onLogout }) {
     }
   };
 
+  const saveToRecentAccounts = async () => {
+    try {
+      if (!profile) return;
+      const stored = await AsyncStorage.getItem('recentAccounts');
+      let accounts = stored ? JSON.parse(stored) : [];
+      // Remove if already exists, then add to front
+      accounts = accounts.filter(a => a.staffId !== profile.staff_id);
+      accounts.unshift({
+        staffId: profile.staff_id,
+        firstName: profile.first_name,
+        lastName: profile.last_name,
+        department: profile.department,
+      });
+      // Keep max 5 recent accounts
+      accounts = accounts.slice(0, 5);
+      await AsyncStorage.setItem('recentAccounts', JSON.stringify(accounts));
+    } catch {}
+  };
+
+  const handleSwitchAccount = () => {
+    Alert.alert('Switch Account', 'Sign out and switch to a different student account on this device?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Switch',
+        onPress: async () => {
+          await saveToRecentAccounts();
+          await AsyncStorage.multiRemove(['token', 'user', 'institution']);
+          if (onLogout) onLogout();
+        },
+      },
+    ]);
+  };
+
   const handleLogout = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -132,6 +165,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
         text: 'Sign Out',
         style: 'destructive',
         onPress: async () => {
+          await saveToRecentAccounts();
           await AsyncStorage.multiRemove(['token', 'user', 'institution']);
           if (onLogout) {
             onLogout();
@@ -251,6 +285,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
             <TouchableOpacity style={styles.passwordBtn} onPress={toggleTheme}>
               <Text style={styles.passwordBtnText}>{isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.passwordBtn, { borderWidth: 1, borderColor: '#3498db', backgroundColor: theme.card }]} onPress={handleSwitchAccount}>
+              <Text style={[styles.passwordBtnText, { color: '#3498db' }]}>Switch Account</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
