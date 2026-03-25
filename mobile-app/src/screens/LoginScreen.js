@@ -77,7 +77,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
 
   const handleLogin = async () => {
     if (!staffId.trim() || !password) {
-      toast.error('Please enter your Staff ID and password');
+      toast.error('Please enter your Student ID and password');
       return;
     }
 
@@ -119,15 +119,15 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
             <Text style={styles.iconText}>G</Text>
           </View>
           <Text style={styles.appName}>GeoAttend</Text>
-          <Text style={styles.subtitle}>Staff Attendance System</Text>
+          <Text style={styles.subtitle}>Student Attendance System</Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Staff ID</Text>
+            <Text style={styles.label}>Student ID</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your Staff ID"
+              placeholder="Enter your Student ID"
               value={staffId}
               onChangeText={setStaffId}
               autoCapitalize="characters"
@@ -193,7 +193,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
           <Text style={styles.registerLink}>Don't have an account? Sign Up</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footer}>Geofenced Attendance System</Text>
+        <Text style={styles.footer}>Geofenced Student Attendance System</Text>
         <Text style={styles.powered}>Powered by Benbax software developers</Text>
       </KeyboardAvoidingView>
     </SafeAreaView>

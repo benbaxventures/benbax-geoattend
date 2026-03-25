@@ -170,7 +170,7 @@ export default function Login({ onLogin }) {
             <input
               style={styles.input}
               type="text"
-              placeholder="Staff ID"
+              placeholder="Admin ID"
               value={staffId}
               onChange={(e) => setStaffId(e.target.value)}
             />
@@ -208,7 +208,7 @@ export default function Login({ onLogin }) {
           Sign in with Google
         </button>
 
-        <p style={styles.footer}>Geofenced Attendance Management System</p>
+        <p style={styles.footer}>Geofenced Student Attendance Management System</p>
       </div>
     </div>
   );

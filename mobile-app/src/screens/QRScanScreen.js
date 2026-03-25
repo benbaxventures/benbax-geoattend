@@ -57,9 +57,9 @@ export default function QRScanScreen() {
         qrCode = qrData.code;
         method = 'qr_code';
       } else if (qrData.staffId) {
-        // Individual staff QR code
+        // Individual student QR code
         if (qrData.staffId !== user?.staffId) {
-          Alert.alert('Invalid QR Code', 'This QR code does not match your staff ID.');
+          Alert.alert('Invalid QR Code', 'This QR code does not match your student ID.');
           setScanned(false);
           setLoading(false);
           return;
@@ -109,7 +109,7 @@ export default function QRScanScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>QR Code Check-In</Text>
-        <Text style={styles.subtitle}>Scan the institution QR code or your staff ID card</Text>
+        <Text style={styles.subtitle}>Scan the institution QR code or your student ID card</Text>
       </View>
 
       <View style={styles.cameraContainer}>
@@ -131,7 +131,7 @@ export default function QRScanScreen() {
 
       <View style={styles.instructions}>
         <Text style={styles.instructionText}>
-          Point your camera at the QR code posted at the entrance or on your staff ID card
+          Point your camera at the QR code posted at the entrance or on your student ID card
         </Text>
       </View>
     </SafeAreaView>

@@ -232,7 +232,7 @@ export default function StaffManagement() {
   return (
     <div>
       <div style={styles.header}>
-        <h1 style={styles.title}>Members Management</h1>
+        <h1 style={styles.title}>Student Management</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button style={{ ...styles.addBtn, background: '#8e44ad' }} onClick={handleBulkPrintQR}>
             <FiPrinter size={16} /> Print All QR
@@ -242,7 +242,7 @@ export default function StaffManagement() {
           </button>
           <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVUpload} style={{ display: 'none' }} />
           <button style={styles.addBtn} onClick={() => navigate('/staff/new')}>
-            <FiPlus size={16} /> Add Member
+            <FiPlus size={16} /> Add Student
           </button>
         </div>
       </div>
@@ -253,7 +253,7 @@ export default function StaffManagement() {
           <input style={styles.searchInput} placeholder="Search by name, ID or email..." value={search} onChange={e => setSearch(e.target.value)} />
         </form>
         <select style={styles.select} value={department} onChange={e => { setDepartment(e.target.value); setPage(1); }}>
-          <option value="">All Departments</option>
+          <option value="">All Programmes</option>
           {departments.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
         <select style={styles.select} value={memberTypeFilter} onChange={e => { setMemberTypeFilter(e.target.value); setPage(1); }}>
@@ -271,11 +271,11 @@ export default function StaffManagement() {
       <table style={styles.table}>
         <thead>
           <tr>
-            <th style={styles.th}>ID</th>
+            <th style={styles.th}>Student ID</th>
             <th style={styles.th}>Name</th>
             <th style={styles.th}>Type</th>
-            <th style={styles.th}>Department</th>
-            <th style={styles.th}>Position</th>
+            <th style={styles.th}>Programme</th>
+            <th style={styles.th}>Level</th>
             <th style={styles.th}>Email</th>
             <th style={styles.th}>Status</th>
             <th style={styles.th}>Actions</th>

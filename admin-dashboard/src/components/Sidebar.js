@@ -4,7 +4,7 @@ import { FiHome, FiUsers, FiClock, FiBarChart2, FiSettings, FiLogOut, FiMapPin, 
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: FiHome },
-  { path: '/staff', label: 'Members', icon: FiUsers },
+  { path: '/staff', label: 'Students', icon: FiUsers },
   { path: '/attendance', label: 'Attendance', icon: FiClock },
   { path: '/reports', label: 'Reports', icon: FiBarChart2 },
   { path: '/settings', label: 'Settings', icon: FiSettings },

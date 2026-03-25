@@ -105,6 +105,9 @@ ALTER TABLE device_logs ALTER COLUMN device_id TYPE VARCHAR(255);
 ALTER TABLE device_logs ALTER COLUMN device_model TYPE VARCHAR(255);
 ALTER TABLE device_logs ALTER COLUMN os_version TYPE VARCHAR(255);
 
+-- Add member_type column (staff or student)
+ALTER TABLE staff ADD COLUMN IF NOT EXISTS member_type VARCHAR(20) DEFAULT 'staff' CHECK (member_type IN ('staff', 'student'));
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attendance_staff ON attendance_records(staff_uuid);
 CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance_records(date);

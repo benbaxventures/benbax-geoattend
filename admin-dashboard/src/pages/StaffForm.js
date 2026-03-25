@@ -30,7 +30,7 @@ export default function StaffForm() {
 
   const [form, setForm] = useState({
     staffId: '', firstName: '', lastName: '', email: '', phone: '',
-    department: '', position: '', role: 'staff', memberType: 'staff', password: '', isActive: true,
+    department: '', position: '', role: 'staff', memberType: 'student', password: '', isActive: true,
   });
   const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -83,15 +83,15 @@ export default function StaffForm() {
     <div>
       <div style={styles.header}>
         <button style={styles.backBtn} onClick={() => navigate('/staff')}><FiArrowLeft size={20} /></button>
-        <h1 style={styles.title}>{isEdit ? 'Edit Member' : 'Add New Member'}</h1>
+        <h1 style={styles.title}>{isEdit ? 'Edit Student' : 'Add New Student'}</h1>
       </div>
 
       <div style={styles.card}>
         <form onSubmit={handleSubmit}>
           <div style={styles.grid}>
             <div style={styles.field}>
-              <label style={styles.label}>Member ID *</label>
-              <input style={styles.input} name="staffId" value={form.staffId} onChange={handleChange} required disabled={isEdit} placeholder="e.g. STF001 or STU001" />
+              <label style={styles.label}>Student ID *</label>
+              <input style={styles.input} name="staffId" value={form.staffId} onChange={handleChange} required disabled={isEdit} placeholder="e.g. STU001 or 01234567" />
             </div>
             <div style={styles.field}>
               <label style={styles.label}>Member Type</label>
@@ -125,12 +125,12 @@ export default function StaffForm() {
               <input style={styles.input} name="phone" value={form.phone} onChange={handleChange} placeholder="+233..." />
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Department</label>
-              <input style={styles.input} name="department" value={form.department} onChange={handleChange} />
+              <label style={styles.label}>Programme</label>
+              <input style={styles.input} name="department" value={form.department} onChange={handleChange} placeholder="e.g. Computer Science" />
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Position</label>
-              <input style={styles.input} name="position" value={form.position} onChange={handleChange} />
+              <label style={styles.label}>Level / Year</label>
+              <input style={styles.input} name="position" value={form.position} onChange={handleChange} placeholder="e.g. Level 200" />
             </div>
             {!isEdit && (
               <div style={styles.field}>
