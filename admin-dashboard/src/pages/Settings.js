@@ -279,11 +279,11 @@ function InstitutionQR() {
         @media print { body { padding: 0; } }
       </style></head><body>
       <div class="card">
-        <div class="logo">GeoAttend</div>
+        <div class="logo">Benbax GeoAttend</div>
         <div class="subtitle">Attendance Check-In</div>
         <img src="${qrCode}" />
         <div class="name">${institutionName}</div>
-        <div class="instruction">Open GeoAttend app → QR Scan → Scan this code</div>
+        <div class="instruction">Open Benbax GeoAttend app → QR Scan → Scan this code</div>
         <div class="footer">Powered by Benbax Software Developers</div>
       </div>
       <script>window.print();</script>

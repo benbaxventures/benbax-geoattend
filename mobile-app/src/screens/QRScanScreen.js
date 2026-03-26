@@ -66,7 +66,7 @@ export default function QRScanScreen() {
         }
         qrCode = qrData.code;
       } else {
-        Alert.alert('Invalid QR Code', 'This is not a valid GeoAttend QR code.');
+        Alert.alert('Invalid QR Code', 'This is not a valid Benbax GeoAttend QR code.');
         setScanned(false);
         setLoading(false);
         return;
@@ -94,7 +94,7 @@ export default function QRScanScreen() {
       );
     } catch (err) {
       if (err instanceof SyntaxError) {
-        Alert.alert('Invalid QR Code', 'This is not a valid GeoAttend QR code.');
+        Alert.alert('Invalid QR Code', 'This is not a valid Benbax GeoAttend QR code.');
       } else {
         const message = err.response?.data?.error || 'Check-in failed. Please try again.';
         Alert.alert('Error', message);

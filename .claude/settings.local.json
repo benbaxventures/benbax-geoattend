@@ -55,7 +55,9 @@
       "Bash(eas update:*)",
       "Bash(curl -s --max-time 30 https://geofence-app-jjpa.onrender.com/api/health)",
       "Bash(curl -s --max-time 15 https://geofence-app-jjpa.onrender.com/api/auth/profile -H \"Authorization: Bearer test\")",
-      "Bash(node -e ':*)"
+      "Bash(node -e ':*)",
+      "Bash(git checkout:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

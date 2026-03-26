@@ -6,13 +6,20 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
 import { login, googleLogin } from '../services/api';
 import { useToast } from '../services/Toast';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const GOOGLE_WEB_CLIENT_ID = '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
+const GOOGLE_ANDROID_CLIENT_ID =
+  Constants.expoConfig?.extra?.GOOGLE_ANDROID_CLIENT_ID ||
+  '725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com';
+
+const GOOGLE_WEB_CLIENT_ID =
+  Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID ||
+  '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
 
 const discovery = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -29,7 +36,14 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState([]);
 
-  const redirectUri = AuthSession.makeRedirectUri({ preferLocalhost: false });
+  const isExpoGo = Constants.appOwnership === 'expo';
+  const clientId = isExpoGo ? GOOGLE_WEB_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID;
+
+  // Expo Go uses Expo's proxy redirect; standalone/dev builds use the app scheme (com.geoattend.app://...)
+  const redirectUri = AuthSession.makeRedirectUri({
+    preferLocalhost: false,
+    useProxy: isExpoGo,
+  });
 
   useEffect(() => {
     AsyncStorage.getItem('recentAccounts').then(stored => {
@@ -41,21 +55,40 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     setGoogleLoading(true);
     try {
       const request = new AuthSession.AuthRequest({
-        clientId: GOOGLE_WEB_CLIENT_ID,
+        clientId,
         scopes: ['openid', 'profile', 'email'],
         redirectUri,
-        responseType: AuthSession.ResponseType.Token,
-        usePKCE: false,
+        // Google increasingly blocks implicit flows; use Authorization Code + PKCE.
+        responseType: AuthSession.ResponseType.Code,
+        usePKCE: true,
       });
 
       const result = await request.promptAsync(discovery);
 
       if (result.type === 'success') {
-        const { access_token } = result.params;
+        let accessToken = result.params.access_token;
+
+        // If we got an authorization code back, exchange it for tokens.
+        if (!accessToken && result.params.code) {
+          const tokenResult = await AuthSession.exchangeCodeAsync(
+            {
+              clientId,
+              code: result.params.code,
+              redirectUri,
+            },
+            discovery
+          );
+          accessToken = tokenResult?.access_token || tokenResult?.accessToken;
+        }
+
+        if (!accessToken) {
+          toast.error('Google login failed (no access token). Please try again.', 'Login Failed');
+          return;
+        }
 
         // Get user info from Google
         const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-          headers: { Authorization: `Bearer ${access_token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
         const userInfo = await userInfoResponse.json();
 
@@ -139,7 +172,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
           <View style={styles.iconCircle}>
             <Text style={styles.iconText}>G</Text>
           </View>
-          <Text style={styles.appName}>GeoAttend</Text>
+          <Text style={styles.appName}>Benbax GeoAttend</Text>
           <Text style={styles.subtitle}>Student Attendance System</Text>
         </View>
 

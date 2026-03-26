@@ -34,10 +34,11 @@ const styles = {
 export default function AttendanceMonitor() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [memberType, setMemberType] = useState('staff');
 
   const fetch = () => {
     setLoading(true);
-    getRealTimeAttendance()
+    getRealTimeAttendance({ memberType })
       .then(r => setRecords(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -60,9 +61,19 @@ export default function AttendanceMonitor() {
             {new Date().toLocaleDateString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} &middot; {records.length} records
           </p>
         </div>
-        <button style={styles.refreshBtn} onClick={fetch} disabled={loading}>
-          <FiRefreshCw size={16} className={loading ? 'spin' : ''} /> Refresh
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <select
+            value={memberType}
+            onChange={(e) => setMemberType(e.target.value)}
+            style={{ padding: '10px 12px', border: '1px solid #e0e0e0', borderRadius: '8px', background: '#fff' }}
+          >
+            <option value="staff">Staff</option>
+            <option value="student">Student</option>
+          </select>
+          <button style={styles.refreshBtn} onClick={fetch} disabled={loading}>
+            <FiRefreshCw size={16} className={loading ? 'spin' : ''} /> Refresh
+          </button>
+        </div>
       </div>
 
       {records.length === 0 ? (
