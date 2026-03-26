@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import { forgotPassword } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [staffId, setStaffId] = useState('');
@@ -12,6 +13,13 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [memberType, setMemberType] = useState('staff');
+
+  React.useEffect(() => {
+    AsyncStorage.getItem('memberType').then((mt) => {
+      setMemberType(mt === 'student' ? 'student' : 'staff');
+    }).catch(() => setMemberType('staff'));
+  }, []);
 
   const handleReset = async () => {
     if (!staffId.trim() || !email.trim() || !newPassword || !confirmPassword) {
@@ -31,7 +39,12 @@ export default function ForgotPasswordScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const { data } = await forgotPassword(staffId.trim().toUpperCase(), email.trim().toLowerCase(), newPassword);
+      const { data } = await forgotPassword(
+        staffId.trim().toUpperCase(),
+        email.trim().toLowerCase(),
+        newPassword,
+        memberType
+      );
       Alert.alert('Success', data.message, [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -50,15 +63,17 @@ export default function ForgotPasswordScreen({ navigation }) {
             <Text style={styles.backBtn}>← Back to Login</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Reset Password</Text>
-          <Text style={styles.subtitle}>Enter your Staff ID and email to verify your identity</Text>
+          <Text style={styles.subtitle}>
+            Enter your {memberType === 'student' ? 'Student' : 'Staff'} ID and email to verify your identity
+          </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Staff ID</Text>
+            <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your Staff ID"
+              placeholder={`Enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID`}
               value={staffId}
               onChangeText={setStaffId}
               autoCapitalize="characters"

@@ -8,7 +8,10 @@ const { sendAbsentAlert } = require('./smsService');
 async function autoCheckOut() {
   console.log('[Scheduler] Running auto check-out...');
   try {
-    const rules = await pool.query('SELECT institution_id, work_end_time FROM attendance_rules');
+    // Only auto-checkout staff/lecturer-type daily attendance
+    const rules = await pool.query(
+      "SELECT institution_id, work_end_time FROM attendance_rules WHERE member_type IN ('staff','lecturer')"
+    );
     const today = new Date().toISOString().split('T')[0];
 
     for (const rule of rules.rows) {
@@ -49,7 +52,7 @@ async function detectAbsences() {
     const institutions = await pool.query(`
       SELECT i.id, i.name, ar.working_days
       FROM institutions i
-      JOIN attendance_rules ar ON ar.institution_id = i.id
+      JOIN attendance_rules ar ON ar.institution_id = i.id AND ar.member_type = 'staff'
     `);
 
     const today = new Date();

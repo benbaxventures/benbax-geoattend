@@ -54,12 +54,12 @@ api.interceptors.response.use(
 );
 
 // Auth
-export const login = (staffId, password, deviceInfo) =>
-  api.post('/auth/login', { staffId, password, ...deviceInfo });
+export const login = (identifier, password, memberType, deviceInfo) =>
+  api.post('/auth/login', { staffId: identifier, password, memberType, ...deviceInfo });
 export const googleLogin = (googleData) =>
   api.post('/auth/google-login', googleData);
-export const forgotPassword = (staffId, email, newPassword) =>
-  api.post('/auth/forgot-password', { staffId, email, newPassword });
+export const forgotPassword = (identifier, email, newPassword, memberType) =>
+  api.post('/auth/forgot-password', { staffId: identifier, email, newPassword, memberType });
 export const refreshToken = () => api.post('/auth/refresh-token');
 export const getProfile = () => api.get('/auth/profile');
 export const changePassword = (currentPassword, newPassword) =>

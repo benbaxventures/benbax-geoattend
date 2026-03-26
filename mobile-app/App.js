@@ -20,14 +20,17 @@ import HomeScreen from './src/screens/HomeScreen';
 import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import AccountTypeScreen from './src/screens/AccountTypeScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function MainTabs({ onLogout }) {
+function MainTabs({ onLogout, memberType }) {
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 10);
   const { theme } = require('./src/services/theme').useTheme();
+
+  const checkInLabel = memberType === 'student' ? 'Student Check-In' : 'Staff Check-In';
 
   return (
     <Tab.Navigator
@@ -48,7 +51,7 @@ function MainTabs({ onLogout }) {
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{
-        tabBarLabel: 'Check In',
+        tabBarLabel: checkInLabel,
         tabBarIcon: ({ color, size }) => <Ionicons name="location" size={size} color={color} />,
       }} />
       <Tab.Screen name="QRScan" component={QRScanScreen} options={{
@@ -72,9 +75,18 @@ function MainTabs({ onLogout }) {
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [memberType, setMemberType] = useState(null);
 
   useEffect(() => {
     AsyncStorage.getItem('token').then(async (token) => {
+      // Load preferred account type (student/staff)
+      try {
+        const storedMemberType = await AsyncStorage.getItem('memberType');
+        setMemberType(storedMemberType || null);
+      } catch {
+        setMemberType(null);
+      }
+
       if (token) {
         // Check biometric — but always keep user logged in
         try {
@@ -112,10 +124,20 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isLoggedIn ? (
             <Stack.Screen name="Main">
-              {() => <MainTabs onLogout={() => setIsLoggedIn(false)} />}
+              {() => <MainTabs onLogout={() => setIsLoggedIn(false)} memberType={memberType} />}
             </Stack.Screen>
           ) : (
             <>
+              {!memberType && (
+                <Stack.Screen name="AccountType">
+                  {(props) => (
+                    <AccountTypeScreen
+                      {...props}
+                      onSelected={(mt) => setMemberType(mt)}
+                    />
+                  )}
+                </Stack.Screen>
+              )}
               <Stack.Screen name="Login">
                 {(props) => (
                   <LoginScreen
@@ -123,6 +145,7 @@ export default function App() {
                     onLogin={() => setIsLoggedIn(true)}
                     onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
                     onRegister={() => props.navigation.navigate('Register')}
+                    memberType={memberType}
                   />
                 )}
               </Stack.Screen>

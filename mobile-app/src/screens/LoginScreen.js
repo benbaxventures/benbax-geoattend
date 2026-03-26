@@ -10,6 +10,8 @@ import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
 import { login, googleLogin } from '../services/api';
 import { useToast } from '../services/Toast';
+import { authenticateWithBiometric, isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from '../services/biometric';
+import { getCredentials, saveCredentials } from '../services/credentials';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -35,6 +37,10 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState([]);
+  const [memberType, setMemberType] = useState('staff');
+  const [bioAvailable, setBioAvailable] = useState(false);
+  const [bioEnabled, setBioEnabled] = useState(false);
+  const [hasSavedCreds, setHasSavedCreds] = useState(false);
 
   const isExpoGo = Constants.appOwnership === 'expo';
   const clientId = isExpoGo ? GOOGLE_WEB_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID;
@@ -51,9 +57,38 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    AsyncStorage.getItem('memberType').then((mt) => {
+      setMemberType(mt === 'student' ? 'student' : 'staff');
+    }).catch(() => setMemberType('staff'));
+  }, []);
+
+  useEffect(() => {
+    isBiometricAvailable().then(setBioAvailable).catch(() => setBioAvailable(false));
+    isBiometricEnabled().then(setBioEnabled).catch(() => setBioEnabled(false));
+  }, []);
+
+  // Autofill saved credentials for the selected account type
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const creds = await getCredentials(memberType);
+        if (cancelled) return;
+        if (creds?.identifier) setStaffId(creds.identifier);
+        if (creds?.password) setPassword(creds.password);
+        setHasSavedCreds(!!creds);
+      } catch {
+        if (!cancelled) setHasSavedCreds(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [memberType]);
+
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
+      const currentMemberType = memberType || 'staff';
       const request = new AuthSession.AuthRequest({
         clientId,
         scopes: ['openid', 'profile', 'email'],
@@ -109,6 +144,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
           firstName: userInfo.given_name,
           lastName: userInfo.family_name,
           profilePhoto: userInfo.picture,
+          memberType: currentMemberType,
           ...deviceInfo,
         });
 
@@ -131,7 +167,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
 
   const handleLogin = async () => {
     if (!staffId.trim() || !password) {
-      toast.error('Please enter your Student ID and password');
+      toast.error(`Please enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID and password`);
       return;
     }
 
@@ -148,11 +184,27 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
       }
 
-      const { data } = await login(staffId.trim().toUpperCase(), password, deviceInfo);
+      const { data } = await login(staffId.trim().toUpperCase(), password, memberType, deviceInfo);
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+
+      // Save credentials securely for next login autofill / biometric login
+      await saveCredentials({
+        memberType,
+        identifier: staffId.trim().toUpperCase(),
+        password,
+      });
+      setHasSavedCreds(true);
+
+      // Offer to enable biometric (non-blocking)
+      try {
+        if (bioAvailable && !bioEnabled) {
+          await setBiometricEnabled(true);
+          setBioEnabled(true);
+        }
+      } catch {}
 
       onLogin();
     } catch (err) {
@@ -160,6 +212,55 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       const debug = err.response?.data?.debug;
       const msg = serverMsg || err.message || 'Unable to connect to server';
       toast.error(debug ? `${msg} (${debug})` : msg, 'Login Failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (loading || googleLoading) return;
+    try {
+      if (!bioAvailable) {
+        toast.error('Biometric is not available on this device.');
+        return;
+      }
+      if (!bioEnabled) {
+        toast.error('Enable biometric in Profile first.');
+        return;
+      }
+
+      const creds = await getCredentials(memberType);
+      if (!creds) {
+        toast.error('No saved credentials found. Sign in once with password first.');
+        return;
+      }
+
+      const ok = await authenticateWithBiometric();
+      if (!ok) return;
+
+      setLoading(true);
+
+      let deviceInfo = {};
+      try {
+        deviceInfo = {
+          deviceId: (Device.osBuildId || Device.modelId || Device.modelName || 'unknown').substring(0, 100),
+          deviceModel: (Device.modelName || 'unknown').substring(0, 100),
+          osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim().substring(0, 100),
+        };
+      } catch (e) {
+        deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
+      }
+
+      const { data } = await login(creds.identifier.trim().toUpperCase(), creds.password, memberType, deviceInfo);
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+
+      onLogin();
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Biometric login failed';
+      toast.error(msg, 'Login Failed');
     } finally {
       setLoading(false);
     }
@@ -173,7 +274,9 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
             <Text style={styles.iconText}>G</Text>
           </View>
           <Text style={styles.appName}>Benbax GeoAttend</Text>
-          <Text style={styles.subtitle}>Student Attendance System</Text>
+          <Text style={styles.subtitle}>
+            {memberType === 'student' ? 'Student Attendance System' : 'Staff Attendance System'}
+          </Text>
         </View>
 
         {recentAccounts.length > 0 && (
@@ -203,10 +306,10 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Student ID</Text>
+            <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your Student ID"
+              placeholder={`Enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID`}
               value={staffId}
               onChangeText={setStaffId}
               autoCapitalize="characters"
@@ -266,6 +369,12 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
               </>
             )}
           </TouchableOpacity>
+
+          {bioAvailable && bioEnabled && hasSavedCreds && (
+            <TouchableOpacity style={styles.biometricLink} onPress={handleBiometricLogin} disabled={loading || googleLoading}>
+              <Text style={styles.biometricLinkText}>Use Biometric Instead?</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <TouchableOpacity onPress={() => onRegister && onRegister()}>
@@ -330,6 +439,8 @@ const styles = StyleSheet.create({
     fontSize: 20, fontWeight: '700', color: '#4285F4', marginRight: 10,
   },
   googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
+  biometricLink: { marginTop: 14, alignItems: 'center' },
+  biometricLinkText: { color: '#1a5276', fontSize: 14, fontWeight: '700' },
   recentSection: { marginBottom: 16 },
   recentTitle: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   recentList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

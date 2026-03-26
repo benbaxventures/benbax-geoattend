@@ -4,7 +4,8 @@ const pool = require('../config/database');
 
 exports.login = async (req, res) => {
   try {
-    const { staffId, password, deviceId, deviceModel, osVersion } = req.body;
+    const { staffId, password, deviceId, deviceModel, osVersion, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
 
     if (!staffId || !password) {
       return res.status(400).json({ error: 'Staff ID and password are required' });
@@ -14,8 +15,8 @@ exports.login = async (req, res) => {
       `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
        FROM staff s
        JOIN institutions i ON s.institution_id = i.id
-       WHERE s.staff_id = $1 AND s.is_active = true`,
-      [staffId.toUpperCase()]
+       WHERE s.staff_id = $1 AND s.member_type = $2 AND s.is_active = true`,
+      [staffId.toUpperCase(), normalizedMemberType]
     );
 
     if (result.rows.length === 0) {
@@ -30,7 +31,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: staff.id, role: staff.role, institutionId: staff.institution_id },
+      { userId: staff.id, role: staff.role, institutionId: staff.institution_id, memberType: staff.member_type },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
@@ -55,6 +56,7 @@ exports.login = async (req, res) => {
         role: staff.role,
         department: staff.department,
         position: staff.position,
+        memberType: staff.member_type,
         institutionId: staff.institution_id,
         institutionName: staff.institution_name,
         profilePhoto: staff.profile_photo_url,
@@ -77,7 +79,8 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { staffId, firstName, lastName, email, phone, password, department, position } = req.body;
+    const { staffId, firstName, lastName, email, phone, password, department, position, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
 
     if (!staffId || !firstName || !lastName || !password) {
       return res.status(400).json({ error: 'Staff ID, first name, last name, and password are required' });
@@ -107,10 +110,10 @@ exports.register = async (req, res) => {
     const qrData = `STAFF-${institutionId}-${staffId.toUpperCase()}`;
 
     const result = await pool.query(
-      `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data, role)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'staff')
+      `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data, role, member_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'staff', $11)
        RETURNING id`,
-      [institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null, department || null, position || null, passwordHash, qrData]
+      [institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null, department || null, position || null, passwordHash, qrData, normalizedMemberType]
     );
 
     res.status(201).json({ message: 'Registration successful. You can now login with your Staff ID and password.' });
@@ -125,7 +128,8 @@ exports.register = async (req, res) => {
 
 exports.googleLogin = async (req, res) => {
   try {
-    const { googleId, email, firstName, lastName, profilePhoto, deviceId, deviceModel, osVersion } = req.body;
+    const { googleId, email, firstName, lastName, profilePhoto, deviceId, deviceModel, osVersion, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
 
     if (!googleId || !email) {
       return res.status(400).json({ error: 'Google ID and email are required' });
@@ -165,10 +169,10 @@ exports.googleLogin = async (req, res) => {
       const institutionId = instResult.rows[0].id;
 
       const insertResult = await pool.query(
-        `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff')
+        `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role, member_type)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff', $8)
          RETURNING *`,
-        [institutionId, safe.staffId, safe.firstName, safe.lastName, safe.email, safe.googleId, safe.profilePhoto]
+        [institutionId, safe.staffId, safe.firstName, safe.lastName, safe.email, safe.googleId, safe.profilePhoto, normalizedMemberType]
       );
 
       // Re-fetch with institution join
@@ -189,7 +193,7 @@ exports.googleLogin = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: staff.id, role: staff.role, institutionId: staff.institution_id },
+      { userId: staff.id, role: staff.role, institutionId: staff.institution_id, memberType: staff.member_type },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
@@ -214,6 +218,7 @@ exports.googleLogin = async (req, res) => {
         role: staff.role,
         department: staff.department,
         position: staff.position,
+        memberType: staff.member_type,
         institutionId: staff.institution_id,
         institutionName: staff.institution_name,
         profilePhoto: staff.profile_photo_url,
@@ -265,7 +270,8 @@ exports.changePassword = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    const { staffId, email, newPassword } = req.body;
+    const { staffId, email, newPassword, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
 
     if (!staffId || !email || !newPassword) {
       return res.status(400).json({ error: 'Staff ID, email, and new password are required' });
@@ -276,8 +282,8 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND is_active = true',
-      [staffId.toUpperCase(), email.toLowerCase().trim()]
+      'SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND member_type = $3 AND is_active = true',
+      [staffId.toUpperCase(), email.toLowerCase().trim(), normalizedMemberType]
     );
 
     if (result.rows.length === 0) {

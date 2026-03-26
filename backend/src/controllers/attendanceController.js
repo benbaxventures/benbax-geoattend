@@ -66,8 +66,8 @@ exports.checkIn = async (req, res) => {
 
     // Check if late
     const rules = await pool.query(
-      'SELECT work_start_time, late_threshold_minutes FROM attendance_rules WHERE institution_id = $1',
-      [institutionId]
+      'SELECT work_start_time, late_threshold_minutes FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
+      [institutionId, req.user.member_type || 'staff']
     );
 
     let isLate = false;
@@ -163,8 +163,8 @@ exports.checkOut = async (req, res) => {
     // Track overtime if checking out after work end time
     try {
       const rules = await pool.query(
-        'SELECT work_end_time FROM attendance_rules WHERE institution_id = $1',
-        [req.user.institution_id]
+        'SELECT work_end_time FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
+        [req.user.institution_id, req.user.member_type || 'staff']
       );
       if (rules.rows.length > 0) {
         const now = new Date();
@@ -303,8 +303,8 @@ exports.getWeeklyStats = async (req, res) => {
 
     // Get working days this month from rules
     const rulesResult = await pool.query(
-      `SELECT working_days FROM attendance_rules WHERE institution_id = $1`,
-      [req.user.institutionId]
+      `SELECT working_days FROM attendance_rules WHERE institution_id = $1 AND member_type = $2`,
+      [req.user.institution_id, req.user.member_type || 'staff']
     );
     const workingDays = rulesResult.rows[0]?.working_days || [1, 2, 3, 4, 5];
 

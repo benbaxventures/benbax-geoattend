@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView, ScrollView,
 } from 'react-native';
 import api from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({
@@ -12,6 +13,13 @@ export default function RegisterScreen({ navigation }) {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [memberType, setMemberType] = useState('staff');
+
+  React.useEffect(() => {
+    AsyncStorage.getItem('memberType').then((mt) => {
+      setMemberType(mt === 'student' ? 'student' : 'staff');
+    }).catch(() => setMemberType('staff'));
+  }, []);
 
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -42,6 +50,7 @@ export default function RegisterScreen({ navigation }) {
         password,
         department: form.department.trim() || undefined,
         position: form.position.trim() || undefined,
+        memberType,
       });
 
       Alert.alert('Success', data.message, [
@@ -59,15 +68,17 @@ export default function RegisterScreen({ navigation }) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Register as a new staff member</Text>
+          <Text style={styles.subtitle}>
+            Register as a new {memberType === 'student' ? 'student' : 'staff'} member
+          </Text>
 
           <View style={styles.form}>
             <View style={styles.row}>
               <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Text style={styles.label}>Staff ID *</Text>
+                <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'} *</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g. STF001"
+                  placeholder={memberType === 'student' ? 'e.g. STD001' : 'e.g. STF001'}
                   value={form.staffId}
                   onChangeText={v => update('staffId', v)}
                   autoCapitalize="characters"

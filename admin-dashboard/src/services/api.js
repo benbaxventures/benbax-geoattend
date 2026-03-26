@@ -49,13 +49,13 @@ export const deleteStaff = (id) => api.delete(`/staff/${id}`);
 export const getInstitution = () => api.get('/institutions/current');
 export const updateInstitution = (data) => api.put('/institutions/current', data);
 export const getInstitutionQR = () => api.get('/institutions/qr-code');
-export const getAttendanceRules = () => api.get('/institutions/rules');
-export const updateAttendanceRules = (data) => api.put('/institutions/rules', data);
+export const getAttendanceRules = (params) => api.get('/institutions/rules', { params });
+export const updateAttendanceRules = (data, params) => api.put('/institutions/rules', data, { params });
 
 // Reports
 export const getDashboardStats = () => api.get('/reports/dashboard');
 export const getAttendanceReport = (params) => api.get('/reports/attendance', { params });
-export const getRealTimeAttendance = () => api.get('/reports/realtime');
+export const getRealTimeAttendance = (params) => api.get('/reports/realtime', { params });
 export const getWeeklySummary = () => api.get('/reports/weekly-summary');
 
 // Export URLs (download directly)

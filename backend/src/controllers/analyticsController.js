@@ -48,7 +48,10 @@ exports.getTopAbsentees = async (req, res) => {
     const { days = 30 } = req.query;
 
     // Get working days count
-    const rules = await pool.query('SELECT working_days FROM attendance_rules WHERE institution_id = $1', [institutionId]);
+    const rules = await pool.query(
+      'SELECT working_days FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
+      [institutionId, (req.query.memberType || 'staff').toLowerCase()]
+    );
     const workingDays = rules.rows[0]?.working_days || [1, 2, 3, 4, 5];
 
     const now = new Date();

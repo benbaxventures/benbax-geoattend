@@ -148,7 +148,12 @@ async function ensureAdminExists() {
          RETURNING id`
       );
       institutionId = ins.rows[0].id;
-      await pool.query('INSERT INTO attendance_rules (institution_id) VALUES ($1)', [institutionId]);
+      await pool.query(
+        `INSERT INTO attendance_rules (institution_id, member_type)
+         VALUES ($1, 'staff'), ($1, 'student')
+         ON CONFLICT DO NOTHING`,
+        [institutionId]
+      );
     } else {
       institutionId = instResult.rows[0].id;
     }

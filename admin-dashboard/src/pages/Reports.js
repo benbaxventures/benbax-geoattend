@@ -38,6 +38,7 @@ export default function Reports() {
   const [records, setRecords] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', department: '', staffId: '' });
+  const [memberType, setMemberType] = useState('staff');
 
   useEffect(() => {
     getDepartments().then(r => setDepartments(r.data)).catch(() => {});
@@ -47,6 +48,7 @@ export default function Reports() {
   const fetchReport = () => {
     const params = {};
     Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
+    params.memberType = memberType;
     getAttendanceReport(params)
       .then(r => setRecords(r.data.records))
       .catch(() => toast.error('Failed to load report'));
@@ -56,6 +58,7 @@ export default function Reports() {
     const token = localStorage.getItem('token');
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v); });
+    params.append('memberType', memberType);
 
     const url = `${API_BASE}/reports/export/${format}?${params.toString()}`;
     // Open in new tab with auth header via fetch
@@ -86,6 +89,13 @@ export default function Reports() {
 
       <div style={styles.filters}>
         <div style={styles.field}>
+          <label style={styles.label}>Member Type</label>
+          <select style={styles.select} value={memberType} onChange={e => setMemberType(e.target.value)}>
+            <option value="staff">Staff</option>
+            <option value="student">Student</option>
+          </select>
+        </div>
+        <div style={styles.field}>
           <label style={styles.label}>Start Date</label>
           <input style={styles.input} type="date" value={filters.startDate} onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))} />
         </div>
@@ -101,8 +111,13 @@ export default function Reports() {
           </select>
         </div>
         <div style={styles.field}>
-          <label style={styles.label}>Staff ID</label>
-          <input style={styles.input} placeholder="e.g. STF001" value={filters.staffId} onChange={e => setFilters(f => ({ ...f, staffId: e.target.value }))} />
+          <label style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</label>
+          <input
+            style={styles.input}
+            placeholder={memberType === 'student' ? 'e.g. STD001' : 'e.g. STF001'}
+            value={filters.staffId}
+            onChange={e => setFilters(f => ({ ...f, staffId: e.target.value }))}
+          />
         </div>
         <button style={styles.filterBtn} onClick={fetchReport}>
           <FiFilter size={14} /> Apply
@@ -113,7 +128,7 @@ export default function Reports() {
         <thead>
           <tr>
             <th style={styles.th}>Date</th>
-            <th style={styles.th}>Staff ID</th>
+            <th style={styles.th}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</th>
             <th style={styles.th}>Name</th>
             <th style={styles.th}>Department</th>
             <th style={styles.th}>Check In</th>

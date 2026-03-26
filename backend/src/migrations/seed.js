@@ -34,8 +34,9 @@ async function seed() {
 
     // Create default attendance rules
     await client.query(`
-      INSERT INTO attendance_rules (institution_id)
-      VALUES ($1)
+      INSERT INTO attendance_rules (institution_id, member_type)
+      VALUES ($1, 'staff'), ($1, 'student')
+      ON CONFLICT DO NOTHING
     `, [institutionId]);
 
     // Create default admin user

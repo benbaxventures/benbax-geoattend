@@ -75,7 +75,9 @@ exports.createInstitution = async (req, res) => {
 
     // Create default attendance rules
     await pool.query(
-      'INSERT INTO attendance_rules (institution_id) VALUES ($1)',
+      `INSERT INTO attendance_rules (institution_id, member_type)
+       VALUES ($1, 'staff'), ($1, 'student')
+       ON CONFLICT DO NOTHING`,
       [id]
     );
 
@@ -88,9 +90,15 @@ exports.createInstitution = async (req, res) => {
 
 exports.getAttendanceRules = async (req, res) => {
   try {
+    const requested = (req.query.memberType || '').toLowerCase();
+    const memberType =
+      (req.user.role === 'admin' || req.user.role === 'super_admin')
+        ? (requested || 'staff')
+        : (req.user.member_type || 'staff');
+
     const result = await pool.query(
-      'SELECT * FROM attendance_rules WHERE institution_id = $1',
-      [req.user.institution_id]
+      'SELECT * FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
+      [req.user.institution_id, memberType]
     );
     res.json(result.rows[0] || {});
   } catch (err) {
@@ -101,8 +109,13 @@ exports.getAttendanceRules = async (req, res) => {
 
 exports.updateAttendanceRules = async (req, res) => {
   try {
-    const { workStartTime, workEndTime, lateThresholdMinutes, earlyDepartureMinutes, workingDays } = req.body;
+    const { workStartTime, workEndTime, lateThresholdMinutes, earlyDepartureMinutes, workingDays, memberType: bodyMemberType } = req.body;
     const institutionId = req.user.institution_id;
+    const requested = (req.query.memberType || bodyMemberType || '').toLowerCase();
+    const memberType =
+      (req.user.role === 'admin' || req.user.role === 'super_admin')
+        ? (requested || 'staff')
+        : (req.user.member_type || 'staff');
 
     const result = await pool.query(
       `UPDATE attendance_rules SET
@@ -112,9 +125,9 @@ exports.updateAttendanceRules = async (req, res) => {
         early_departure_minutes = COALESCE($4, early_departure_minutes),
         working_days = COALESCE($5, working_days),
         updated_at = NOW()
-       WHERE institution_id = $6
+       WHERE institution_id = $6 AND member_type = $7
        RETURNING *`,
-      [workStartTime, workEndTime, lateThresholdMinutes, earlyDepartureMinutes, workingDays, institutionId]
+      [workStartTime, workEndTime, lateThresholdMinutes, earlyDepartureMinutes, workingDays, institutionId, memberType]
     );
 
     res.json(result.rows[0]);

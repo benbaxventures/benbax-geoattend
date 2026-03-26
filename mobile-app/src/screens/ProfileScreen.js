@@ -158,6 +158,28 @@ export default function ProfileScreen({ navigation, onLogout }) {
     ]);
   };
 
+  const handleChangeAccountType = () => {
+    Alert.alert('Change Account Type', 'Switch between Student and Staff mode? You will be signed out.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Student',
+        onPress: async () => {
+          await AsyncStorage.setItem('memberType', 'student');
+          await AsyncStorage.multiRemove(['token', 'user', 'institution']);
+          if (onLogout) onLogout();
+        },
+      },
+      {
+        text: 'Staff',
+        onPress: async () => {
+          await AsyncStorage.setItem('memberType', 'staff');
+          await AsyncStorage.multiRemove(['token', 'user', 'institution']);
+          if (onLogout) onLogout();
+        },
+      },
+    ]);
+  };
+
   const handleLogout = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -236,6 +258,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
             <TouchableOpacity style={[styles.passwordBtn, { backgroundColor: theme.card }]} onPress={() => setShowPasswordForm(!showPasswordForm)}>
               <Text style={[styles.passwordBtnText, { color: theme.primary }]}>{t('changePassword')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.passwordBtn, { backgroundColor: theme.card }]} onPress={handleChangeAccountType}>
+              <Text style={[styles.passwordBtnText, { color: theme.primary }]}>Change Account Type</Text>
             </TouchableOpacity>
 
             {showPasswordForm && (

@@ -6,16 +6,31 @@ exports.getDashboardStats = async (req, res) => {
   try {
     const institutionId = req.user.institution_id;
     const today = new Date().toISOString().split('T')[0];
+    const memberType = (req.query.memberType || 'staff').toLowerCase();
 
     const [totalStaff, presentToday, lateToday, absentToday] = await Promise.all([
-      pool.query('SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true', [institutionId]),
-      pool.query('SELECT COUNT(DISTINCT staff_uuid) FROM attendance_records WHERE institution_id = $1 AND date = $2', [institutionId, today]),
-      pool.query('SELECT COUNT(DISTINCT staff_uuid) FROM attendance_records WHERE institution_id = $1 AND date = $2 AND is_late = true', [institutionId, today]),
+      pool.query('SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND member_type = $2 AND is_active = true', [institutionId, memberType]),
+      pool.query(
+        `SELECT COUNT(DISTINCT ar.staff_uuid)
+         FROM attendance_records ar
+         JOIN staff s ON s.id = ar.staff_uuid
+         WHERE ar.institution_id = $1 AND ar.date = $2 AND s.member_type = $3`,
+        [institutionId, today, memberType]
+      ),
+      pool.query(
+        `SELECT COUNT(DISTINCT ar.staff_uuid)
+         FROM attendance_records ar
+         JOIN staff s ON s.id = ar.staff_uuid
+         WHERE ar.institution_id = $1 AND ar.date = $2 AND ar.is_late = true AND s.member_type = $3`,
+        [institutionId, today, memberType]
+      ),
       pool.query(
         `SELECT COUNT(*) FROM staff s
-         WHERE s.institution_id = $1 AND s.is_active = true
-         AND s.id NOT IN (SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2)`,
-        [institutionId, today]
+         WHERE s.institution_id = $1 AND s.member_type = $3 AND s.is_active = true
+         AND s.id NOT IN (
+           SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2
+         )`,
+        [institutionId, today, memberType]
       ),
     ]);
 
@@ -34,9 +49,10 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getAttendanceReport = async (req, res) => {
   try {
-    const { startDate, endDate, department, staffId, page = 1, limit = 50 } = req.query;
+    const { startDate, endDate, department, staffId, page = 1, limit = 50, memberType = 'staff' } = req.query;
     const institutionId = req.user.institution_id;
     const offset = (page - 1) * limit;
+    const mt = String(memberType).toLowerCase();
 
     // Build LEFT JOIN so all active staff appear, even those with no attendance records
     let joinConditions = `ar.staff_uuid = s.id AND ar.institution_id = s.institution_id`;
@@ -56,10 +72,12 @@ exports.getAttendanceReport = async (req, res) => {
 
     let query = `
       SELECT ar.id, ar.date, ar.check_in_time, ar.check_out_time, ar.check_in_method, ar.is_late,
-             s.staff_id, s.first_name, s.last_name, s.department, s.position
+             s.staff_id, s.first_name, s.last_name, s.department, s.position, s.member_type
       FROM staff s
       LEFT JOIN attendance_records ar ON ${joinConditions}
-      WHERE s.institution_id = $1 AND s.is_active = true`;
+      WHERE s.institution_id = $1 AND s.member_type = $${paramIndex} AND s.is_active = true`;
+    params.push(mt);
+    paramIndex++;
 
     if (department) {
       query += ` AND s.department = $${paramIndex}`;
@@ -92,14 +110,15 @@ exports.getRealTimeAttendance = async (req, res) => {
   try {
     const institutionId = req.user.institution_id;
     const today = new Date().toISOString().split('T')[0];
+    const memberType = (req.query.memberType || 'staff').toLowerCase();
 
     const result = await pool.query(
       `SELECT ar.*, s.staff_id, s.first_name, s.last_name, s.department, s.position, s.profile_photo_url
        FROM attendance_records ar
        JOIN staff s ON ar.staff_uuid = s.id
-       WHERE ar.institution_id = $1 AND ar.date = $2
+       WHERE ar.institution_id = $1 AND ar.date = $2 AND s.member_type = $3
        ORDER BY ar.check_in_time DESC`,
-      [institutionId, today]
+      [institutionId, today, memberType]
     );
 
     res.json(result.rows);
@@ -112,17 +131,19 @@ exports.getRealTimeAttendance = async (req, res) => {
 exports.getWeeklySummary = async (req, res) => {
   try {
     const institutionId = req.user.institution_id;
+    const memberType = (req.query.memberType || 'staff').toLowerCase();
     const result = await pool.query(
       `SELECT
         ar.date,
         COUNT(DISTINCT ar.staff_uuid) as present,
         COUNT(DISTINCT CASE WHEN ar.is_late THEN ar.staff_uuid END) as late,
-        (SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true) as total_staff
+        (SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND member_type = $2 AND is_active = true) as total_staff
        FROM attendance_records ar
-       WHERE ar.institution_id = $1 AND ar.date >= CURRENT_DATE - INTERVAL '7 days'
+       JOIN staff s ON s.id = ar.staff_uuid
+       WHERE ar.institution_id = $1 AND s.member_type = $2 AND ar.date >= CURRENT_DATE - INTERVAL '7 days'
        GROUP BY ar.date
        ORDER BY ar.date`,
-      [institutionId]
+      [institutionId, memberType]
     );
 
     res.json(result.rows);
@@ -134,18 +155,20 @@ exports.getWeeklySummary = async (req, res) => {
 
 exports.exportExcel = async (req, res) => {
   try {
-    const { startDate, endDate, department } = req.query;
+    const { startDate, endDate, department, memberType = 'staff' } = req.query;
     const institutionId = req.user.institution_id;
+    const mt = String(memberType).toLowerCase();
 
     let query = `
       SELECT ar.date, s.staff_id, s.first_name, s.last_name, s.department, s.position,
              ar.check_in_time, ar.check_out_time, ar.check_in_method, ar.is_late, ar.is_within_geofence
       FROM attendance_records ar
       JOIN staff s ON ar.staff_uuid = s.id
-      WHERE ar.institution_id = $1`;
-    const params = [institutionId];
+      WHERE ar.institution_id = $1 AND s.member_type = $2`;
+    const params = [institutionId, mt];
     let paramIndex = 2;
 
+    paramIndex = 3;
     if (startDate) { query += ` AND ar.date >= $${paramIndex}`; params.push(startDate); paramIndex++; }
     if (endDate) { query += ` AND ar.date <= $${paramIndex}`; params.push(endDate); paramIndex++; }
     if (department) { query += ` AND s.department = $${paramIndex}`; params.push(department); paramIndex++; }
@@ -192,8 +215,9 @@ exports.exportExcel = async (req, res) => {
 
 exports.exportPDF = async (req, res) => {
   try {
-    const { startDate, endDate, department } = req.query;
+    const { startDate, endDate, department, memberType = 'staff' } = req.query;
     const institutionId = req.user.institution_id;
+    const mt = String(memberType).toLowerCase();
 
     // Get institution info
     const instResult = await pool.query('SELECT name FROM institutions WHERE id = $1', [institutionId]);
@@ -212,7 +236,9 @@ exports.exportPDF = async (req, res) => {
              ar.check_in_time, ar.check_out_time, ar.is_late, ar.check_in_method
       FROM staff s
       LEFT JOIN attendance_records ar ON ${joinConditions}
-      WHERE s.institution_id = $1 AND s.is_active = true`;
+      WHERE s.institution_id = $1 AND s.member_type = $${paramIndex} AND s.is_active = true`;
+    params.push(mt);
+    paramIndex++;
 
     if (department) { query += ` AND s.department = $${paramIndex}`; params.push(department); paramIndex++; }
 
@@ -238,7 +264,7 @@ exports.exportPDF = async (req, res) => {
     // Table header
     const tableTop = doc.y;
     const colWidths = [55, 55, 85, 70, 55, 55, 45, 40];
-    const colHeaders = ['Date', 'Student ID', 'Name', 'Programme', 'Check In', 'Check Out', 'Method', 'Status'];
+    const colHeaders = ['Date', mt === 'student' ? 'Student ID' : 'Staff ID', 'Name', 'Department', 'Check In', 'Check Out', 'Method', 'Status'];
 
     doc.fontSize(8).font('Helvetica-Bold');
     let x = 40;

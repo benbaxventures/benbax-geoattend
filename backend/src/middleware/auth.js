@@ -12,7 +12,7 @@ const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const result = await pool.query(
-      'SELECT id, institution_id, staff_id, first_name, last_name, email, role, is_active FROM staff WHERE id = $1',
+      'SELECT id, institution_id, staff_id, first_name, last_name, email, role, member_type, is_active FROM staff WHERE id = $1',
       [decoded.userId]
     );
 

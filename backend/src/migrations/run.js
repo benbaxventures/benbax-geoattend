@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS attendance_records (
 CREATE TABLE IF NOT EXISTS attendance_rules (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  member_type VARCHAR(20) NOT NULL DEFAULT 'staff' CHECK (member_type IN ('staff', 'student', 'lecturer')),
   work_start_time TIME NOT NULL DEFAULT '08:00:00',
   work_end_time TIME NOT NULL DEFAULT '17:00:00',
   late_threshold_minutes INTEGER DEFAULT 15,
@@ -74,6 +75,10 @@ CREATE TABLE IF NOT EXISTS attendance_rules (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Ensure one rules row per institution + member_type
+CREATE UNIQUE INDEX IF NOT EXISTS ux_attendance_rules_institution_member_type
+  ON attendance_rules(institution_id, member_type);
 
 -- Device log table
 CREATE TABLE IF NOT EXISTS device_logs (
@@ -107,6 +112,14 @@ ALTER TABLE device_logs ALTER COLUMN os_version TYPE VARCHAR(255);
 
 -- Add member_type column (staff or student)
 ALTER TABLE staff ADD COLUMN IF NOT EXISTS member_type VARCHAR(20) DEFAULT 'staff' CHECK (member_type IN ('staff', 'student'));
+
+-- Backfill missing student rules rows for existing institutions (safe if already present)
+INSERT INTO attendance_rules (institution_id, member_type)
+SELECT i.id, 'student'
+FROM institutions i
+WHERE NOT EXISTS (
+  SELECT 1 FROM attendance_rules ar WHERE ar.institution_id = i.id AND ar.member_type = 'student'
+);
 
 -- Leave requests table
 CREATE TABLE IF NOT EXISTS leave_requests (
