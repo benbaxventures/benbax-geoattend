@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { checkIn, checkOut } from './api';
+import { checkIn, checkOut, postGeofenceEvent } from './api';
 
 const QUEUE_KEY = 'offline_queue';
 
@@ -32,6 +32,8 @@ export const syncQueue = async () => {
         await checkIn(item.data);
       } else if (item.action === 'check-out') {
         await checkOut(item.data);
+      } else if (item.action === 'geofence-event') {
+        await postGeofenceEvent(item.data);
       }
       synced++;
     } catch (err) {

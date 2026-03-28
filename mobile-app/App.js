@@ -127,31 +127,32 @@ export default function App() {
               {() => <MainTabs onLogout={() => setIsLoggedIn(false)} memberType={memberType} />}
             </Stack.Screen>
           ) : (
-            <>
-              {!memberType && (
-                <Stack.Screen name="AccountType">
-                  {(props) => (
-                    <AccountTypeScreen
-                      {...props}
-                      onSelected={(mt) => setMemberType(mt)}
-                    />
-                  )}
-                </Stack.Screen>
-              )}
-              <Stack.Screen name="Login">
+            !memberType ? (
+              <Stack.Screen name="AccountType">
                 {(props) => (
-                  <LoginScreen
+                  <AccountTypeScreen
                     {...props}
-                    onLogin={() => setIsLoggedIn(true)}
-                    onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
-                    onRegister={() => props.navigation.navigate('Register')}
-                    memberType={memberType}
+                    onSelected={(mt) => setMemberType(mt)}
                   />
                 )}
               </Stack.Screen>
-              <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-              <Stack.Screen name="Register" component={RegisterScreen} />
-            </>
+            ) : (
+              <>
+                <Stack.Screen name="Login">
+                  {(props) => (
+                    <LoginScreen
+                      {...props}
+                      onLogin={() => setIsLoggedIn(true)}
+                      onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
+                      onRegister={() => props.navigation.navigate('Register')}
+                      memberType={memberType}
+                    />
+                  )}
+                </Stack.Screen>
+                <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
+              </>
+            )
           )}
         </Stack.Navigator>
       </NavigationContainer>

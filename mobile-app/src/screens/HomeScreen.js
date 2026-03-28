@@ -5,11 +5,12 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentLocation, calculateDistance } from '../services/location';
-import { checkIn, checkOut, getTodayStatus, getWeeklyStats } from '../services/api';
+import { checkIn, checkOut, getTodayStatus, getWeeklyStats, postGeofenceEvent } from '../services/api';
 import { addToQueue, syncQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { WebView } from 'react-native-webview';
+import NetInfo from '@react-native-community/netinfo';
 import { useTheme } from '../services/theme';
 import { useI18n } from '../services/i18n';
 import { useToast } from '../services/Toast';
@@ -73,6 +74,24 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Auto-sync queued check-ins once internet is back
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      const connected = !!state.isConnected;
+      setOnline(connected);
+      if (connected) {
+        const result = await syncQueue();
+        if (result.synced > 0) {
+          toast.success(`${result.synced} offline check-in(s) synced successfully.`, 'Synced');
+          await loadData();
+        }
+      }
+      const qLen = await getQueueLength();
+      setPendingSync(qLen);
+    });
+    return () => unsubscribe();
+  }, [loadData, toast]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -158,6 +177,36 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
+
+  // When we detect user is outside geofence while app is open, record a geofence event
+  useEffect(() => {
+    const postExitIfNeeded = async () => {
+      if (!institution || distance === null) return;
+      const outside = distance > institution.geofenceRadius;
+      if (!outside) return;
+
+      const payload = {
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        source: 'foreground_status',
+      };
+
+      try {
+        const connected = await isOnline();
+        if (!connected) {
+          await addToQueue('geofence-event', payload);
+          setPendingSync(await getQueueLength());
+          return;
+        }
+        await postGeofenceEvent(payload);
+      } catch {
+        // Best-effort; ignore failures here
+      }
+    };
+
+    postExitIfNeeded();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [distance, institution?.geofenceRadius]);
 
   const isWithin = institution && distance !== null && distance <= institution.geofenceRadius;
   const now = new Date();

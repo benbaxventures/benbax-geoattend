@@ -8,6 +8,7 @@ import * as Device from 'expo-device';
 import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
 import { login, googleLogin } from '../services/api';
 import { useToast } from '../services/Toast';
 import { authenticateWithBiometric, isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from '../services/biometric';
@@ -42,14 +43,34 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [bioEnabled, setBioEnabled] = useState(false);
   const [hasSavedCreds, setHasSavedCreds] = useState(false);
 
-  const isExpoGo = Constants.appOwnership === 'expo';
-  const clientId = isExpoGo ? GOOGLE_WEB_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID;
+  // NOTE:
+  // - Expo Go is increasingly incompatible with Google OAuth.
+  // - Dev builds / APKs should use Android client ID + package/SHA-1 configured in Google Cloud.
+  // - We still keep webClientId for any web/proxy-based flows.
+  // Android OAuth must use Google's reverse client-id scheme and path /oauth2redirect (not /oauthredirect).
+  const androidClientIdPrefix = String(GOOGLE_ANDROID_CLIENT_ID || '').replace('.apps.googleusercontent.com', '');
+  const androidGoogleRedirectUri = androidClientIdPrefix
+    ? `com.googleusercontent.apps.${androidClientIdPrefix}:/oauth2redirect`
+    : undefined;
 
-  // Expo Go uses Expo's proxy redirect; standalone/dev builds use the app scheme (com.geoattend.app://...)
-  const redirectUri = AuthSession.makeRedirectUri({
-    preferLocalhost: false,
-    useProxy: isExpoGo,
-  });
+  const redirectUri =
+    Platform.OS === 'android' && androidGoogleRedirectUri
+      ? androidGoogleRedirectUri
+      : AuthSession.makeRedirectUri({ scheme: 'com.geoattend.app', path: 'oauth2redirect' });
+
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+      androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      redirectUri,
+      scopes: ['openid', 'profile', 'email'],
+      responseType: AuthSession.ResponseType.Code,
+      usePKCE: true,
+    },
+    discovery
+  );
+
+  console.log('Google redirectUri:', redirectUri);
 
   useEffect(() => {
     AsyncStorage.getItem('recentAccounts').then(stored => {
@@ -89,32 +110,27 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     setGoogleLoading(true);
     try {
       const currentMemberType = memberType || 'staff';
-      const request = new AuthSession.AuthRequest({
-        clientId,
-        scopes: ['openid', 'profile', 'email'],
-        redirectUri,
-        // Google increasingly blocks implicit flows; use Authorization Code + PKCE.
-        responseType: AuthSession.ResponseType.Code,
-        usePKCE: true,
-      });
+      if (!request) {
+        toast.error('Google login is not ready. Please try again.', 'Login Failed');
+        return;
+      }
 
-      const result = await request.promptAsync(discovery);
+      const result = await promptAsync();
 
-      if (result.type === 'success') {
-        let accessToken = result.params.access_token;
-
-        // If we got an authorization code back, exchange it for tokens.
-        if (!accessToken && result.params.code) {
-          const tokenResult = await AuthSession.exchangeCodeAsync(
-            {
-              clientId,
-              code: result.params.code,
-              redirectUri,
+      if (result.type === 'success' && result.params?.code) {
+        // Exchange auth code for access token
+        const tokenResult = await AuthSession.exchangeCodeAsync(
+          {
+            clientId: GOOGLE_ANDROID_CLIENT_ID,
+            code: result.params.code,
+            redirectUri,
+            extraParams: {
+              code_verifier: request.codeVerifier,
             },
-            discovery
-          );
-          accessToken = tokenResult?.access_token || tokenResult?.accessToken;
-        }
+          },
+          discovery
+        );
+        const accessToken = tokenResult?.access_token || tokenResult?.accessToken;
 
         if (!accessToken) {
           toast.error('Google login failed (no access token). Please try again.', 'Login Failed');

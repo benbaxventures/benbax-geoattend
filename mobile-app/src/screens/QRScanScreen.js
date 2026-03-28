@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import { checkIn } from '../services/api';
 import { getCurrentLocation } from '../services/location';
+import { addToQueue, getQueueLength, isOnline } from '../services/offlineQueue';
 
 export default function QRScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -78,13 +79,23 @@ export default function QRScanScreen() {
       let deviceId = 'unknown';
       try { deviceId = Device.osBuildId || Device.modelId || Device.modelName || 'unknown'; } catch {}
 
-      const { data: result } = await checkIn({
+      const payload = {
         latitude: location?.latitude,
         longitude: location?.longitude,
         method,
         qrCode,
         deviceId,
-      });
+      };
+
+      const connected = await isOnline();
+      if (!connected) {
+        await addToQueue('check-in', payload);
+        const qLen = await getQueueLength();
+        Alert.alert('Saved Offline', `Check-in queued. Will sync when internet is back. Pending: ${qLen}`);
+        return;
+      }
+
+      const { data: result } = await checkIn(payload);
 
       Alert.alert(
         'Check-In Successful',

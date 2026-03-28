@@ -10,7 +10,10 @@ export default function AccountTypeScreen({ navigation, onSelected }) {
     try {
       await AsyncStorage.setItem('memberType', memberType);
       if (onSelected) onSelected(memberType);
-      navigation.replace('Login');
+      const routeNames = navigation?.getState?.()?.routeNames || [];
+      if (routeNames.includes('Login')) {
+        navigation.replace('Login');
+      }
     } finally {
       setSaving(null);
     }
