@@ -32,6 +32,7 @@ const discovery = {
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const toast = useToast();
+  const [institutionCode, setInstitutionCode] = useState('');
   const [staffId, setStaffId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -85,6 +86,12 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   }, []);
 
   useEffect(() => {
+    AsyncStorage.getItem('institutionCode').then((code) => {
+      if (code) setInstitutionCode(String(code).toUpperCase());
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     isBiometricAvailable().then(setBioAvailable).catch(() => setBioAvailable(false));
     isBiometricEnabled().then(setBioEnabled).catch(() => setBioEnabled(false));
   }, []);
@@ -110,6 +117,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     setGoogleLoading(true);
     try {
       const currentMemberType = memberType || 'staff';
+      const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
       if (!request) {
         toast.error('Google login is not ready. Please try again.', 'Login Failed');
         return;
@@ -118,19 +126,45 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
       const result = await promptAsync();
 
       if (result.type === 'success' && result.params?.code) {
+        let accessToken = null;
+        const code = result.params.code;
+
         // Exchange auth code for access token
-        const tokenResult = await AuthSession.exchangeCodeAsync(
-          {
-            clientId: GOOGLE_ANDROID_CLIENT_ID,
-            code: result.params.code,
-            redirectUri,
-            extraParams: {
-              code_verifier: request.codeVerifier,
+        try {
+          const tokenResult = await AuthSession.exchangeCodeAsync(
+            {
+              clientId: GOOGLE_ANDROID_CLIENT_ID,
+              code,
+              redirectUri,
+              extraParams: {
+                code_verifier: request.codeVerifier,
+              },
             },
-          },
-          discovery
-        );
-        const accessToken = tokenResult?.access_token || tokenResult?.accessToken;
+            discovery
+          );
+          accessToken = tokenResult?.access_token || tokenResult?.accessToken || null;
+        } catch (exErr) {
+          // Some configurations require using the web client for token exchange.
+          console.error('Google token exchange (android client) failed:', exErr?.message || exErr);
+          try {
+            const tokenResult = await AuthSession.exchangeCodeAsync(
+              {
+                clientId: GOOGLE_WEB_CLIENT_ID,
+                code,
+                redirectUri,
+                extraParams: {
+                  code_verifier: request.codeVerifier,
+                },
+              },
+              discovery
+            );
+            accessToken = tokenResult?.access_token || tokenResult?.accessToken || null;
+          } catch (exErr2) {
+            console.error('Google token exchange (web client) failed:', exErr2?.message || exErr2);
+            toast.error(exErr2?.message || 'Failed to exchange Google login code', 'Login Failed');
+            return;
+          }
+        }
 
         if (!accessToken) {
           toast.error('Google login failed (no access token). Please try again.', 'Login Failed');
@@ -138,10 +172,21 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
         }
 
         // Get user info from Google
-        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        const userInfo = await userInfoResponse.json();
+        let userInfo;
+        try {
+          const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          if (!userInfoResponse.ok) {
+            const text = await userInfoResponse.text().catch(() => '');
+            throw new Error(`Google userinfo failed (${userInfoResponse.status}) ${text}`.slice(0, 180));
+          }
+          userInfo = await userInfoResponse.json();
+        } catch (uiErr) {
+          console.error('Google userinfo fetch failed:', uiErr?.message || uiErr);
+          toast.error(uiErr?.message || 'Failed to fetch Google user profile', 'Login Failed');
+          return;
+        }
 
         let deviceInfo = {};
         try {
@@ -154,19 +199,30 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
           deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
         }
 
-        const { data } = await googleLogin({
-          googleId: userInfo.id,
-          email: userInfo.email,
-          firstName: userInfo.given_name,
-          lastName: userInfo.family_name,
-          profilePhoto: userInfo.picture,
-          memberType: currentMemberType,
-          ...deviceInfo,
-        });
+        let data;
+        try {
+          const res = await googleLogin({
+            googleId: userInfo.id,
+            email: userInfo.email,
+            firstName: userInfo.given_name,
+            lastName: userInfo.family_name,
+            profilePhoto: userInfo.picture,
+            institutionCode: normalizedInstitutionCode || undefined,
+            memberType: currentMemberType,
+            ...deviceInfo,
+          });
+          data = res.data;
+        } catch (apiErr) {
+          console.error('Backend googleLogin failed:', apiErr?.message || apiErr);
+          const msg = apiErr?.response?.data?.error || apiErr?.message || 'Network Error';
+          toast.error(msg, 'Login Failed');
+          return;
+        }
 
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('user', JSON.stringify(data.user));
         await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+        await AsyncStorage.setItem('institutionCode', normalizedInstitutionCode);
         onLogin();
       } else if (result.type === 'cancel') {
         // User cancelled
@@ -182,6 +238,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   };
 
   const handleLogin = async () => {
+    const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
     if (!staffId.trim() || !password) {
       toast.error(`Please enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID and password`);
       return;
@@ -200,11 +257,12 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
       }
 
-      const { data } = await login(staffId.trim().toUpperCase(), password, memberType, deviceInfo);
+      const { data } = await login(staffId.trim().toUpperCase(), password, normalizedInstitutionCode, memberType, deviceInfo);
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+      await AsyncStorage.setItem('institutionCode', normalizedInstitutionCode);
 
       // Save credentials securely for next login autofill / biometric login
       await saveCredentials({
@@ -267,11 +325,13 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
       }
 
-      const { data } = await login(creds.identifier.trim().toUpperCase(), creds.password, memberType, deviceInfo);
+      const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
+      const { data } = await login(creds.identifier.trim().toUpperCase(), creds.password, normalizedInstitutionCode, memberType, deviceInfo);
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
+      await AsyncStorage.setItem('institutionCode', normalizedInstitutionCode);
 
       onLogin();
     } catch (err) {
@@ -321,6 +381,18 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
         )}
 
         <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Institution Code</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. INST-123456"
+              value={institutionCode}
+              onChangeText={(v) => setInstitutionCode(v.toUpperCase())}
+              autoCapitalize="characters"
+              placeholderTextColor="#bdc3c7"
+            />
+          </View>
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</Text>
             <TextInput
@@ -475,6 +547,6 @@ const styles = StyleSheet.create({
   recentId: { fontSize: 10, color: 'rgba(255,255,255,0.6)' },
   forgotText: { textAlign: 'right', color: '#1a5276', fontSize: 13, fontWeight: '500', marginTop: 8 },
   footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
-  registerLink: { textAlign: 'center', color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 20 },
+  registerLink: { textAlign: 'center', color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 20, marginBottom: Platform.OS === 'android' ? 56 : 20 },
   powered: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 8 },
 });

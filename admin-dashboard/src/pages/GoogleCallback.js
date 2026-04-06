@@ -19,6 +19,13 @@ export default function GoogleCallback({ onLogin }) {
       }
 
       try {
+        const institutionCode = (localStorage.getItem('institutionCode') || '').trim().toUpperCase();
+        if (!institutionCode) {
+          toast.error('Institution code is required. Please sign in manually first.');
+          navigate('/login');
+          return;
+        }
+
         // Fetch Google user info
         const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -32,6 +39,7 @@ export default function GoogleCallback({ onLogin }) {
           firstName: userInfo.given_name,
           lastName: userInfo.family_name,
           profilePhoto: userInfo.picture,
+          institutionCode,
         });
 
         localStorage.setItem('token', data.token);

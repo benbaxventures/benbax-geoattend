@@ -1,6 +1,21 @@
 const pool = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 const { generateInstitutionQR } = require('../utils/qrcode');
+const {
+  DEFAULT_TRIAL_DAYS,
+  ensureTrialSubscription,
+  getCurrentSubscription,
+  buildSubscriptionSnapshot,
+} = require('../services/subscriptionService');
+
+async function generateInstitutionCode() {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = `INST-${Math.floor(100000 + Math.random() * 900000)}`;
+    const exists = await pool.query('SELECT id FROM institutions WHERE institution_code = $1', [code]);
+    if (exists.rows.length === 0) return code;
+  }
+  return `INST-${Date.now().toString().slice(-6)}`;
+}
 
 exports.getInstitution = async (req, res) => {
   try {
@@ -66,11 +81,12 @@ exports.createInstitution = async (req, res) => {
     }
 
     const id = uuidv4();
+    const institutionCode = await generateInstitutionCode();
     const result = await pool.query(
-      `INSERT INTO institutions (id, name, address, city, region, latitude, longitude, geofence_radius)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO institutions (id, name, institution_code, address, city, region, latitude, longitude, geofence_radius)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [id, name, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
+      [id, name, institutionCode, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
     );
 
     // Create default attendance rules
@@ -81,9 +97,111 @@ exports.createInstitution = async (req, res) => {
       [id]
     );
 
+    await ensureTrialSubscription(id);
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Create institution error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getSubscriptionStatus = async (req, res) => {
+  try {
+    await ensureTrialSubscription(req.user.institution_id);
+    const subscription = await getCurrentSubscription(req.user.institution_id);
+    res.json({ subscription: buildSubscriptionSnapshot(subscription) });
+  } catch (err) {
+    console.error('Get subscription status error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const axios = require('axios');
+
+exports.activateSubscription = async (req, res) => {
+  try {
+    const { planName, durationDays, paymentReference } = req.body;
+    const days = parseInt(durationDays || '30', 10);
+
+    if (!Number.isFinite(days) || days < 1 || days > 366) {
+      return res.status(400).json({ error: 'durationDays must be between 1 and 366' });
+    }
+
+    // If a paymentReference is provided, verify it with Paystack using secret key
+    if (paymentReference) {
+      const secret = process.env.PAYSTACK_SECRET_KEY;
+      if (!secret) {
+        return res.status(500).json({ error: 'Payment verification not configured on server' });
+      }
+
+      try {
+        const verifyRes = await axios.get(`https://api.paystack.co/transaction/verify/${encodeURIComponent(paymentReference)}`, {
+          headers: { Authorization: `Bearer ${secret}` },
+          timeout: 15000,
+        });
+        const verified = verifyRes.data && verifyRes.data.data && verifyRes.data.data.status === 'success';
+        if (!verified) {
+          return res.status(400).json({ error: 'Payment not verified or failed' });
+        }
+      } catch (verErr) {
+        console.error('Paystack verify error:', verErr?.response?.data || verErr.message || verErr);
+        return res.status(400).json({ error: 'Failed to verify payment reference' });
+      }
+    }
+
+    const result = await pool.query(
+      `INSERT INTO subscriptions (institution_id, plan_name, status, trial_start, trial_end, current_period_end, payment_reference)
+       VALUES ($1, $2, 'active', NULL, NULL, NOW() + ($3 || ' days')::INTERVAL, $4)
+       RETURNING id, plan_name, status, trial_start, trial_end, current_period_end, payment_reference`,
+      [req.user.institution_id, planName || 'paid_plan', String(days), paymentReference || null]
+    );
+
+    res.json({
+      message: 'Subscription activated',
+      subscription: buildSubscriptionSnapshot(result.rows[0]),
+    });
+  } catch (err) {
+    console.error('Activate subscription error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.extendTrial = async (req, res) => {
+  try {
+    const extraDays = parseInt(req.body.extraDays || String(DEFAULT_TRIAL_DAYS), 10);
+    if (!Number.isFinite(extraDays) || extraDays < 1 || extraDays > 90) {
+      return res.status(400).json({ error: 'extraDays must be between 1 and 90' });
+    }
+
+    await ensureTrialSubscription(req.user.institution_id);
+    const updated = await pool.query(
+      `WITH latest AS (
+         SELECT id
+         FROM subscriptions
+         WHERE institution_id = $2
+         ORDER BY created_at DESC
+         LIMIT 1
+       )
+       UPDATE subscriptions s
+       SET status = 'trialing',
+           trial_end = GREATEST(COALESCE(s.trial_end, NOW()), NOW()) + ($1 || ' days')::INTERVAL,
+           updated_at = NOW()
+       FROM latest
+       WHERE s.id = latest.id
+       RETURNING s.id, s.plan_name, s.status, s.trial_start, s.trial_end, s.current_period_end, s.payment_reference`,
+      [String(extraDays), req.user.institution_id]
+    );
+    if (updated.rows.length === 0) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    res.json({
+      message: 'Trial extended',
+      subscription: buildSubscriptionSnapshot(updated.rows[0]),
+    });
+  } catch (err) {
+    console.error('Extend trial error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

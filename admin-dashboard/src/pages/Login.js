@@ -113,6 +113,7 @@ const styles = {
 };
 
 export default function Login({ onLogin }) {
+  const [institutionCode, setInstitutionCode] = useState(localStorage.getItem('institutionCode') || '');
   const [staffId, setStaffId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -120,15 +121,16 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!staffId || !password) {
-      toast.error('Please enter staff ID and password');
+    if (!institutionCode || !staffId || !password) {
+      toast.error('Please enter institution code, staff ID and password');
       return;
     }
 
     setLoading(true);
     try {
-      const { data } = await login(staffId, password);
+      const { data } = await login(staffId, password, institutionCode.trim().toUpperCase());
       localStorage.setItem('token', data.token);
+      localStorage.setItem('institutionCode', institutionCode.trim().toUpperCase());
 
       if (data.user.role !== 'admin' && data.user.role !== 'super_admin') {
         toast.error('Admin access required');
@@ -165,6 +167,16 @@ export default function Login({ onLogin }) {
         <p style={styles.subtitle}>Admin Dashboard - Sign in to continue</p>
 
         <form onSubmit={handleSubmit}>
+          <div style={styles.inputGroup}>
+            <FiMapPin style={styles.inputIcon} size={18} />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Institution Code (e.g. INST-123456)"
+              value={institutionCode}
+              onChange={(e) => setInstitutionCode(e.target.value.toUpperCase())}
+            />
+          </div>
           <div style={styles.inputGroup}>
             <FiUser style={styles.inputIcon} size={18} />
             <input

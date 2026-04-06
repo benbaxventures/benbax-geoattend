@@ -34,6 +34,12 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.geoattend.app"/>
       </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.googleusercontent.apps.725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i" android:pathPrefix="/oauth2redirect"/>
+      </intent-filter>
     </activity>
   </application>
 </manifest>

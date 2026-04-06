@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const analyticsController = require('../controllers/analyticsController');
 const { authenticate, requireAdmin } = require('../middleware/auth');
+const { requireActiveSubscription } = require('../middleware/subscription');
 
-router.use(authenticate, requireAdmin);
+router.use(authenticate, requireActiveSubscription, requireAdmin);
 
 router.get('/trends', analyticsController.getAttendanceTrends);
 router.get('/top-absentees', analyticsController.getTopAbsentees);

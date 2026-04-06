@@ -1,8 +1,15 @@
 const router = require('express').Router();
 const institutionController = require('../controllers/institutionController');
 const { authenticate, requireAdmin, requireSuperAdmin } = require('../middleware/auth');
+const { requireActiveSubscription } = require('../middleware/subscription');
 
 router.use(authenticate);
+
+router.get('/subscription', institutionController.getSubscriptionStatus);
+router.post('/subscription/activate', requireAdmin, institutionController.activateSubscription);
+router.post('/subscription/extend-trial', requireAdmin, institutionController.extendTrial);
+
+router.use(requireActiveSubscription);
 
 router.get('/current', institutionController.getInstitution);
 router.put('/current', requireAdmin, institutionController.updateInstitution);

@@ -1,5 +1,18 @@
 const pool = require('../config/database');
 const { isWithinGeofence } = require('../utils/geofence');
+const { sendStudentLateAlertToGuardian } = require('../services/smsService');
+
+async function logFraudEvent({ institutionId, staffUuid, eventType, details, ipAddress }) {
+  try {
+    await pool.query(
+      `INSERT INTO fraud_events (institution_id, staff_uuid, event_type, details, ip_address)
+       VALUES ($1, $2, $3, $4::jsonb, $5)`,
+      [institutionId, staffUuid || null, eventType, details ? JSON.stringify(details) : null, ipAddress || null]
+    );
+  } catch (err) {
+    console.error('Fraud log error:', err.message);
+  }
+}
 
 exports.checkIn = async (req, res) => {
   try {
@@ -20,6 +33,13 @@ exports.checkIn = async (req, res) => {
         [qrCode, staffUuid]
       );
       if (qrResult.rows.length === 0) {
+        await logFraudEvent({
+          institutionId,
+          staffUuid,
+          eventType: 'invalid_qr_attempt',
+          details: { method, qrCode: String(qrCode || '').slice(0, 30) },
+          ipAddress: req.ip,
+        });
         return res.status(400).json({ error: 'Invalid QR code' });
       }
     }
@@ -32,6 +52,13 @@ exports.checkIn = async (req, res) => {
     );
 
     if (existing.rows.length > 0 && !existing.rows[0].check_out_time) {
+      await logFraudEvent({
+        institutionId,
+        staffUuid,
+        eventType: 'duplicate_checkin_attempt',
+        details: { method, date: today },
+        ipAddress: req.ip,
+      });
       return res.status(400).json({ error: 'You already have an active check-in. Please check out first.' });
     }
 
@@ -53,6 +80,13 @@ exports.checkIn = async (req, res) => {
         withinGeofence = geofenceCheck.isWithin;
 
         if (method === 'gps' && !withinGeofence) {
+          await logFraudEvent({
+            institutionId,
+            staffUuid,
+            eventType: 'outside_geofence_attempt',
+            details: { distance: geofenceCheck.distance, radius: geofenceCheck.radius, method },
+            ipAddress: req.ip,
+          });
           return res.status(403).json({
             error: 'You are outside the institution geofence',
             distance: geofenceCheck.distance,
@@ -97,6 +131,25 @@ exports.checkIn = async (req, res) => {
          VALUES ($1, $2, 'check_in', $3)`,
         [staffUuid, deviceId, req.ip]
       );
+    }
+
+    // Notify guardians when a student checks in late
+    if (isLate && req.user.member_type === 'student') {
+      try {
+        const guardians = await pool.query(
+          `SELECT name, phone
+           FROM guardians
+           WHERE student_id = $1 AND phone IS NOT NULL AND notify_on_absence = true`,
+          [staffUuid]
+        );
+        const studentName = `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() || req.user.staff_id;
+        const time = new Date().toLocaleTimeString();
+        for (const g of guardians.rows) {
+          await sendStudentLateAlertToGuardian(g.phone, studentName, time);
+        }
+      } catch (notifyErr) {
+        console.error('Late guardian SMS error:', notifyErr.message);
+      }
     }
 
     res.status(201).json({

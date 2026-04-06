@@ -10,6 +10,7 @@ const navItems = [
   { path: '/leave', label: 'Leave', icon: FiCalendar },
   { path: '/analytics', label: 'Analytics', icon: FiTrendingUp },
   { path: '/audit', label: 'Audit Log', icon: FiShield },
+  { path: '/billing', label: 'Billing', icon: FiShield },
   { path: '/settings', label: 'Settings', icon: FiSettings },
 ];
 

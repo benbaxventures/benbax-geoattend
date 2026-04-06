@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { FiDownload, FiFileText, FiFilter } from 'react-icons/fi';
-import { getAttendanceReport, getDepartments } from '../services/api';
+import { FiDownload, FiFileText, FiFilter, FiAlertTriangle } from 'react-icons/fi';
+import { getAttendanceReport, getDepartments, getFraudReport, getTodaySummary, getGeofenceEvents } from '../services/api';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -36,14 +36,21 @@ const styles = {
 
 export default function Reports() {
   const [records, setRecords] = useState([]);
+  const [fraudEvents, setFraudEvents] = useState([]);
+  const [geofenceEvents, setGeofenceEvents] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', department: '', staffId: '' });
   const [memberType, setMemberType] = useState('staff');
+  const [todaySummary, setTodaySummary] = useState({ present: 0, late: 0, absent: 0 });
 
   useEffect(() => {
     getDepartments().then(r => setDepartments(r.data)).catch(() => {});
     fetchReport();
   }, []);
+
+  useEffect(() => {
+    fetchReport();
+  }, [memberType]);
 
   const fetchReport = () => {
     const params = {};
@@ -52,6 +59,18 @@ export default function Reports() {
     getAttendanceReport(params)
       .then(r => setRecords(r.data.records))
       .catch(() => toast.error('Failed to load report'));
+
+    getFraudReport(params)
+      .then(r => setFraudEvents(r.data.events || []))
+      .catch(() => {});
+
+    getGeofenceEvents({ ...params, onlyExits: true })
+      .then(r => setGeofenceEvents(r.data.events || []))
+      .catch(() => {});
+
+    getTodaySummary({ memberType })
+      .then(r => setTodaySummary(r.data))
+      .catch(() => {});
   };
 
   const handleExport = (format) => {
@@ -73,11 +92,22 @@ export default function Reports() {
       .catch(() => toast.error('Export failed'));
   };
 
+  const handleWhatsAppShare = () => {
+    const text = `Benbax GeoAttend Report (${memberType})
+Today: ${todaySummary.present || 0} present, ${todaySummary.late || 0} late, ${todaySummary.absent || 0} absent.
+Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${filters.department || 'all'}.`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>Attendance Reports</h1>
         <div style={styles.exportBtns}>
+          <button style={styles.exportBtn('#25D366')} onClick={handleWhatsAppShare}>
+            WhatsApp
+          </button>
           <button style={styles.exportBtn('#27ae60')} onClick={() => handleExport('excel')}>
             <FiDownload size={14} /> Excel
           </button>
@@ -164,6 +194,74 @@ export default function Reports() {
           )}
         </tbody>
       </table>
+
+      <div style={{ marginTop: 24 }}>
+        <h2 style={{ fontSize: 18, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FiAlertTriangle /> Fraud Report
+        </h2>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Time</th>
+              <th style={styles.th}>Type</th>
+              <th style={styles.th}>User</th>
+              <th style={styles.th}>ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {fraudEvents.map((f) => (
+              <tr key={f.id}>
+                <td style={styles.td}>{new Date(f.created_at).toLocaleString()}</td>
+                <td style={styles.td}>{f.event_type}</td>
+                <td style={styles.td}>{f.first_name ? `${f.first_name} ${f.last_name}` : '-'}</td>
+                <td style={styles.td}>{f.staff_id || '-'}</td>
+              </tr>
+            ))}
+            {fraudEvents.length === 0 && (
+              <tr><td colSpan={4} style={{ ...styles.td, textAlign: 'center', color: '#95a5a6' }}>No suspicious events found</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ marginTop: 24 }}>
+        <h2 style={{ fontSize: 18, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FiAlertTriangle /> Geofence Exits (Recent)
+        </h2>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Time</th>
+              <th style={styles.th}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</th>
+              <th style={styles.th}>Name</th>
+              <th style={styles.th}>Department</th>
+              <th style={styles.th}>Event</th>
+              <th style={styles.th}>Distance (m)</th>
+              <th style={styles.th}>Radius (m)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {geofenceEvents.map((e) => (
+              <tr key={e.id}>
+                <td style={styles.td}>{new Date(e.created_at).toLocaleString()}</td>
+                <td style={styles.td}><strong>{e.staff_id || '-'}</strong></td>
+                <td style={styles.td}>{e.first_name ? `${e.first_name} ${e.last_name}` : '-'}</td>
+                <td style={styles.td}>{e.department || '-'}</td>
+                <td style={styles.td}>{e.event}</td>
+                <td style={styles.td}>{typeof e.distance_m === 'number' ? e.distance_m : '-'}</td>
+                <td style={styles.td}>{typeof e.radius_m === 'number' ? e.radius_m : '-'}</td>
+              </tr>
+            ))}
+            {geofenceEvents.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ ...styles.td, textAlign: 'center', color: '#95a5a6' }}>
+                  No geofence exits recorded
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

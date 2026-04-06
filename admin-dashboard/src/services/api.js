@@ -31,7 +31,8 @@ api.interceptors.response.use(
 );
 
 // Auth
-export const login = (staffId, password) => api.post('/auth/login', { staffId, password });
+export const login = (staffId, password, institutionCode) =>
+  api.post('/auth/login', { staffId, password, institutionCode });
 export const googleLogin = (googleData) => api.post('/auth/google-login', googleData);
 export const getProfile = () => api.get('/auth/profile');
 
@@ -51,12 +52,18 @@ export const updateInstitution = (data) => api.put('/institutions/current', data
 export const getInstitutionQR = () => api.get('/institutions/qr-code');
 export const getAttendanceRules = (params) => api.get('/institutions/rules', { params });
 export const updateAttendanceRules = (data, params) => api.put('/institutions/rules', data, { params });
+// Subscriptions / Billing
+export const getSubscriptionStatus = () => api.get('/institutions/subscription');
+export const activateSubscription = (data) => api.post('/institutions/subscription/activate', data);
 
 // Reports
-export const getDashboardStats = () => api.get('/reports/dashboard');
+export const getDashboardStats = (params) => api.get('/reports/dashboard', { params });
+export const getTodaySummary = (params) => api.get('/reports/today-summary', { params });
 export const getAttendanceReport = (params) => api.get('/reports/attendance', { params });
 export const getRealTimeAttendance = (params) => api.get('/reports/realtime', { params });
-export const getWeeklySummary = () => api.get('/reports/weekly-summary');
+export const getWeeklySummary = (params) => api.get('/reports/weekly-summary', { params });
+export const getFraudReport = (params) => api.get('/reports/fraud', { params });
+export const getGeofenceEvents = (params) => api.get('/reports/geofence-events', { params });
 
 // Export URLs (download directly)
 export const getExcelExportUrl = (params) => {

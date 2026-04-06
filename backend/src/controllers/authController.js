@@ -1,29 +1,71 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
+const {
+  normalizeInstitutionCode,
+  getInstitutionByCode,
+  ensureTrialSubscription,
+  getCurrentSubscription,
+  buildSubscriptionSnapshot,
+} = require('../services/subscriptionService');
+
+async function getSubscriptionPayload(institutionId) {
+  await ensureTrialSubscription(institutionId);
+  const subscription = await getCurrentSubscription(institutionId);
+  return buildSubscriptionSnapshot(subscription);
+}
 
 exports.login = async (req, res) => {
   try {
-    const { staffId, password, deviceId, deviceModel, osVersion, memberType } = req.body;
+    const { staffId, password, institutionCode, deviceId, deviceModel, osVersion, memberType } = req.body;
     const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!staffId || !password) {
       return res.status(400).json({ error: 'Staff ID and password are required' });
     }
 
-    const result = await pool.query(
-      `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
-       FROM staff s
-       JOIN institutions i ON s.institution_id = i.id
-       WHERE s.staff_id = $1 AND s.member_type = $2 AND s.is_active = true`,
-      [staffId.toUpperCase(), normalizedMemberType]
-    );
+    let institution;
+    let result;
+    let staff;
+
+    if (normalizedInstitutionCode) {
+      institution = await getInstitutionByCode(normalizedInstitutionCode);
+      if (!institution) {
+        return res.status(404).json({ error: 'Invalid institution code' });
+      }
+
+      result = await pool.query(
+        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+         FROM staff s
+         JOIN institutions i ON s.institution_id = i.id
+         WHERE s.staff_id = $1 AND s.member_type = $2 AND s.institution_id = $3 AND s.is_active = true`,
+        [staffId.toUpperCase(), normalizedMemberType, institution.id]
+      );
+    } else {
+      // No institution code provided — try to resolve by staffId across institutions
+      result = await pool.query(
+        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code
+         FROM staff s
+         JOIN institutions i ON s.institution_id = i.id
+         WHERE s.staff_id = $1 AND s.member_type = $2 AND s.is_active = true`,
+        [staffId.toUpperCase(), normalizedMemberType]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(400).json({ error: 'Staff not found. Please provide your institution code.' });
+      }
+      if (result.rows.length > 1) {
+        return res.status(400).json({ error: 'Multiple institutions found for this Staff ID — please provide your institution code.' });
+      }
+      institution = { id: result.rows[0].institution_id, institution_code: result.rows[0].institution_code };
+    }
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const staff = result.rows[0];
+    staff = result.rows[0];
     const validPassword = await bcrypt.compare(password, staff.password_hash);
 
     if (!validPassword) {
@@ -45,6 +87,8 @@ exports.login = async (req, res) => {
       ).catch(err => console.error('Device log error:', err.message));
     }
 
+    const subscription = await getSubscriptionPayload(staff.institution_id);
+
     res.json({
       token,
       user: {
@@ -62,6 +106,7 @@ exports.login = async (req, res) => {
         profilePhoto: staff.profile_photo_url,
       },
       institution: {
+        code: institution.institution_code,
         name: staff.institution_name,
         address: staff.inst_address,
         city: staff.inst_city,
@@ -70,6 +115,7 @@ exports.login = async (req, res) => {
         longitude: parseFloat(staff.inst_lon),
         geofenceRadius: staff.geofence_radius,
       },
+      subscription,
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -79,23 +125,23 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { staffId, firstName, lastName, email, phone, password, department, position, memberType } = req.body;
+    const { staffId, firstName, lastName, email, phone, password, department, position, institutionCode, memberType } = req.body;
     const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
-    if (!staffId || !firstName || !lastName || !password) {
-      return res.status(400).json({ error: 'Staff ID, first name, last name, and password are required' });
+    if (!staffId || !firstName || !lastName || !password || !normalizedInstitutionCode) {
+      return res.status(400).json({ error: 'Staff ID, first name, last name, password, and institution code are required' });
     }
 
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    // Get the first institution (default)
-    const instResult = await pool.query('SELECT id FROM institutions ORDER BY created_at LIMIT 1');
-    if (instResult.rows.length === 0) {
-      return res.status(400).json({ error: 'No institution configured. Contact your administrator.' });
+    const institution = await getInstitutionByCode(normalizedInstitutionCode);
+    if (!institution) {
+      return res.status(404).json({ error: 'Invalid institution code' });
     }
-    const institutionId = instResult.rows[0].id;
+    const institutionId = institution.id;
 
     // Check if staff ID already exists
     const existing = await pool.query(
@@ -128,11 +174,23 @@ exports.register = async (req, res) => {
 
 exports.googleLogin = async (req, res) => {
   try {
-    const { googleId, email, firstName, lastName, profilePhoto, deviceId, deviceModel, osVersion, memberType } = req.body;
+    const { googleId, email, firstName, lastName, profilePhoto, institutionCode, deviceId, deviceModel, osVersion, memberType } = req.body;
     const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!googleId || !email) {
       return res.status(400).json({ error: 'Google ID and email are required' });
+    }
+
+    let institution;
+    let result;
+    let staff;
+
+    if (normalizedInstitutionCode) {
+      institution = await getInstitutionByCode(normalizedInstitutionCode);
+      if (!institution) {
+        return res.status(404).json({ error: 'Invalid institution code' });
+      }
     }
 
     // Truncate values to fit column limits safely
@@ -148,45 +206,61 @@ exports.googleLogin = async (req, res) => {
       osVersion: osVersion ? String(osVersion).slice(0, 50) : null,
     };
 
-    // Check if user exists by google_id or email
-    let result = await pool.query(
-      `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
-       FROM staff s
-       JOIN institutions i ON s.institution_id = i.id
-       WHERE (s.google_id = $1 OR s.email = $2) AND s.is_active = true`,
-      [safe.googleId, safe.email]
-    );
-
-    let staff;
-
-    if (result.rows.length === 0) {
-      // Auto-register: assign to the first institution
-      const instResult = await pool.query('SELECT id FROM institutions ORDER BY created_at LIMIT 1');
-      if (instResult.rows.length === 0) {
-        return res.status(400).json({ error: 'No institution configured. Contact your administrator.' });
-      }
-
-      const institutionId = instResult.rows[0].id;
-
-      const insertResult = await pool.query(
-        `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role, member_type)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff', $8)
-         RETURNING *`,
-        [institutionId, safe.staffId, safe.firstName, safe.lastName, safe.email, safe.googleId, safe.profilePhoto, normalizedMemberType]
-      );
-
-      // Re-fetch with institution join
+    // If institution code provided, check within that institution. Otherwise try to find an existing staff by google_id/email.
+    if (institution) {
       result = await pool.query(
         `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
          FROM staff s
          JOIN institutions i ON s.institution_id = i.id
-         WHERE s.id = $1`,
-        [insertResult.rows[0].id]
+         WHERE (s.google_id = $1 OR s.email = $2) AND s.institution_id = $3 AND s.is_active = true`,
+        [safe.googleId, safe.email, institution.id]
       );
-      staff = result.rows[0];
+
+      if (result.rows.length === 0) {
+        // Create new user under the provided institution
+        const insertResult = await pool.query(
+          `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role, member_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff', $8)
+           RETURNING *`,
+          [institution.id, safe.staffId, safe.firstName, safe.lastName, safe.email, safe.googleId, safe.profilePhoto, normalizedMemberType]
+        );
+
+        // Re-fetch with institution join
+        result = await pool.query(
+          `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+           FROM staff s
+           JOIN institutions i ON s.institution_id = i.id
+           WHERE s.id = $1`,
+          [insertResult.rows[0].id]
+        );
+        staff = result.rows[0];
+      } else {
+        staff = result.rows[0];
+        // Link google_id if not yet linked
+        if (!staff.google_id) {
+          await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [safe.googleId, staff.id]);
+        }
+      }
     } else {
+      // No institution code — try to find existing staff by google id or email across institutions
+      result = await pool.query(
+        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code
+         FROM staff s
+         JOIN institutions i ON s.institution_id = i.id
+         WHERE (s.google_id = $1 OR s.email = $2) AND s.is_active = true`,
+        [safe.googleId, safe.email]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(400).json({ error: 'No existing account found — please provide your institution code to create an account.' });
+      }
+      if (result.rows.length > 1) {
+        return res.status(400).json({ error: 'Multiple accounts found — please provide your institution code.' });
+      }
+
       staff = result.rows[0];
-      // Link google_id if not yet linked
+      institution = { id: staff.institution_id, institution_code: staff.institution_code };
+      // If google_id missing, link it
       if (!staff.google_id) {
         await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [safe.googleId, staff.id]);
       }
@@ -207,6 +281,8 @@ exports.googleLogin = async (req, res) => {
       ).catch(err => console.error('Device log error:', err.message));
     }
 
+    const subscription = await getSubscriptionPayload(staff.institution_id);
+
     res.json({
       token,
       user: {
@@ -224,6 +300,7 @@ exports.googleLogin = async (req, res) => {
         profilePhoto: staff.profile_photo_url,
       },
       institution: {
+        code: institution.institution_code,
         name: staff.institution_name,
         address: staff.inst_address,
         city: staff.inst_city,
@@ -232,6 +309,7 @@ exports.googleLogin = async (req, res) => {
         longitude: parseFloat(staff.inst_lon),
         geofenceRadius: staff.geofence_radius,
       },
+      subscription,
     });
   } catch (err) {
     console.error('Google login error:', err);
@@ -270,20 +348,26 @@ exports.changePassword = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    const { staffId, email, newPassword, memberType } = req.body;
+    const { staffId, email, newPassword, institutionCode, memberType } = req.body;
     const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
-    if (!staffId || !email || !newPassword) {
-      return res.status(400).json({ error: 'Staff ID, email, and new password are required' });
+    if (!staffId || !email || !newPassword || !normalizedInstitutionCode) {
+      return res.status(400).json({ error: 'Staff ID, email, new password, and institution code are required' });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
+    const institution = await getInstitutionByCode(normalizedInstitutionCode);
+    if (!institution) {
+      return res.status(404).json({ error: 'Invalid institution code' });
+    }
+
     const result = await pool.query(
-      'SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND member_type = $3 AND is_active = true',
-      [staffId.toUpperCase(), email.toLowerCase().trim(), normalizedMemberType]
+      'SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND member_type = $3 AND institution_id = $4 AND is_active = true',
+      [staffId.toUpperCase(), email.toLowerCase().trim(), normalizedMemberType, institution.id]
     );
 
     if (result.rows.length === 0) {
@@ -304,7 +388,12 @@ exports.refreshToken = async (req, res) => {
   try {
     const staff = req.user;
     const token = jwt.sign(
-      { userId: staff.userId || staff.id, role: staff.role, institutionId: staff.institutionId },
+      {
+        userId: staff.userId || staff.id,
+        role: staff.role,
+        institutionId: staff.institution_id || staff.institutionId,
+        memberType: staff.member_type || staff.memberType,
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );

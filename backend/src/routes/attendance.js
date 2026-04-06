@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const attendanceController = require('../controllers/attendanceController');
 const { authenticate } = require('../middleware/auth');
+const { requireActiveSubscription } = require('../middleware/subscription');
 
-router.use(authenticate);
+router.use(authenticate, requireActiveSubscription);
 
 router.post('/check-in', attendanceController.checkIn);
 router.post('/check-out', attendanceController.checkOut);

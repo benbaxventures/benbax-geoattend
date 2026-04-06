@@ -26,7 +26,7 @@ const actionColors = {
 const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
   title: { fontSize: '24px', fontWeight: '700' },
-  grid: { display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px' },
+  grid: { display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px', alignItems: 'flex-start' },
   card: { background: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   filters: { display: 'flex', gap: '12px', marginBottom: '16px' },
   select: { padding: '8px 14px', border: '1px solid #e0e0e0', borderRadius: '8px', background: '#fff', fontSize: '14px' },
@@ -43,6 +43,7 @@ export default function AuditLog() {
   const [logs, setLogs] = useState([]);
   const [schedulerJobs, setSchedulerJobs] = useState([]);
   const [actionFilter, setActionFilter] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
 
   useEffect(() => {
     getAuditLogs({ action: actionFilter || undefined })
@@ -53,13 +54,22 @@ export default function AuditLog() {
       .catch(() => {});
   }, [actionFilter]);
 
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 900);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   return (
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>Audit Log & Automation</h1>
       </div>
 
-      <div style={{ ...styles.grid, '@media (max-width: 900px)': { gridTemplateColumns: '1fr' } }}>
+      <div style={{
+        ...styles.grid,
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 300px',
+      }}>
         {/* Audit Logs */}
         <div style={styles.card}>
           <h3 style={{ margin: '0 0 16px', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>

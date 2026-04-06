@@ -40,6 +40,7 @@
     "extra": {
       "GOOGLE_ANDROID_CLIENT_ID": "725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com",
       "GOOGLE_WEB_CLIENT_ID": "725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com",
+      "API_BASE_URL": "https://geofence-app-jjpa.onrender.com/api",
       "eas": {
         "projectId": "4a453cbb-ffe6-48dc-9c41-a1ca2c3866b8"
       }

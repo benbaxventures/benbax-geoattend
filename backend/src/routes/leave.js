@@ -2,8 +2,9 @@ const router = require('express').Router();
 const leaveController = require('../controllers/leaveController');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { auditMiddleware } = require('../middleware/audit');
+const { requireActiveSubscription } = require('../middleware/subscription');
 
-router.use(authenticate);
+router.use(authenticate, requireActiveSubscription);
 
 // Staff routes
 router.post('/', leaveController.requestLeave);

@@ -2,8 +2,9 @@ const router = require('express').Router();
 const staffController = require('../controllers/staffController');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { auditMiddleware } = require('../middleware/audit');
+const { requireActiveSubscription } = require('../middleware/subscription');
 
-router.use(authenticate, requireAdmin);
+router.use(authenticate, requireActiveSubscription, requireAdmin);
 
 router.get('/', staffController.getAllStaff);
 router.get('/departments', staffController.getDepartments);

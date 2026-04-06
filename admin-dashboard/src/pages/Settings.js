@@ -5,7 +5,7 @@ import { getInstitution, updateInstitution, getAttendanceRules, updateAttendance
 
 const styles = {
   title: { fontSize: '24px', fontWeight: '700', marginBottom: '24px' },
-  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', maxWidth: '900px' },
+  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', maxWidth: '900px', alignItems: 'flex-start' },
   card: { background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   cardTitle: { fontSize: '16px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' },
   field: { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' },
@@ -44,6 +44,7 @@ export default function Settings() {
   const [rules, setRules] = useState({ work_start_time: '08:00', work_end_time: '17:00', late_threshold_minutes: 15, early_departure_minutes: 30, working_days: [1,2,3,4,5] });
   const [gettingLocation, setGettingLocation] = useState(false);
   const [rulesMemberType, setRulesMemberType] = useState('staff');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -100,6 +101,12 @@ export default function Settings() {
     getAttendanceRules({ memberType: rulesMemberType }).then(r => { if (r.data && r.data.id) setRules(r.data); }).catch(() => {});
   }, [rulesMemberType]);
 
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 900);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   const saveInstitution = async () => {
     try {
       await updateInstitution({
@@ -138,7 +145,7 @@ export default function Settings() {
     <div>
       <h1 style={styles.title}>Settings</h1>
 
-      <div style={styles.grid}>
+      <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
         <div style={styles.card}>
           <h3 style={styles.cardTitle}><FiMapPin size={18} /> Institution & Geofence</h3>
           <div style={styles.field}>

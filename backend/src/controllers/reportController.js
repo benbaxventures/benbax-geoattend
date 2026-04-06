@@ -47,6 +47,87 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
+exports.getTodaySummary = async (req, res) => {
+  try {
+    const institutionId = req.user.institution_id;
+    const today = new Date().toISOString().split('T')[0];
+    const memberType = (req.query.memberType || 'staff').toLowerCase();
+
+    const [presentToday, lateToday, absentToday] = await Promise.all([
+      pool.query(
+        `SELECT COUNT(DISTINCT ar.staff_uuid)
+         FROM attendance_records ar
+         JOIN staff s ON s.id = ar.staff_uuid
+         WHERE ar.institution_id = $1 AND ar.date = $2 AND s.member_type = $3`,
+        [institutionId, today, memberType]
+      ),
+      pool.query(
+        `SELECT COUNT(DISTINCT ar.staff_uuid)
+         FROM attendance_records ar
+         JOIN staff s ON s.id = ar.staff_uuid
+         WHERE ar.institution_id = $1 AND ar.date = $2 AND ar.is_late = true AND s.member_type = $3`,
+        [institutionId, today, memberType]
+      ),
+      pool.query(
+        `SELECT COUNT(*)
+         FROM staff s
+         WHERE s.institution_id = $1 AND s.member_type = $3 AND s.is_active = true
+           AND s.id NOT IN (
+             SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2
+           )`,
+        [institutionId, today, memberType]
+      ),
+    ]);
+
+    res.json({
+      date: today,
+      memberType,
+      present: parseInt(presentToday.rows[0].count, 10),
+      late: parseInt(lateToday.rows[0].count, 10),
+      absent: parseInt(absentToday.rows[0].count, 10),
+    });
+  } catch (err) {
+    console.error('Today summary error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getFraudReport = async (req, res) => {
+  try {
+    const institutionId = req.user.institution_id;
+    const { startDate, endDate, page = 1, limit = 100 } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = `
+      SELECT f.*, s.staff_id, s.first_name, s.last_name, s.member_type
+      FROM fraud_events f
+      LEFT JOIN staff s ON s.id = f.staff_uuid
+      WHERE f.institution_id = $1`;
+    const params = [institutionId];
+    let i = 2;
+
+    if (startDate) {
+      query += ` AND DATE(f.created_at) >= $${i}`;
+      params.push(startDate);
+      i++;
+    }
+    if (endDate) {
+      query += ` AND DATE(f.created_at) <= $${i}`;
+      params.push(endDate);
+      i++;
+    }
+
+    query += ` ORDER BY f.created_at DESC LIMIT $${i} OFFSET $${i + 1}`;
+    params.push(parseInt(limit, 10), parseInt(offset, 10));
+
+    const result = await pool.query(query, params);
+    res.json({ events: result.rows, page: parseInt(page, 10), limit: parseInt(limit, 10) });
+  } catch (err) {
+    console.error('Fraud report error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 exports.getAttendanceReport = async (req, res) => {
   try {
     const { startDate, endDate, department, staffId, page = 1, limit = 50, memberType = 'staff' } = req.query;
@@ -124,6 +205,77 @@ exports.getRealTimeAttendance = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('Real-time attendance error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getGeofenceEvents = async (req, res) => {
+  try {
+    const institutionId = req.user.institution_id;
+    const {
+      startDate,
+      endDate,
+      department,
+      memberType = 'staff',
+      onlyExits = 'true',
+      page = 1,
+      limit = 100,
+    } = req.query;
+    const mt = String(memberType).toLowerCase();
+    const offset = (page - 1) * limit;
+
+    const params = [institutionId];
+    let i = 2;
+    let where = 'g.institution_id = $1';
+
+    if (startDate) {
+      where += ` AND DATE(g.created_at) >= $${i}`;
+      params.push(startDate);
+      i++;
+    }
+    if (endDate) {
+      where += ` AND DATE(g.created_at) <= $${i}`;
+      params.push(endDate);
+      i++;
+    }
+    if (onlyExits === 'true') {
+      where += ` AND g.event = 'exit'`;
+    }
+
+    where += ` AND s.member_type = $${i}`;
+    params.push(mt);
+    i++;
+
+    if (department) {
+      where += ` AND s.department = $${i}`;
+      params.push(department);
+      i++;
+    }
+
+    const query = `
+      SELECT
+        g.*,
+        s.staff_id,
+        s.first_name,
+        s.last_name,
+        s.department,
+        s.member_type
+      FROM geofence_events g
+      JOIN staff s ON s.id = g.staff_uuid
+      WHERE ${where}
+      ORDER BY g.created_at DESC
+      LIMIT $${i} OFFSET $${i + 1}
+    `;
+    params.push(parseInt(limit, 10), parseInt(offset, 10));
+
+    const result = await pool.query(query, params);
+    res.json({
+      events: result.rows,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  } catch (err) {
+    console.error('Geofence events report error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

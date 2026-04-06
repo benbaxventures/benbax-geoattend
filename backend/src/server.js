@@ -12,6 +12,7 @@ const institutionRoutes = require('./routes/institution');
 const reportRoutes = require('./routes/reports');
 const leaveRoutes = require('./routes/leave');
 const analyticsRoutes = require('./routes/analytics');
+const geofenceRoutes = require('./routes/geofence');
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use('/api/institutions', institutionRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/leave', leaveRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/geofence', geofenceRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -121,6 +123,53 @@ async function runAutoMigration() {
       entity_id VARCHAR(255), details JSONB, performed_by VARCHAR(255) NOT NULL,
       ip_address VARCHAR(45), created_at TIMESTAMP DEFAULT NOW()
     )`,
+    `CREATE TABLE IF NOT EXISTS fraud_events (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+      staff_uuid UUID REFERENCES staff(id) ON DELETE SET NULL,
+      event_type VARCHAR(50) NOT NULL,
+      details JSONB,
+      ip_address VARCHAR(45),
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS geofence_events (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+      staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+      event VARCHAR(10) NOT NULL CHECK (event IN ('enter','exit')),
+      latitude DECIMAL(10, 8),
+      longitude DECIMAL(11, 8),
+      distance_m INTEGER,
+      radius_m INTEGER,
+      created_at TIMESTAMP DEFAULT NOW(),
+      resolved_at TIMESTAMP,
+      notes TEXT
+    )`,
+    `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS institution_code VARCHAR(30)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS ux_institutions_code ON institutions(institution_code)`,
+    `UPDATE institutions
+     SET institution_code = UPPER('INST-' || SUBSTRING(REPLACE(id::text, '-', '') FROM 1 FOR 6))
+     WHERE institution_code IS NULL`,
+    `CREATE TABLE IF NOT EXISTS subscriptions (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+      plan_name VARCHAR(100) NOT NULL DEFAULT 'trial',
+      status VARCHAR(20) NOT NULL DEFAULT 'trialing' CHECK (status IN ('trialing', 'active', 'past_due', 'cancelled')),
+      trial_start TIMESTAMP,
+      trial_end TIMESTAMP,
+      current_period_end TIMESTAMP,
+      payment_reference VARCHAR(255),
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_subscriptions_institution ON subscriptions(institution_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)`,
+    `INSERT INTO subscriptions (institution_id, plan_name, status, trial_start, trial_end)
+     SELECT i.id, 'trial', 'trialing', NOW(), NOW() + INTERVAL '28 days'
+     FROM institutions i
+     WHERE NOT EXISTS (
+       SELECT 1 FROM subscriptions s WHERE s.institution_id = i.id
+     )`,
     `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotation_token VARCHAR(255)`,
     `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotated_at TIMESTAMP`,
   ];

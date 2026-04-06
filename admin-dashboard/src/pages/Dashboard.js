@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Line, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { FiUsers, FiUserCheck, FiClock, FiUserX } from 'react-icons/fi';
-import { getDashboardStats, getWeeklySummary } from '../services/api';
+import { getDashboardStats, getWeeklySummary, getTodaySummary } from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler);
 
@@ -58,12 +58,15 @@ function useIsMobile(breakpoint = 768) {
 export default function Dashboard() {
   const [stats, setStats] = useState({ totalStaff: 0, presentToday: 0, lateToday: 0, absentToday: 0 });
   const [weekly, setWeekly] = useState([]);
+  const [todaySummary, setTodaySummary] = useState({ present: 0, late: 0, absent: 0 });
+  const [memberType, setMemberType] = useState('staff');
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    getDashboardStats().then(r => setStats(r.data)).catch(() => {});
-    getWeeklySummary().then(r => setWeekly(r.data)).catch(() => {});
-  }, []);
+    getDashboardStats({ memberType }).then(r => setStats(r.data)).catch(() => {});
+    getWeeklySummary({ memberType }).then(r => setWeekly(r.data)).catch(() => {});
+    getTodaySummary({ memberType }).then(r => setTodaySummary(r.data)).catch(() => {});
+  }, [memberType]);
 
   const statValues = [stats.totalStaff, stats.presentToday, stats.lateToday, stats.absentToday];
 
@@ -102,7 +105,22 @@ export default function Dashboard() {
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>Dashboard</h1>
+        <div style={{ marginTop: 8 }}>
+          <select value={memberType} onChange={(e) => setMemberType(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e0e0e0', background: '#fff' }}>
+            <option value="staff">Staff</option>
+            <option value="student">Student</option>
+          </select>
+        </div>
         <p style={styles.date}>{new Date().toLocaleDateString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      </div>
+
+      <div style={{ background: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Today Summary ({memberType})</h3>
+        <div style={{ display: 'flex', gap: 16, fontSize: 15 }}>
+          <span><strong>{todaySummary.present || 0}</strong> present</span>
+          <span><strong>{todaySummary.late || 0}</strong> late</span>
+          <span><strong>{todaySummary.absent || 0}</strong> absent</span>
+        </div>
       </div>
 
       <div style={styles.statsGrid}>

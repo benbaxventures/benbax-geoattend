@@ -10,6 +10,7 @@ import StaffForm from './pages/StaffForm';
 import AttendanceMonitor from './pages/AttendanceMonitor';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Billing from './pages/Billing';
 import LeaveManagement from './pages/LeaveManagement';
 import Analytics from './pages/Analytics';
 import AuditLog from './pages/AuditLog';
@@ -52,7 +53,9 @@ function App() {
     marginLeft: isMobile ? 0 : '250px',
     minHeight: '100vh',
     width: isMobile ? '100%' : undefined,
-    overflow: 'hidden',
+    overflowX: 'auto',
+    overflowY: 'auto',
+    boxSizing: 'border-box',
   }), [isMobile]);
 
   if (loading) return null;
@@ -87,6 +90,7 @@ function App() {
             <Route path="/leave" element={<LeaveManagement />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/audit" element={<AuditLog />} />
+            <Route path="/billing" element={<Billing />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

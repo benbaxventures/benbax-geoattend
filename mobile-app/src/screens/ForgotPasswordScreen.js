@@ -7,6 +7,7 @@ import { forgotPassword } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ForgotPasswordScreen({ navigation }) {
+  const [institutionCode, setInstitutionCode] = useState('');
   const [staffId, setStaffId] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -21,8 +22,14 @@ export default function ForgotPasswordScreen({ navigation }) {
     }).catch(() => setMemberType('staff'));
   }, []);
 
+  React.useEffect(() => {
+    AsyncStorage.getItem('institutionCode').then((code) => {
+      if (code) setInstitutionCode(String(code).toUpperCase());
+    }).catch(() => {});
+  }, []);
+
   const handleReset = async () => {
-    if (!staffId.trim() || !email.trim() || !newPassword || !confirmPassword) {
+    if (!institutionCode.trim() || !staffId.trim() || !email.trim() || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -43,6 +50,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         staffId.trim().toUpperCase(),
         email.trim().toLowerCase(),
         newPassword,
+        institutionCode.trim().toUpperCase(),
         memberType
       );
       Alert.alert('Success', data.message, [
@@ -69,6 +77,18 @@ export default function ForgotPasswordScreen({ navigation }) {
         </View>
 
         <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Institution Code</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. INST-123456"
+              value={institutionCode}
+              onChangeText={(v) => setInstitutionCode(v.toUpperCase())}
+              autoCapitalize="characters"
+              placeholderTextColor="#bdc3c7"
+            />
+          </View>
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</Text>
             <TextInput

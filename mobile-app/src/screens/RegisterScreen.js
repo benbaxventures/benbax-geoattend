@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({
     staffId: '', firstName: '', lastName: '', email: '', phone: '',
-    password: '', confirmPassword: '', department: '', position: '',
+    password: '', confirmPassword: '', department: '', position: '', institutionCode: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,15 +19,19 @@ export default function RegisterScreen({ navigation }) {
     AsyncStorage.getItem('memberType').then((mt) => {
       setMemberType(mt === 'student' ? 'student' : 'staff');
     }).catch(() => setMemberType('staff'));
+
+    AsyncStorage.getItem('institutionCode').then((code) => {
+      if (code) update('institutionCode', String(code).toUpperCase());
+    }).catch(() => {});
   }, []);
 
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   const handleRegister = async () => {
-    const { staffId, firstName, lastName, password, confirmPassword } = form;
+    const { institutionCode, staffId, firstName, lastName, password, confirmPassword } = form;
 
-    if (!staffId.trim() || !firstName.trim() || !lastName.trim() || !password) {
-      Alert.alert('Error', 'Please fill in Staff ID, First Name, Last Name, and Password');
+    if (!institutionCode.trim() || !staffId.trim() || !firstName.trim() || !lastName.trim() || !password) {
+      Alert.alert('Error', 'Please fill in Institution Code, Staff ID, First Name, Last Name, and Password');
       return;
     }
     if (password.length < 6) {
@@ -43,6 +47,7 @@ export default function RegisterScreen({ navigation }) {
     try {
       const { data } = await api.post('/auth/register', {
         staffId: staffId.trim().toUpperCase(),
+        institutionCode: institutionCode.trim().toUpperCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: form.email.trim() || undefined,
@@ -73,6 +78,18 @@ export default function RegisterScreen({ navigation }) {
           </Text>
 
           <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Institution Code *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. INST-123456"
+                value={form.institutionCode}
+                onChangeText={v => update('institutionCode', v.toUpperCase())}
+                autoCapitalize="characters"
+                placeholderTextColor="#bdc3c7"
+              />
+            </View>
+
             <View style={styles.row}>
               <View style={[styles.inputContainer, { flex: 1 }]}>
                 <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'} *</Text>

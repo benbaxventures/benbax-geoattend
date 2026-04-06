@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const pool = require('../config/database');
 const { sendAbsenceAlert, sendDailySummary, sendWeeklySummary, sendAutoSuspendNotice } = require('./emailService');
-const { sendAbsentAlert } = require('./smsService');
+const { sendAbsentAlert, sendStudentAbsentAlertToGuardian } = require('./smsService');
 
 // ─── AUTO CHECK-OUT ─────────────────────────────────────────────────────────
 // Runs every day at the institution's work_end_time (default: 5:30 PM)
@@ -63,11 +63,11 @@ async function detectAbsences() {
       const workingDays = inst.working_days || [1, 2, 3, 4, 5];
       if (!workingDays.includes(dayOfWeek)) continue;
 
-      // Find active members who haven't checked in today and don't have approved leave
+      // Find active staff who haven't checked in today and don't have approved leave
       const absent = await pool.query(`
         SELECT s.id, s.staff_id, s.first_name, s.last_name, s.department, s.email, s.phone
         FROM staff s
-        WHERE s.institution_id = $1 AND s.is_active = true
+        WHERE s.institution_id = $1 AND s.member_type IN ('staff','lecturer') AND s.is_active = true
           AND s.id NOT IN (SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2)
           AND s.id NOT IN (
             SELECT staff_uuid FROM leave_requests
@@ -102,7 +102,26 @@ async function detectAbsences() {
         }
       }
 
-      console.log(`[Scheduler] ${absent.rows.length} absence(s) detected for ${inst.name}`);
+      // Parent notifications for absent students
+      const absentStudents = await pool.query(`
+        SELECT s.id, s.staff_id, s.first_name, s.last_name
+        FROM staff s
+        WHERE s.institution_id = $1 AND s.member_type = 'student' AND s.is_active = true
+          AND s.id NOT IN (SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2)
+      `, [inst.id, todayDate]);
+
+      for (const student of absentStudents.rows) {
+        const guardians = await pool.query(
+          `SELECT phone FROM guardians WHERE student_id = $1 AND phone IS NOT NULL AND notify_on_absence = true`,
+          [student.id]
+        );
+        const studentName = `${student.first_name} ${student.last_name}`;
+        for (const g of guardians.rows) {
+          await sendStudentAbsentAlertToGuardian(g.phone, studentName, todayDate);
+        }
+      }
+
+      console.log(`[Scheduler] ${absent.rows.length} staff absence(s), ${absentStudents.rows.length} student absence(s) for ${inst.name}`);
     }
   } catch (err) {
     console.error('[Scheduler] Absence detection error:', err.message);

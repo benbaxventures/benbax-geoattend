@@ -8,6 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS institutions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL,
+  institution_code VARCHAR(30) UNIQUE,
   address TEXT,
   city VARCHAR(100),
   region VARCHAR(100),
@@ -19,6 +20,13 @@ CREATE TABLE IF NOT EXISTS institutions (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Backfill institution codes for existing rows
+UPDATE institutions
+SET institution_code = UPPER('INST-' || SUBSTRING(REPLACE(id::text, '-', '') FROM 1 FOR 6))
+WHERE institution_code IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_institutions_code ON institutions(institution_code);
 
 -- Staff table
 CREATE TABLE IF NOT EXISTS staff (
@@ -60,6 +68,31 @@ CREATE TABLE IF NOT EXISTS attendance_records (
   notes TEXT,
   date DATE NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Subscriptions table (trial and paid access control)
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  plan_name VARCHAR(100) NOT NULL DEFAULT 'trial',
+  status VARCHAR(20) NOT NULL DEFAULT 'trialing' CHECK (status IN ('trialing', 'active', 'past_due', 'cancelled')),
+  trial_start TIMESTAMP,
+  trial_end TIMESTAMP,
+  current_period_end TIMESTAMP,
+  payment_reference VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_institution ON subscriptions(institution_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
+
+-- Ensure every institution has at least one subscription row (default trial)
+INSERT INTO subscriptions (institution_id, plan_name, status, trial_start, trial_end)
+SELECT i.id, 'trial', 'trialing', NOW(), NOW() + INTERVAL '28 days'
+FROM institutions i
+WHERE NOT EXISTS (
+  SELECT 1 FROM subscriptions s WHERE s.institution_id = i.id
 );
 
 -- Attendance rules table
@@ -162,6 +195,17 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Fraud / suspicious activity events
+CREATE TABLE IF NOT EXISTS fraud_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  staff_uuid UUID REFERENCES staff(id) ON DELETE SET NULL,
+  event_type VARCHAR(50) NOT NULL,
+  details JSONB,
+  ip_address VARCHAR(45),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- QR code rotation support
 ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotation_token VARCHAR(255);
 ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotated_at TIMESTAMP;
@@ -182,6 +226,9 @@ CREATE INDEX IF NOT EXISTS idx_overtime_date ON overtime_records(date);
 CREATE INDEX IF NOT EXISTS idx_audit_institution ON audit_logs(institution_id);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_fraud_institution ON fraud_events(institution_id);
+CREATE INDEX IF NOT EXISTS idx_fraud_type ON fraud_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_fraud_created ON fraud_events(created_at);
 
 -- ========== COURSES & LECTURES ==========
 
@@ -294,6 +341,25 @@ CREATE INDEX IF NOT EXISTS idx_lecture_attendance_student ON lecture_attendance(
 CREATE INDEX IF NOT EXISTS idx_lecture_instances_date ON lecture_instances(date);
 CREATE INDEX IF NOT EXISTS idx_lecture_instances_course ON lecture_instances(course_id);
 CREATE INDEX IF NOT EXISTS idx_guardians_student ON guardians(student_id);
+
+-- ========== GEOFENCE EVENTS ==========
+
+CREATE TABLE IF NOT EXISTS geofence_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  staff_uuid UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+  event VARCHAR(10) NOT NULL CHECK (event IN ('enter','exit')),
+  latitude DECIMAL(10, 8),
+  longitude DECIMAL(11, 8),
+  distance_m INTEGER,
+  radius_m INTEGER,
+  created_at TIMESTAMP DEFAULT NOW(),
+  resolved_at TIMESTAMP,
+  notes TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_geofence_staff_date ON geofence_events(staff_uuid, created_at);
+CREATE INDEX IF NOT EXISTS idx_geofence_institution_date ON geofence_events(institution_id, created_at);
 `;
 
 async function runMigration() {
