@@ -89,6 +89,32 @@ exports.createInstitution = async (req, res) => {
       [id, name, institutionCode, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
     );
 
+    // Some DB setups or triggers may null out the institution_code; ensure it's present
+    let created = result.rows[0];
+    if (!created.institution_code) {
+      // generate a unique code and update the row
+      const newCode = await generateInstitutionCode();
+      try {
+        const upd = await pool.query(
+          `UPDATE institutions SET institution_code = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+          [newCode, id]
+        );
+        if (upd.rows.length > 0) created = upd.rows[0];
+        // Immediately re-query to verify
+        const verify = await pool.query('SELECT institution_code FROM institutions WHERE id = $1', [id]);
+        console.log('Institution code after update:', verify.rows[0]?.institution_code);
+      } catch (e) {
+        console.error('Failed to set institution_code after create:', e.message || e);
+      }
+    }
+    // Ensure we return the latest persisted row (in case triggers/updates modified it)
+    try {
+      const fresh = await pool.query('SELECT * FROM institutions WHERE id = $1', [id]);
+      if (fresh.rows.length > 0) created = fresh.rows[0];
+    } catch (e) {
+      console.error('Failed to re-query institution after create:', e.message || e);
+    }
+
     // Create default attendance rules
     await pool.query(
       `INSERT INTO attendance_rules (institution_id, member_type)
@@ -99,9 +125,35 @@ exports.createInstitution = async (req, res) => {
 
     await ensureTrialSubscription(id);
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(created);
   } catch (err) {
     console.error('Create institution error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.repairInstitutionCode = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Institution id is required' });
+
+    const existing = await pool.query('SELECT id, institution_code FROM institutions WHERE id = $1', [id]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
+    }
+    if (existing.rows[0].institution_code) {
+      return res.json({ message: 'Institution already has a code', institution: existing.rows[0] });
+    }
+
+    const code = await generateInstitutionCode();
+    const updated = await pool.query(
+      'UPDATE institutions SET institution_code = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [code, id]
+    );
+
+    res.json({ message: 'Institution code repaired', institution: updated.rows[0] });
+  } catch (err) {
+    console.error('Repair institution code error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

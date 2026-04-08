@@ -54,6 +54,7 @@ export const getAttendanceRules = (params) => api.get('/institutions/rules', { p
 export const updateAttendanceRules = (data, params) => api.put('/institutions/rules', data, { params });
 export const createInstitution = (data) => api.post('/institutions', data);
 export const getAllInstitutions = () => api.get('/institutions');
+export const repairInstitutionCode = (id) => api.post(`/institutions/${id}/repair-code`);
 // Subscriptions / Billing
 export const getSubscriptionStatus = () => api.get('/institutions/subscription');
 export const activateSubscription = (data) => api.post('/institutions/subscription/activate', data);

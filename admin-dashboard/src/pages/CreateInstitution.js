@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { createInstitution, getAllInstitutions } from '../services/api';
+import { createInstitution, getAllInstitutions, repairInstitutionCode } from '../services/api';
 
 const styles = {
   container: { maxWidth: 760, margin: '0 auto' },
@@ -33,16 +33,34 @@ export default function CreateInstitution() {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (raw) {
         const d = JSON.parse(raw);
-        if (d) {
-          setName(d.name || '');
-          setAddress(d.address || '');
-          setCity(d.city || '');
-          setRegion(d.region || '');
-          setLatitude(d.latitude || '');
-          setLongitude(d.longitude || '');
-          setGeofenceRadius(d.geofenceRadius || 200);
-          toast.info('Draft restored for Create Institution');
-          setHasDraft(true);
+        if (d && typeof d === 'object') {
+          const restored = {
+            name: String(d.name ?? '').trim(),
+            address: String(d.address ?? '').trim(),
+            city: String(d.city ?? '').trim(),
+            region: String(d.region ?? '').trim(),
+            latitude: d.latitude === null || d.latitude === undefined ? '' : String(d.latitude),
+            longitude: d.longitude === null || d.longitude === undefined ? '' : String(d.longitude),
+            geofenceRadius: Number.isFinite(Number(d.geofenceRadius)) ? Number(d.geofenceRadius) : 200,
+          };
+
+          const hasAny =
+            !!(restored.name || restored.address || restored.city || restored.region || restored.latitude || restored.longitude);
+
+          if (hasAny) {
+            setName(restored.name);
+            setAddress(restored.address);
+            setCity(restored.city);
+            setRegion(restored.region);
+            setLatitude(restored.latitude);
+            setLongitude(restored.longitude);
+            setGeofenceRadius(restored.geofenceRadius);
+            toast.info('Draft restored for Create Institution');
+            setHasDraft(true);
+          } else {
+            // If the stored draft is empty, don't show "restored" messaging.
+            setHasDraft(false);
+          }
         }
       }
     } catch (e) {
@@ -75,6 +93,16 @@ export default function CreateInstitution() {
           if (found) inst = found;
         } catch (e) {
           // ignore fetch errors
+        }
+      }
+      // Still missing code? Try repairing it (super_admin only).
+      if (!inst.institution_code && inst.id) {
+        try {
+          const repaired = await repairInstitutionCode(inst.id);
+          const repairedInst = repaired?.data?.institution;
+          if (repairedInst) inst = repairedInst;
+        } catch (e) {
+          // ignore repair errors; raw response will still show for debugging
         }
       }
       setCreated(inst);
