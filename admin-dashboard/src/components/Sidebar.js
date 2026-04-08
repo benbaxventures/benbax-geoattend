@@ -122,6 +122,22 @@ export default function Sidebar({ user, onLogout }) {
     ...styles.sidebar,
     ...(isMobile ? { transform: open ? 'translateX(0)' : 'translateX(-100%)' } : {}),
   };
+  // Build nav items; add "Request Leave" for non-admin roles
+  const finalNavItems = [...navItems];
+  if (user && user.role && user.role.toLowerCase() !== 'admin') {
+    // insert near Leave
+    const insertIndex = finalNavItems.findIndex(i => i.path === '/leave');
+    const item = { path: '/request-leave', label: 'Request Leave', icon: FiCalendar };
+    if (insertIndex >= 0) finalNavItems.splice(insertIndex + 1, 0, item);
+    else finalNavItems.push(item);
+  }
+
+  // Add Create Institution link for super_admin only
+  if (user && user.role && user.role.toLowerCase() === 'super_admin') {
+    const instItem = { path: '/institutions/new', label: 'Create Institution', icon: FiMapPin };
+    // place near top after Dashboard
+    finalNavItems.splice(1, 0, instItem);
+  }
 
   return (
     <>
@@ -140,7 +156,7 @@ export default function Sidebar({ user, onLogout }) {
         </div>
 
         <nav style={styles.nav}>
-          {navItems.map(({ path, label, icon: Icon }) => (
+          {finalNavItems.map(({ path, label, icon: Icon }) => (
             <NavLink
               key={path}
               to={path}

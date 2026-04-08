@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Introspected schema placeholder - run `npx prisma db pull` to populate
+// Basic models reflecting common tables used by the app.
+
+model Staff {
+  id            String   @id
+  institution_id String
+  staff_id      String
+  first_name    String?
+  last_name     String?
+  email         String?
+  password_hash String?
+  role          String?
+  member_type   String?
+  is_active     Boolean?
+  leaveRequests LeaveRequest[] @relation("StaffLeaves")
+}
+
+model Institution {
+  id               String   @id
+  institution_code String
+  name             String
+  geofence_radius  Int?
+  latitude         Float?
+  longitude        Float?
+  leaveRequests    LeaveRequest[] @relation("InstitutionLeaves")
+}
+
+model LeaveRequest {
+  id             Int       @id @default(autoincrement())
+  staff_uuid     String
+  institution_id String
+  leave_type     String?
+  start_date     DateTime
+  end_date       DateTime
+  reason         String?
+  status         String?   @default("pending")
+  reviewed_by    String?
+  review_note    String?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  reviewed_at    DateTime?
+
+  staff          Staff?    @relation("StaffLeaves", fields: [staff_uuid], references: [id])
+  institution    Institution? @relation("InstitutionLeaves", fields: [institution_id], references: [id])
+}

@@ -21,6 +21,7 @@ import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import AccountTypeScreen from './src/screens/AccountTypeScreen';
+import LeaveRequestScreen from './src/screens/LeaveRequestScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -154,6 +155,7 @@ export default function App() {
               </>
             )
           )}
+          {isLoggedIn && <Stack.Screen name="LeaveRequest" component={LeaveRequestScreen} />}
         </Stack.Navigator>
       </NavigationContainer>
       </ToastProvider>

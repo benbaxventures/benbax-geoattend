@@ -1,4 +1,11 @@
 const pool = require('../config/database');
+let prisma;
+try {
+  prisma = require('../prismaClient');
+} catch (e) {
+  // Prisma not available; fallback to raw SQL pool
+  prisma = null;
+}
 
 // Staff: request leave
 exports.requestLeave = async (req, res) => {
@@ -19,7 +26,36 @@ exports.requestLeave = async (req, res) => {
       return res.status(400).json({ error: 'Cannot request leave for past dates' });
     }
 
-    // Check for overlapping leave requests
+    // Check for overlapping leave requests and insert (use Prisma when available)
+    if (prisma) {
+      const overlap = await prisma.leave_requests.findFirst({
+        where: {
+          staff_uuid: staffUuid,
+          status: { in: ['pending', 'approved'] },
+          AND: [
+            { start_date: { lte: new Date(endDate) } },
+            { end_date: { gte: new Date(startDate) } }
+          ]
+        }
+      });
+
+      if (overlap) return res.status(400).json({ error: 'You already have a leave request for these dates' });
+
+      const created = await prisma.leave_requests.create({
+        data: {
+          staff_uuid: staffUuid,
+          institution_id: institutionId,
+          leave_type: leaveType || 'personal',
+          start_date: new Date(startDate),
+          end_date: new Date(endDate),
+          reason: reason || null,
+        }
+      });
+
+      return res.status(201).json(created);
+    }
+
+    // fallback: raw SQL
     const overlap = await pool.query(
       `SELECT id FROM leave_requests
        WHERE staff_uuid = $1 AND status IN ('pending', 'approved')
@@ -48,6 +84,17 @@ exports.requestLeave = async (req, res) => {
 // Staff: get my leave requests
 exports.getMyLeaves = async (req, res) => {
   try {
+    if (prisma) {
+      const rows = await prisma.leave_requests.findMany({
+        where: { staff_uuid: req.user.id },
+        orderBy: { created_at: 'desc' },
+        include: {
+          // reviewer fields via manual join are not available automatically; use $queryRaw for complex joins
+        }
+      });
+      return res.json(rows);
+    }
+
     const result = await pool.query(
       `SELECT lr.*, s.first_name as reviewer_first_name, s.last_name as reviewer_last_name
        FROM leave_requests lr
@@ -66,6 +113,16 @@ exports.getMyLeaves = async (req, res) => {
 // Staff: cancel own pending leave
 exports.cancelLeave = async (req, res) => {
   try {
+    if (prisma) {
+      const updated = await prisma.leave_requests.updateMany({
+        where: { id: Number(req.params.id), staff_uuid: req.user.id, status: 'pending' },
+        data: { status: 'cancelled', updated_at: new Date() }
+      });
+      if (updated.count === 0) return res.status(404).json({ error: 'Leave request not found or cannot be cancelled' });
+      const row = await prisma.leave_requests.findUnique({ where: { id: Number(req.params.id) } });
+      return res.json(row);
+    }
+
     const result = await pool.query(
       `UPDATE leave_requests SET status = 'cancelled', updated_at = NOW()
        WHERE id = $1 AND staff_uuid = $2 AND status = 'pending'
@@ -110,6 +167,20 @@ exports.getAllLeaves = async (req, res) => {
     query += ` ORDER BY lr.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(parseInt(limit, 10), parseInt(offset, 10));
 
+    if (prisma) {
+      const where = { institution_id: institutionId };
+      if (status) where.status = status;
+
+      const leaves = await prisma.leave_requests.findMany({
+        where,
+        orderBy: { created_at: 'desc' },
+        take: parseInt(limit, 10),
+        skip: parseInt(offset, 10),
+      });
+      const total = await prisma.leave_requests.count({ where });
+      return res.json({ leaves, total, page: parseInt(page, 10), limit: parseInt(limit, 10) });
+    }
+
     const result = await pool.query(query, params);
 
     const countQuery = `SELECT COUNT(*) FROM leave_requests WHERE institution_id = $1${status ? ' AND status = $2' : ''}`;
@@ -137,6 +208,18 @@ exports.reviewLeave = async (req, res) => {
 
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ error: 'Status must be approved or rejected' });
+    }
+
+    if (prisma) {
+      const existing = await prisma.leave_requests.findUnique({ where: { id: Number(id) } });
+      if (!existing || existing.institution_id !== institutionId) return res.status(404).json({ error: 'Leave request not found' });
+      if (existing.status !== 'pending') return res.status(400).json({ error: 'Can only review pending requests' });
+
+      const updated = await prisma.leave_requests.update({
+        where: { id: Number(id) },
+        data: { status, reviewed_by: req.user.id, reviewed_at: new Date(), review_note: reviewNote || null, updated_at: new Date() }
+      });
+      return res.json(updated);
     }
 
     const existing = await pool.query(

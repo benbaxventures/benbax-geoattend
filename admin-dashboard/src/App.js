@@ -12,6 +12,8 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Billing from './pages/Billing';
 import LeaveManagement from './pages/LeaveManagement';
+import RequestLeave from './pages/RequestLeave';
+import CreateInstitution from './pages/CreateInstitution';
 import Analytics from './pages/Analytics';
 import AuditLog from './pages/AuditLog';
 import GoogleCallback from './pages/GoogleCallback';
@@ -88,6 +90,8 @@ function App() {
             <Route path="/attendance" element={<AttendanceMonitor />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/leave" element={<LeaveManagement />} />
+            <Route path="/request-leave" element={<RequestLeave />} />
+            <Route path="/institutions/new" element={<CreateInstitution />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/audit" element={<AuditLog />} />
             <Route path="/billing" element={<Billing />} />

@@ -52,6 +52,8 @@ export const updateInstitution = (data) => api.put('/institutions/current', data
 export const getInstitutionQR = () => api.get('/institutions/qr-code');
 export const getAttendanceRules = (params) => api.get('/institutions/rules', { params });
 export const updateAttendanceRules = (data, params) => api.put('/institutions/rules', data, { params });
+export const createInstitution = (data) => api.post('/institutions', data);
+export const getAllInstitutions = () => api.get('/institutions');
 // Subscriptions / Billing
 export const getSubscriptionStatus = () => api.get('/institutions/subscription');
 export const activateSubscription = (data) => api.post('/institutions/subscription/activate', data);
@@ -79,6 +81,10 @@ export const getPdfExportUrl = (params) => {
 export const getAllLeaves = (params) => api.get('/leave', { params });
 export const getLeaveStats = () => api.get('/leave/stats');
 export const reviewLeave = (id, data) => api.put(`/leave/${id}/review`, data);
+// Staff leave (request/cancel/my leaves)
+export const requestLeave = (data) => api.post('/leave', data);
+export const getMyLeaves = () => api.get('/leave/my');
+export const cancelLeave = (id) => api.put(`/leave/${id}/cancel`);
 
 // Analytics
 export const getAttendanceTrends = (params) => api.get('/analytics/trends', { params });

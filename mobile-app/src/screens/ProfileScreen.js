@@ -317,6 +317,13 @@ export default function ProfileScreen({ navigation, onLogout }) {
               <Text style={[styles.passwordBtnText, { color: '#3498db' }]}>Switch Account</Text>
             </TouchableOpacity>
 
+            {/* Leave request for staff */}
+            {(profile?.member_type || 'staff') === 'staff' && (
+              <TouchableOpacity style={[styles.passwordBtn, { borderWidth: 1, borderColor: '#27ae60', backgroundColor: theme.card }]} onPress={() => navigation.navigate('LeaveRequest')}>
+                <Text style={[styles.passwordBtnText, { color: '#27ae60' }]}>Request Leave</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
               <Text style={styles.logoutBtnText}>Sign Out</Text>
             </TouchableOpacity>
