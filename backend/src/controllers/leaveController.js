@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { sendExpoPushNotifications } = require('../services/pushNotificationService');
 let prisma;
 try {
   prisma = require('../prismaClient');
@@ -73,6 +74,21 @@ exports.requestLeave = async (req, res) => {
        RETURNING *`,
       [staffUuid, institutionId, leaveType || 'personal', startDate, endDate, reason || null]
     );
+
+    // Notify admins — non-blocking
+    pool.query(
+      `SELECT push_token FROM staff WHERE institution_id = $1 AND role IN ('admin','super_admin') AND is_active = true AND push_token IS NOT NULL`,
+      [institutionId]
+    ).then((admins) => {
+      const staffName = `${req.user.first_name} ${req.user.last_name}`.trim();
+      const messages = admins.rows.map((a) => ({
+        to: a.push_token,
+        title: 'New Leave Request',
+        body: `${staffName} has requested ${leaveType || 'personal'} leave from ${startDate} to ${endDate}.`,
+        data: { type: 'leave_request', leaveId: result.rows[0].id },
+      }));
+      sendExpoPushNotifications(messages).catch(() => {});
+    }).catch(() => {});
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -242,6 +258,25 @@ exports.reviewLeave = async (req, res) => {
        RETURNING *`,
       [status, req.user.id, reviewNote || null, id]
     );
+
+    // Notify the staff member — non-blocking
+    pool.query(
+      `SELECT s.push_token, s.first_name, lr.leave_type, lr.start_date, lr.end_date
+       FROM leave_requests lr
+       JOIN staff s ON lr.staff_uuid = s.id
+       WHERE lr.id = $1`,
+      [id]
+    ).then((rows) => {
+      if (!rows.rows.length || !rows.rows[0].push_token) return;
+      const { push_token, first_name, leave_type, start_date, end_date } = rows.rows[0];
+      const statusLabel = status === 'approved' ? 'approved' : 'rejected';
+      sendExpoPushNotifications([{
+        to: push_token,
+        title: `Leave Request ${statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)}`,
+        body: `Hi ${first_name}, your ${leave_type} leave (${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}) has been ${statusLabel}.${reviewNote ? ` Note: ${reviewNote}` : ''}`,
+        data: { type: 'leave_review', leaveId: id, status },
+      }]).catch(() => {});
+    }).catch(() => {});
 
     res.json(result.rows[0]);
   } catch (err) {

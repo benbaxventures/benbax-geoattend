@@ -115,20 +115,40 @@ exports.createInstitution = async (req, res) => {
       console.error('Failed to re-query institution after create:', e.message || e);
     }
 
-    // Create default attendance rules
-    await pool.query(
-      `INSERT INTO attendance_rules (institution_id, member_type)
-       VALUES ($1, 'staff'), ($1, 'student')
-       ON CONFLICT DO NOTHING`,
-      [id]
-    );
+    // Create default attendance rules (explicit conflict target for PostgreSQL)
+    try {
+      await pool.query(
+        `INSERT INTO attendance_rules (institution_id, member_type)
+         VALUES ($1, 'staff'), ($1, 'student')
+         ON CONFLICT (institution_id, member_type) DO NOTHING`,
+        [id]
+      );
+    } catch (rulesErr) {
+      console.error('Create institution: attendance_rules insert:', rulesErr.message);
+      for (const mt of ['staff', 'student']) {
+        await pool.query(
+          `INSERT INTO attendance_rules (institution_id, member_type)
+           SELECT $1, $2::varchar
+           WHERE NOT EXISTS (
+             SELECT 1 FROM attendance_rules ar
+             WHERE ar.institution_id = $1 AND ar.member_type = $2
+           )`,
+          [id, mt]
+        ).catch(() => {});
+      }
+    }
 
-    await ensureTrialSubscription(id);
+    try {
+      await ensureTrialSubscription(id);
+    } catch (subErr) {
+      console.error('Create institution: trial subscription skipped:', subErr.message);
+    }
 
     res.status(201).json(created);
   } catch (err) {
     console.error('Create institution error:', err);
-    res.status(500).json({ error: 'Server error' });
+    const debug = process.env.NODE_ENV !== 'production' ? err.message : undefined;
+    res.status(500).json({ error: 'Server error', ...(debug && { debug }) });
   }
 };
 

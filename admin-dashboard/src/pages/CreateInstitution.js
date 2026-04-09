@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { createInstitution, getAllInstitutions, repairInstitutionCode } from '../services/api';
+import { createInstitution, getAllInstitutions, repairInstitutionCode, createInitialAdmin } from '../services/api';
 
 const styles = {
   container: { maxWidth: 760, margin: '0 auto' },
@@ -10,7 +10,8 @@ const styles = {
   row: { display: 'flex', gap: 12, marginBottom: 12 },
   input: { flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 14 },
   btn: (bg) => ({ padding: '8px 16px', borderRadius: 8, background: bg, color: '#fff', border: 'none', cursor: 'pointer' }),
-  codeBox: { marginTop: 16, padding: 12, background: '#f6f8fa', borderRadius: 8, fontFamily: 'monospace' }
+  codeBox: { marginTop: 16, padding: 12, background: '#f6f8fa', borderRadius: 8, fontFamily: 'monospace' },
+  apiHint: { marginTop: 8, fontSize: 12, color: '#7f8c8d' },
 };
 
 export default function CreateInstitution() {
@@ -24,6 +25,7 @@ export default function CreateInstitution() {
   const [geofenceRadius, setGeofenceRadius] = useState(200);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState(null);
+  const [adminCredentials, setAdminCredentials] = useState(null);
   const [showRaw, setShowRaw] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
 
@@ -106,7 +108,26 @@ export default function CreateInstitution() {
         }
       }
       setCreated(inst);
-      toast.success('Institution created');
+
+      // Automatically create initial admin for the new institution
+      const institutionCode = inst.institution_code || inst.institutionCode || inst.code;
+      if (institutionCode) {
+        try {
+          const adminRes = await createInitialAdmin({
+            institutionCode,
+            firstName: 'Admin',
+            lastName: 'User',
+          });
+          setAdminCredentials(adminRes.data.credentials);
+          toast.success('Institution and admin account created successfully');
+        } catch (adminErr) {
+          console.error('Failed to create admin:', adminErr);
+          toast.warning('Institution created but admin account creation failed. You can create one manually.');
+        }
+      } else {
+        toast.success('Institution created (no admin account - missing institution code)');
+      }
+
       try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to create institution');
@@ -124,6 +145,18 @@ export default function CreateInstitution() {
     }
   };
 
+  const copyAdminCredentials = async () => {
+    if (!adminCredentials) return toast.info('Admin credentials not available');
+    const code = created?.institution_code || created?.institutionCode || created?.code;
+    const text = `Institution Code: ${code}\nAdmin ID: ${adminCredentials.staffId}\nPassword: ${adminCredentials.password}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Admin credentials copied');
+    } catch {
+      toast.info('Copy these credentials:\n' + text);
+    }
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -131,6 +164,9 @@ export default function CreateInstitution() {
       </div>
 
       <form style={styles.form} onSubmit={submit}>
+        <div style={styles.apiHint}>
+          API base URL: <span style={{ fontFamily: 'monospace' }}>{process.env.REACT_APP_API_URL || '(default: Render)'}</span>
+        </div>
         {hasDraft && (
           <div style={{ marginBottom: 12, padding: 10, background: '#fff8e1', borderRadius: 8 }}>
             <strong>Draft saved:</strong> your entered values were restored from a draft. <button type="button" onClick={() => { try { localStorage.removeItem(DRAFT_KEY); setHasDraft(false); setName(''); setAddress(''); setCity(''); setRegion(''); setLatitude(''); setLongitude(''); setGeofenceRadius(200); } catch(e){} }} style={{ marginLeft: 8 }}>Clear draft</button>
@@ -153,7 +189,7 @@ export default function CreateInstitution() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button type="button" onClick={() => { setName(''); setAddress(''); setCity(''); setRegion(''); setLatitude(''); setLongitude(''); setGeofenceRadius(200); setCreated(null); try { localStorage.removeItem(DRAFT_KEY); } catch(e) {} }} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff' }}>Reset</button>
+          <button type="button" onClick={() => { setName(''); setAddress(''); setCity(''); setRegion(''); setLatitude(''); setLongitude(''); setGeofenceRadius(200); setCreated(null); setAdminCredentials(null); try { localStorage.removeItem(DRAFT_KEY); } catch(e) {} }} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff' }}>Reset</button>
           <button type="submit" disabled={creating} style={styles.btn('#1a5276')}>{creating ? 'Creating...' : 'Create Institution'}</button>
         </div>
 
@@ -162,14 +198,37 @@ export default function CreateInstitution() {
               <div><strong>Institution created:</strong> {created.name || created.data?.name || '—'}</div>
               <div style={{ marginTop: 8 }}>
                 <strong>Institution code:</strong>{' '}
-                <span style={{ fontFamily: 'monospace' }}>
+                <span style={{ fontFamily: 'monospace', fontSize: 16, background: '#fff3cd', padding: '4px 8px', borderRadius: 4 }}>
                   {created.institution_code || created.institutionCode || created.code || created.data?.institution_code || 'Not returned'}
                 </span>
               </div>
-              <div style={{ marginTop: 8 }}>
-                <button onClick={copyCode} style={{ ...styles.btn('#27ae60'), marginRight: 8 }}>Copy Code</button>
+
+              {adminCredentials && (
+                <div style={{ marginTop: 16, padding: 12, background: '#d4edda', borderRadius: 8, border: '2px solid #28a745' }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: '#155724' }}>Admin Account Created</div>
+                  <div style={{ marginBottom: 4 }}>
+                    <strong>Admin ID:</strong>{' '}
+                    <span style={{ fontFamily: 'monospace', fontSize: 15 }}>{adminCredentials.staffId}</span>
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    <strong>Password:</strong>{' '}
+                    <span style={{ fontFamily: 'monospace', fontSize: 15 }}>{adminCredentials.password}</span>
+                  </div>
+                  <button onClick={copyAdminCredentials} style={{ ...styles.btn('#28a745'), marginTop: 4 }}>
+                    Copy All Credentials
+                  </button>
+                  <div style={{ marginTop: 8, fontSize: 13, color: '#155724' }}>
+                    <strong>Important:</strong> Share these credentials with the institution admin. They should change the password after first login.
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginTop: 12 }}>
+                <button onClick={copyCode} style={{ ...styles.btn('#27ae60'), marginRight: 8 }}>Copy Institution Code</button>
                 <label style={{ marginLeft: 8 }}><input type="checkbox" checked={showRaw} onChange={e => setShowRaw(e.target.checked)} /> Show raw response</label>
-                <div style={{ marginTop: 8 }}><small style={{ color: '#666' }}>Share this code with the institution admin so they can register/login under this institution.</small></div>
+                {!adminCredentials && (
+                  <div style={{ marginTop: 8 }}><small style={{ color: '#856404', background: '#fff3cd', padding: 6, borderRadius: 4, display: 'inline-block' }}>Warning: No admin account was created. Users signing up with this code will be regular staff members.</small></div>
+                )}
                 {showRaw && (
                   <pre style={{ marginTop: 8, maxHeight: 200, overflow: 'auto', background: '#fff', padding: 8 }}>{JSON.stringify(created, null, 2)}</pre>
                 )}

@@ -31,9 +31,9 @@ async function ensureTrialSubscription(institutionId) {
   }
 
   const created = await pool.query(
-    `INSERT INTO subscriptions (institution_id, status, trial_start, trial_end)
-     VALUES ($1, 'trialing', NOW(), NOW() + ($2 || ' days')::INTERVAL)
-     RETURNING id, status, trial_start, trial_end, current_period_end`,
+    `INSERT INTO subscriptions (institution_id, plan_name, status, trial_start, trial_end)
+     VALUES ($1, 'trial', 'trialing', NOW(), NOW() + ($2 || ' days')::INTERVAL)
+     RETURNING id, plan_name, status, trial_start, trial_end, current_period_end`,
     [institutionId, String(DEFAULT_TRIAL_DAYS)]
   );
   return created.rows[0];

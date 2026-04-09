@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { login } from '../services/api';
+import { login, register } from '../services/api';
 import { FiMapPin, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const styles = {
@@ -121,16 +121,19 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!institutionCode || !staffId || !password) {
-      toast.error('Please enter institution code, staff ID and password');
+    if (!staffId || !password) {
+      toast.error('Please enter Staff ID and password');
       return;
     }
 
     setLoading(true);
     try {
-      const { data } = await login(staffId, password, institutionCode.trim().toUpperCase());
+      const codeTrim = institutionCode.trim();
+      // Super admin (ADMIN001) can login without institution code
+      const { data } = await login(staffId, password, codeTrim || undefined);
       localStorage.setItem('token', data.token);
-      localStorage.setItem('institutionCode', institutionCode.trim().toUpperCase());
+      const resolvedCode = data.institution?.code || codeTrim;
+      if (resolvedCode) localStorage.setItem('institutionCode', String(resolvedCode).toUpperCase());
 
       if (data.user.role !== 'admin' && data.user.role !== 'super_admin') {
         toast.error('Admin access required');
@@ -154,6 +157,13 @@ export default function Login({ onLogin }) {
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
     const redirectUri = encodeURIComponent(window.location.origin + '/auth/google/callback');
     const scope = encodeURIComponent('profile email');
+    // Require institution code for Google callback
+    const codeTrim = (institutionCode || '').trim();
+    if (!codeTrim) {
+      toast.error('Please enter your institution code before using Google sign-in');
+      return;
+    }
+    try { localStorage.setItem('institutionCode', codeTrim.toUpperCase()); } catch(e){}
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
   };
 
@@ -167,12 +177,16 @@ export default function Login({ onLogin }) {
         <p style={styles.subtitle}>Admin Dashboard - Sign in to continue</p>
 
         <form onSubmit={handleSubmit}>
+          <div style={{ fontSize: 12, color: '#2c3e50', marginBottom: 12, padding: 10, background: '#e8f5e9', borderRadius: 8, lineHeight: 1.5 }}>
+            <strong style={{ color: '#27ae60' }}>Super Admin (ADMIN001):</strong> Leave institution code empty to login<br/>
+            <strong style={{ color: '#3498db', marginTop: 4, display: 'inline-block' }}>Institution Admins:</strong> Enter your institution code and credentials provided by super admin
+          </div>
           <div style={styles.inputGroup}>
             <FiMapPin style={styles.inputIcon} size={18} />
             <input
               style={styles.input}
               type="text"
-              placeholder="Institution Code (e.g. INST-123456)"
+              placeholder="Institution Code (optional for ADMIN001)"
               value={institutionCode}
               onChange={(e) => setInstitutionCode(e.target.value.toUpperCase())}
             />
@@ -208,6 +222,10 @@ export default function Login({ onLogin }) {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <div style={{ marginTop: 12, padding: 12, background: '#fff3cd', borderRadius: 8, fontSize: 13, lineHeight: 1.5 }}>
+          <strong>Don't have admin credentials?</strong> Contact your super administrator to create an admin account for your institution. Regular signup creates staff accounts without admin access.
+        </div>
 
         <div style={styles.divider}>
           <div style={styles.dividerLine} />

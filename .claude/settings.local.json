@@ -57,7 +57,12 @@
       "Bash(curl -s --max-time 15 https://geofence-app-jjpa.onrender.com/api/auth/profile -H \"Authorization: Bearer test\")",
       "Bash(node -e ':*)",
       "Bash(git checkout:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find /c/Users/brigh/webDev/Geofence-app/backend/src/migrations -name \"*.sql\" -exec grep -l \"leave_requests\" {} \\\\;)",
+      "Bash(ipconfig:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell \"(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias ''Wi-Fi*'' | Select-Object -First 1).IPAddress\")",
+      "Bash(curl:*)"
     ]
   }
 }

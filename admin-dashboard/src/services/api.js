@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geofence-app-jjpa.onrender.com/api';
+function resolveApiBaseUrl() {
+  const envUrl = process.env.REACT_APP_API_URL;
+  // Hard safety: when running locally, always prefer local backend unless explicitly overridden.
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return envUrl || 'http://localhost:5000/api';
+  }
+  return envUrl || 'https://geofence-app-jjpa.onrender.com/api';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,7 +30,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    const isAuthAttempt =
+      url.includes('/auth/login') ||
+      url.includes('/auth/google-login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/forgot-password');
+
+    if (error.response?.status === 401 && !isAuthAttempt) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -30,16 +46,22 @@ api.interceptors.response.use(
   }
 );
 
-// Auth
-export const login = (staffId, password, institutionCode) =>
-  api.post('/auth/login', { staffId, password, institutionCode });
+// Auth — omit institutionCode when empty so backend can resolve super_admin (e.g. ADMIN001) across institutions
+export const login = (staffId, password, institutionCode) => {
+  const body = { staffId, password };
+  const code = institutionCode && String(institutionCode).trim();
+  if (code) body.institutionCode = code.toUpperCase();
+  return api.post('/auth/login', body);
+};
 export const googleLogin = (googleData) => api.post('/auth/google-login', googleData);
 export const getProfile = () => api.get('/auth/profile');
+export const createInitialAdmin = (data) => api.post('/auth/create-initial-admin', data);
 
 // Staff
 export const getStaff = (params) => api.get('/staff', { params });
 export const getStaffById = (id) => api.get(`/staff/${id}`);
 export const createStaff = (data) => api.post('/staff', data);
+export const register = (data) => api.post('/auth/register', data);
 export const updateStaff = (id, data) => api.put(`/staff/${id}`, data);
 export const resetStaffPassword = (id, newPassword) => api.put(`/staff/${id}/reset-password`, { newPassword });
 export const getStaffQRCode = (id) => api.get(`/staff/${id}/qr-code`);

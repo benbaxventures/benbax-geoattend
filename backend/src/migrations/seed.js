@@ -16,14 +16,16 @@ async function seed() {
       return;
     }
 
-    // Create default institution
+    // Create default institution with institution code
     const institutionId = uuidv4();
+    const institutionCode = `INST-${Math.floor(100000 + Math.random() * 900000)}`;
     await client.query(`
-      INSERT INTO institutions (id, name, address, city, region, latitude, longitude, geofence_radius)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO institutions (id, name, institution_code, address, city, region, latitude, longitude, geofence_radius)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `, [
       institutionId,
       'Sample Institution Ghana',
+      institutionCode,
       '123 Independence Avenue',
       'Accra',
       'Greater Accra',
@@ -63,8 +65,15 @@ async function seed() {
     ]);
 
     console.log('Seed completed successfully.');
+    console.log('='.repeat(60));
+    console.log('SUPER ADMIN CREDENTIALS:');
+    console.log(`  Staff ID: ADMIN001`);
+    console.log(`  Password: ${process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123'}`);
+    console.log(`  Institution Code: (leave empty when logging in)`);
+    console.log('='.repeat(60));
+    console.log(`Institution: Sample Institution Ghana`);
     console.log(`Institution ID: ${institutionId}`);
-    console.log(`Admin login: ADMIN001 / ${process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123'}`);
+    console.log(`Institution Code: ${institutionCode}`);
   } catch (err) {
     console.error('Seed failed:', err.message);
     process.exit(1);

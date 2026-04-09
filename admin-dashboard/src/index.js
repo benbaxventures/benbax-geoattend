@@ -11,4 +11,10 @@ root.render(
   </React.StrictMode>
 );
 
-serviceWorkerRegistration.register();
+// In development (localhost), the service worker can cache an older bundle/env
+// and cause confusing API base URL behavior. Keep it disabled locally.
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  serviceWorkerRegistration.unregister();
+} else {
+  serviceWorkerRegistration.register();
+}

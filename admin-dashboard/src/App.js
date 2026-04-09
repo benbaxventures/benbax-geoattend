@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import StaffManagement from './pages/StaffManagement';
 import StaffForm from './pages/StaffForm';
 import AttendanceMonitor from './pages/AttendanceMonitor';
@@ -32,12 +33,6 @@ function App() {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -49,6 +44,7 @@ function App() {
     localStorage.removeItem('user');
   };
 
+  // Only declare mainStyle ONCE
   const mainStyle = useMemo(() => ({
     flex: 1,
     padding: isMobile ? '60px 12px 16px' : '24px',
@@ -77,6 +73,26 @@ function App() {
     );
   }
 
+  // Super admin: show separate dashboard
+  if (user.role && user.role.toLowerCase() === 'super_admin') {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/*" element={<SuperAdminDashboard onLogout={handleLogout} />}>
+            <Route path="institutions/new" element={<CreateInstitution />} />
+            <Route path="audit" element={<AuditLog />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="*" element={<Navigate to="/institutions/new" />} />
+          </Route>
+        </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
+      </Router>
+    );
+  }
+
+  
+
+  // Only non-super_admins see the sidebar and regular dashboard
   return (
     <Router>
       <div style={{ display: 'flex', minHeight: '100vh' }}>

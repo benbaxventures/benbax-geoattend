@@ -25,6 +25,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Ignore non-http(s) schemes (e.g. browser extensions) to avoid cache.put errors.
+  try {
+    const url = new URL(event.request.url);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+  } catch {
+    return;
+  }
+
   // Network-first strategy for API calls
   if (event.request.url.includes('/api/')) {
     event.respondWith(
@@ -40,7 +48,13 @@ self.addEventListener('fetch', (event) => {
       return fetch(event.request).then((response) => {
         if (!response || response.status !== 200 || response.type !== 'basic') return response;
         const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+        caches.open(CACHE_NAME).then((cache) => {
+          try {
+            cache.put(event.request, responseToCache);
+          } catch {
+            // ignore cache failures (e.g. unsupported schemes)
+          }
+        });
         return response;
       });
     })

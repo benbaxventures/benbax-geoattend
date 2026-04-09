@@ -19,6 +19,14 @@ async function requireActiveSubscription(req, res, next) {
     const subscription = await getCurrentSubscription(req.user.institution_id);
     const now = new Date();
 
+    if (!subscription) {
+      return res.status(402).json({
+        error: 'Subscription required',
+        code: 'SUBSCRIPTION_REQUIRED',
+        subscription: null,
+      });
+    }
+
     let allowed = false;
     if (subscription.status === 'trialing') {
       allowed = subscription.trial_end && new Date(subscription.trial_end) >= now;

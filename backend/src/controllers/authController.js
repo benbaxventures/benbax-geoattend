@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
+const crypto = require('crypto');
 const {
   normalizeInstitutionCode,
   getInstitutionByCode,
@@ -13,6 +14,16 @@ async function getSubscriptionPayload(institutionId) {
   await ensureTrialSubscription(institutionId);
   const subscription = await getCurrentSubscription(institutionId);
   return buildSubscriptionSnapshot(subscription);
+}
+
+/** Never fail login if subscriptions table or trial row is missing. */
+async function getSubscriptionPayloadSafe(institutionId) {
+  try {
+    return await getSubscriptionPayload(institutionId);
+  } catch (e) {
+    console.error('Login: subscription payload skipped:', e.message);
+    return null;
+  }
 }
 
 exports.login = async (req, res) => {
@@ -36,19 +47,26 @@ exports.login = async (req, res) => {
       }
 
       result = await pool.query(
-        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
+        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region,
+                i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code as inst_institution_code
          FROM staff s
          JOIN institutions i ON s.institution_id = i.id
          WHERE s.staff_id = $1 AND s.member_type = $2 AND s.institution_id = $3 AND s.is_active = true`,
         [staffId.toUpperCase(), normalizedMemberType, institution.id]
       );
+      if (result.rows.length === 0) {
+        return res.status(401).json({
+          error:
+            `No account found with Staff ID "${staffId}" for institution code "${normalizedInstitutionCode}". Please check your Staff ID and institution code, or contact your institution administrator.`,
+        });
+      }
     } else {
       // No institution code provided — try to resolve by staffId across institutions
       result = await pool.query(
         `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code
          FROM staff s
          JOIN institutions i ON s.institution_id = i.id
-         WHERE s.staff_id = $1 AND s.member_type = $2 AND s.is_active = true`,
+         WHERE s.staff_id = $1 AND s.member_type = $2 AND s.is_active = true AND s.role IN ('admin','super_admin')`,
         [staffId.toUpperCase(), normalizedMemberType]
       );
 
@@ -61,11 +79,10 @@ exports.login = async (req, res) => {
       institution = { id: result.rows[0].institution_id, institution_code: result.rows[0].institution_code };
     }
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
     staff = result.rows[0];
+    if (!staff.password_hash) {
+      return res.status(401).json({ error: 'Password login is not set for this account. Use Google sign-in or reset password.' });
+    }
     const validPassword = await bcrypt.compare(password, staff.password_hash);
 
     if (!validPassword) {
@@ -87,7 +104,13 @@ exports.login = async (req, res) => {
       ).catch(err => console.error('Device log error:', err.message));
     }
 
-    const subscription = await getSubscriptionPayload(staff.institution_id);
+    const subscription = await getSubscriptionPayloadSafe(staff.institution_id);
+
+    const institutionCodeOut =
+      institution?.institution_code ||
+      staff.inst_institution_code ||
+      normalizedInstitutionCode ||
+      null;
 
     res.json({
       token,
@@ -106,7 +129,7 @@ exports.login = async (req, res) => {
         profilePhoto: staff.profile_photo_url,
       },
       institution: {
-        code: institution.institution_code,
+        code: institutionCodeOut,
         name: staff.institution_name,
         address: staff.inst_address,
         city: staff.inst_city,
@@ -281,7 +304,7 @@ exports.googleLogin = async (req, res) => {
       ).catch(err => console.error('Device log error:', err.message));
     }
 
-    const subscription = await getSubscriptionPayload(staff.institution_id);
+    const subscription = await getSubscriptionPayloadSafe(staff.institution_id);
 
     res.json({
       token,
@@ -300,7 +323,7 @@ exports.googleLogin = async (req, res) => {
         profilePhoto: staff.profile_photo_url,
       },
       institution: {
-        code: institution.institution_code,
+        code: institution?.institution_code || null,
         name: staff.institution_name,
         address: staff.inst_address,
         city: staff.inst_city,
@@ -380,6 +403,65 @@ exports.forgotPassword = async (req, res) => {
     res.json({ message: 'Password reset successfully. You can now login with your new password.' });
   } catch (err) {
     console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Super-admin helper: create the initial admin for an institution and return credentials.
+exports.createInitialAdmin = async (req, res) => {
+  try {
+    const { institutionCode, staffId, firstName, lastName, email, phone, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
+
+    if (!normalizedInstitutionCode) {
+      return res.status(400).json({ error: 'Institution code is required' });
+    }
+
+    const institution = await getInstitutionByCode(normalizedInstitutionCode);
+    if (!institution) {
+      return res.status(404).json({ error: 'Invalid institution code' });
+    }
+
+    const institutionId = institution.id;
+
+    // Prevent creating a second admin if one already exists for this institution
+    const existingAdmin = await pool.query(
+      "SELECT id FROM staff WHERE institution_id = $1 AND role IN ('admin','super_admin')",
+      [institutionId]
+    );
+    if (existingAdmin.rows.length > 0) {
+      return res.status(409).json({ error: 'An admin account already exists for this institution' });
+    }
+
+    const finalStaffId = staffId ? staffId.toUpperCase() : ('ADMIN' + crypto.randomBytes(3).toString('hex').toUpperCase());
+
+    // Ensure unique staff id within institution
+    const collide = await pool.query('SELECT id FROM staff WHERE staff_id = $1 AND institution_id = $2', [finalStaffId, institutionId]);
+    if (collide.rows.length > 0) {
+      return res.status(409).json({ error: 'Generated Staff ID already exists — try again' });
+    }
+
+    const rawPassword = crypto.randomBytes(4).toString('hex');
+    const passwordHash = await bcrypt.hash(rawPassword, 12);
+    const qrData = `STAFF-${institutionId}-${finalStaffId}`;
+
+    const insertResult = await pool.query(
+      `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, password_hash, qr_code_data, role, member_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'admin', $9)
+       RETURNING id, staff_id, first_name, last_name, email`,
+      [institutionId, finalStaffId, firstName || 'Admin', lastName || 'User', email || null, phone || null, passwordHash, qrData, normalizedMemberType]
+    );
+
+    // Return the plaintext password once so the super-admin can relay it securely.
+    res.status(201).json({
+      message: 'Initial admin created',
+      credentials: { staffId: finalStaffId, password: rawPassword },
+      staff: insertResult.rows[0],
+    });
+  } catch (err) {
+    console.error('Create initial admin error:', err);
+    if (err.code === '23505') return res.status(409).json({ error: 'Staff ID or email already exists' });
     res.status(500).json({ error: 'Server error' });
   }
 };

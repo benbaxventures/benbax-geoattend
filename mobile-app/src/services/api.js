@@ -41,7 +41,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     // Surface useful network diagnostics in logs
-    if (!error.response) {
+    // Suppress noise for non-critical background calls (push token registration)
+    const silentUrls = ['/auth/push-token'];
+    if (!error.response && !silentUrls.some((u) => originalRequest?.url?.includes(u))) {
       console.error('[API] Network error:', {
         baseURL: api.defaults.baseURL,
         url: originalRequest?.url,
@@ -51,8 +53,9 @@ api.interceptors.response.use(
       });
     }
 
-    // Render/Neon instances can "sleep" and wake slowly.
-    // If we get a true network error (no response), try to wake via /health once and retry.
+    // Render/Neon instances can "sleep" and wake slowly (up to 30s on free tier).
+    // If we get a true network error (no response), ping /health, wait for the server
+    // to finish waking, then retry the original request once.
     if (
       !error.response &&
       originalRequest &&
@@ -62,9 +65,10 @@ api.interceptors.response.use(
     ) {
       originalRequest._wakeAndRetry = true;
       try {
-        await api.get('/health');
-      } catch (wakeErr) {
-        // ignore wake error; we'll retry the original request anyway
+        await api.get('/health', { timeout: 30000 });
+      } catch {
+        // Server still waking — wait a bit before retrying anyway
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
       return api(originalRequest);
     }
