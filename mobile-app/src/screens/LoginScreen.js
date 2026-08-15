@@ -10,7 +10,7 @@ import { useToast } from '../services/Toast';
 import { authenticateWithBiometric, isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from '../services/biometric';
 import { getCredentials, saveCredentials } from '../services/credentials';
 
-export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
+export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId, onRegister }) {
   const toast = useToast();
   const [institutionCode, setInstitutionCode] = useState('');
   const [staffId, setStaffId] = useState('');
@@ -261,6 +261,10 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
 
           <TouchableOpacity onPress={() => onForgotPassword && onForgotPassword()}>
             <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => onForgotStaffId && onForgotStaffId()}>
+            <Text style={styles.forgotText}>Forgot {memberType === 'student' ? 'Student' : 'Staff'} ID?</Text>
           </TouchableOpacity>
 
           {bioAvailable && bioEnabled && hasSavedCreds && (

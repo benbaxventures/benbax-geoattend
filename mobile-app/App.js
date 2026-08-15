@@ -11,6 +11,7 @@ import { ToastProvider } from './src/services/Toast';
 
 import LoginScreen from './src/screens/LoginScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import ForgotStaffIdScreen from './src/screens/ForgotStaffIdScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import { registerForPushNotifications, scheduleCheckInReminder } from './src/services/notifications';
 import { ThemeProvider } from './src/services/theme';
@@ -145,12 +146,14 @@ export default function App() {
                       {...props}
                       onLogin={() => setIsLoggedIn(true)}
                       onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
+                      onForgotStaffId={() => props.navigation.navigate('ForgotStaffId')}
                       onRegister={() => props.navigation.navigate('Register')}
                       memberType={memberType}
                     />
                   )}
                 </Stack.Screen>
                 <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+                <Stack.Screen name="ForgotStaffId" component={ForgotStaffIdScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
               </>
             )

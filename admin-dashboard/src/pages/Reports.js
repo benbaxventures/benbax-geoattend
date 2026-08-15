@@ -34,12 +34,79 @@ const styles = {
   onTimeBadge: { color: '#27ae60', fontWeight: '600' },
 };
 
+function toDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function periodRange(period) {
+  const today = new Date();
+  const start = new Date(today);
+  const end = new Date(today);
+
+  switch (period) {
+    case 'today':
+      break;
+    case 'yesterday':
+      start.setDate(start.getDate() - 1);
+      end.setDate(end.getDate() - 1);
+      break;
+    case 'last7':
+      start.setDate(start.getDate() - 6);
+      break;
+    case 'last30':
+      start.setDate(start.getDate() - 29);
+      break;
+    case 'this_week':
+      start.setDate(start.getDate() - start.getDay());
+      break;
+    case 'last_week': {
+      const dow = start.getDay();
+      start.setDate(start.getDate() - dow - 7);
+      end.setDate(end.getDate() - dow - 1);
+      break;
+    }
+    case 'this_month':
+      start.setDate(1);
+      break;
+    case 'last_month': {
+      start.setDate(1);
+      start.setMonth(start.getMonth() - 1);
+      end.setDate(0);
+      break;
+    }
+    case 'this_year':
+      start.setMonth(0, 1);
+      break;
+    default:
+      return null;
+  }
+
+  return { startDate: toDateStr(start), endDate: toDateStr(end) };
+}
+
+const PERIOD_OPTIONS = [
+  { value: '', label: 'All time' },
+  { value: 'today', label: 'Today' },
+  { value: 'yesterday', label: 'Yesterday' },
+  { value: 'last7', label: 'Last 7 days' },
+  { value: 'last30', label: 'Last 30 days' },
+  { value: 'this_week', label: 'This week' },
+  { value: 'last_week', label: 'Last week' },
+  { value: 'this_month', label: 'This month' },
+  { value: 'last_month', label: 'Last month' },
+  { value: 'this_year', label: 'This year' },
+];
+
 export default function Reports() {
   const [records, setRecords] = useState([]);
   const [fraudEvents, setFraudEvents] = useState([]);
   const [geofenceEvents, setGeofenceEvents] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', department: '', staffId: '' });
+  const [period, setPeriod] = useState('');
   const [memberType, setMemberType] = useState('staff');
   const [todaySummary, setTodaySummary] = useState({ present: 0, late: 0, absent: 0 });
 
@@ -51,6 +118,16 @@ export default function Reports() {
   useEffect(() => {
     fetchReport();
   }, [memberType]);
+
+  const handlePeriodChange = (value) => {
+    setPeriod(value);
+    const range = periodRange(value);
+    if (range) {
+      setFilters(f => ({ ...f, startDate: range.startDate, endDate: range.endDate }));
+    } else {
+      setFilters(f => ({ ...f, startDate: '', endDate: '' }));
+    }
+  };
 
   const fetchReport = () => {
     const params = {};
@@ -126,12 +203,40 @@ Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${f
           </select>
         </div>
         <div style={styles.field}>
+          <label style={styles.label}>Period</label>
+          <select
+            style={styles.select}
+            value={period}
+            onChange={e => {
+              handlePeriodChange(e.target.value);
+            }}
+          >
+            {PERIOD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+        <div style={styles.field}>
           <label style={styles.label}>Start Date</label>
-          <input style={styles.input} type="date" value={filters.startDate} onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))} />
+          <input
+            style={styles.input}
+            type="date"
+            value={filters.startDate}
+            onChange={e => {
+              setPeriod('');
+              setFilters(f => ({ ...f, startDate: e.target.value }));
+            }}
+          />
         </div>
         <div style={styles.field}>
           <label style={styles.label}>End Date</label>
-          <input style={styles.input} type="date" value={filters.endDate} onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))} />
+          <input
+            style={styles.input}
+            type="date"
+            value={filters.endDate}
+            onChange={e => {
+              setPeriod('');
+              setFilters(f => ({ ...f, endDate: e.target.value }));
+            }}
+          />
         </div>
         <div style={styles.field}>
           <label style={styles.label}>Department</label>

@@ -269,6 +269,42 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// Public helper: find a user's Staff ID using institution code + email + member type.
+exports.forgotStaffId = async (req, res) => {
+  try {
+    const { institutionCode, email, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
+
+    if (!email || !normalizedInstitutionCode) {
+      return res.status(400).json({ error: 'Email and institution code are required' });
+    }
+
+    const institution = await getInstitutionByCode(normalizedInstitutionCode);
+    if (!institution) {
+      return res.status(404).json({ error: 'Invalid institution code' });
+    }
+
+    const result = await pool.query(
+      'SELECT staff_id, first_name, last_name FROM staff WHERE LOWER(email) = $1 AND member_type = $2 AND institution_id = $3 AND is_active = true',
+      [email.toLowerCase().trim(), normalizedMemberType, institution.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+
+    res.json({
+      staffId: result.rows[0].staff_id,
+      firstName: result.rows[0].first_name,
+      lastName: result.rows[0].last_name,
+    });
+  } catch (err) {
+    console.error('Forgot staff ID error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // Super-admin helper: create the initial admin for an institution and return credentials.
 exports.createInitialAdmin = async (req, res) => {
   try {

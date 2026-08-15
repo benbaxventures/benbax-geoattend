@@ -137,4 +137,7 @@ export const requestLeave = (data) => api.post('/leave', data);
 export const getMyLeaves = () => api.get('/leave/my');
 export const cancelLeave = (id) => api.put(`/leave/${id}/cancel`);
 
+export const findStaffByEmail = (institutionCode, email, memberType) =>
+  api.post('/auth/forgot-staff-id', { institutionCode, email, memberType });
+
 export default api;
