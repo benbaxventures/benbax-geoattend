@@ -5,30 +5,10 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
-import * as WebBrowser from 'expo-web-browser';
-import Constants from 'expo-constants';
-import * as AuthSession from 'expo-auth-session';
-import * as Google from 'expo-auth-session/providers/google';
-import { login, googleLogin } from '../services/api';
+import { login } from '../services/api';
 import { useToast } from '../services/Toast';
 import { authenticateWithBiometric, isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from '../services/biometric';
 import { getCredentials, saveCredentials } from '../services/credentials';
-
-WebBrowser.maybeCompleteAuthSession();
-
-const GOOGLE_ANDROID_CLIENT_ID =
-  Constants.expoConfig?.extra?.GOOGLE_ANDROID_CLIENT_ID ||
-  '725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com';
-
-const GOOGLE_WEB_CLIENT_ID =
-  Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID ||
-  '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
-
-const discovery = {
-  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: 'https://oauth2.googleapis.com/token',
-  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
-};
 
 export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const toast = useToast();
@@ -37,41 +17,11 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState([]);
   const [memberType, setMemberType] = useState('staff');
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioEnabled, setBioEnabled] = useState(false);
   const [hasSavedCreds, setHasSavedCreds] = useState(false);
-
-  // NOTE:
-  // - Expo Go is increasingly incompatible with Google OAuth.
-  // - Dev builds / APKs should use Android client ID + package/SHA-1 configured in Google Cloud.
-  // - We still keep webClientId for any web/proxy-based flows.
-  // Android OAuth must use Google's reverse client-id scheme and path /oauth2redirect (not /oauthredirect).
-  const androidClientIdPrefix = String(GOOGLE_ANDROID_CLIENT_ID || '').replace('.apps.googleusercontent.com', '');
-  const androidGoogleRedirectUri = androidClientIdPrefix
-    ? `com.googleusercontent.apps.${androidClientIdPrefix}:/oauth2redirect`
-    : undefined;
-
-  const redirectUri =
-    Platform.OS === 'android' && androidGoogleRedirectUri
-      ? androidGoogleRedirectUri
-      : AuthSession.makeRedirectUri({ scheme: 'com.geoattend.app', path: 'oauth2redirect' });
-
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-      webClientId: GOOGLE_WEB_CLIENT_ID,
-      redirectUri,
-      scopes: ['openid', 'profile', 'email'],
-      responseType: AuthSession.ResponseType.Code,
-      usePKCE: true,
-    },
-    discovery
-  );
-
-  console.log('Google redirectUri:', redirectUri);
 
   useEffect(() => {
     AsyncStorage.getItem('recentAccounts').then(stored => {
@@ -112,130 +62,6 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
     })();
     return () => { cancelled = true; };
   }, [memberType]);
-
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    try {
-      const currentMemberType = memberType || 'staff';
-      const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
-      if (!request) {
-        toast.error('Google login is not ready. Please try again.', 'Login Failed');
-        return;
-      }
-
-      const result = await promptAsync();
-
-      if (result.type === 'success' && result.params?.code) {
-        let accessToken = null;
-        const code = result.params.code;
-
-        // Exchange auth code for access token
-        try {
-          const tokenResult = await AuthSession.exchangeCodeAsync(
-            {
-              clientId: GOOGLE_ANDROID_CLIENT_ID,
-              code,
-              redirectUri,
-              extraParams: {
-                code_verifier: request.codeVerifier,
-              },
-            },
-            discovery
-          );
-          accessToken = tokenResult?.access_token || tokenResult?.accessToken || null;
-        } catch (exErr) {
-          // Some configurations require using the web client for token exchange.
-          console.error('Google token exchange (android client) failed:', exErr?.message || exErr);
-          try {
-            const tokenResult = await AuthSession.exchangeCodeAsync(
-              {
-                clientId: GOOGLE_WEB_CLIENT_ID,
-                code,
-                redirectUri,
-                extraParams: {
-                  code_verifier: request.codeVerifier,
-                },
-              },
-              discovery
-            );
-            accessToken = tokenResult?.access_token || tokenResult?.accessToken || null;
-          } catch (exErr2) {
-            console.error('Google token exchange (web client) failed:', exErr2?.message || exErr2);
-            toast.error(exErr2?.message || 'Failed to exchange Google login code', 'Login Failed');
-            return;
-          }
-        }
-
-        if (!accessToken) {
-          toast.error('Google login failed (no access token). Please try again.', 'Login Failed');
-          return;
-        }
-
-        // Get user info from Google
-        let userInfo;
-        try {
-          const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          });
-          if (!userInfoResponse.ok) {
-            const text = await userInfoResponse.text().catch(() => '');
-            throw new Error(`Google userinfo failed (${userInfoResponse.status}) ${text}`.slice(0, 180));
-          }
-          userInfo = await userInfoResponse.json();
-        } catch (uiErr) {
-          console.error('Google userinfo fetch failed:', uiErr?.message || uiErr);
-          toast.error(uiErr?.message || 'Failed to fetch Google user profile', 'Login Failed');
-          return;
-        }
-
-        let deviceInfo = {};
-        try {
-          deviceInfo = {
-            deviceId: (Device.osBuildId || Device.modelId || Device.modelName || 'unknown').substring(0, 100),
-            deviceModel: (Device.modelName || 'unknown').substring(0, 100),
-            osVersion: `${Device.osName || Platform.OS} ${Device.osVersion || ''}`.trim().substring(0, 100),
-          };
-        } catch (e) {
-          deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
-        }
-
-        let data;
-        try {
-          const res = await googleLogin({
-            googleId: userInfo.id,
-            email: userInfo.email,
-            firstName: userInfo.given_name,
-            lastName: userInfo.family_name,
-            profilePhoto: userInfo.picture,
-            institutionCode: normalizedInstitutionCode || undefined,
-            memberType: currentMemberType,
-            ...deviceInfo,
-          });
-          data = res.data;
-        } catch (apiErr) {
-          console.error('Backend googleLogin failed:', apiErr?.message || apiErr);
-          const msg = apiErr?.response?.data?.error || apiErr?.message || 'Network Error';
-          toast.error(msg, 'Login Failed');
-          return;
-        }
-
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
-        await AsyncStorage.setItem('institution', JSON.stringify(data.institution));
-        await AsyncStorage.setItem('institutionCode', normalizedInstitutionCode);
-        onLogin();
-      } else if (result.type === 'cancel') {
-        // User cancelled
-      } else {
-        toast.error('Google login failed. Please try again.', 'Login Failed');
-      }
-    } catch (err) {
-      const serverError = err.response?.data?.error || err.message || 'Google login failed';
-      toast.error(serverError, 'Login Failed');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 
   const handleLogin = async () => {
     const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
@@ -292,7 +118,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
   };
 
   const handleBiometricLogin = async () => {
-    if (loading || googleLoading) return;
+    if (loading) return;
     try {
       if (!bioAvailable) {
         toast.error('Biometric is not available on this device.');
@@ -437,29 +263,8 @@ export default function LoginScreen({ onLogin, onForgotPassword, onRegister }) {
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
-            onPress={handleGoogleLogin}
-            disabled={googleLoading}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color="#333" />
-            ) : (
-              <>
-                <Text style={styles.googleIcon}>G</Text>
-                <Text style={styles.googleButtonText}>Sign in with Google</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
           {bioAvailable && bioEnabled && hasSavedCreds && (
-            <TouchableOpacity style={styles.biometricLink} onPress={handleBiometricLogin} disabled={loading || googleLoading}>
+            <TouchableOpacity style={styles.biometricLink} onPress={handleBiometricLogin} disabled={loading}>
               <Text style={styles.biometricLinkText}>Use Biometric Instead?</Text>
             </TouchableOpacity>
           )}
@@ -513,20 +318,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  divider: {
-    flexDirection: 'row', alignItems: 'center', marginVertical: 16,
-  },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#e0e0e0' },
-  dividerText: { marginHorizontal: 12, color: '#bdc3c7', fontSize: 13, fontWeight: '600' },
-  googleButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#fff', borderRadius: 10, padding: 14,
-    borderWidth: 1.5, borderColor: '#e0e0e0',
-  },
-  googleIcon: {
-    fontSize: 20, fontWeight: '700', color: '#4285F4', marginRight: 10,
-  },
-  googleButtonText: { fontSize: 15, fontWeight: '600', color: '#333' },
   biometricLink: { marginTop: 14, alignItems: 'center' },
   biometricLinkText: { color: '#1a5276', fontSize: 14, fontWeight: '700' },
   recentSection: { marginBottom: 16 },

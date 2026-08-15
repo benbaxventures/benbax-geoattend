@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { FiMapPin, FiShield, FiTrendingUp } from 'react-icons/fi';
+import { FiList, FiMapPin, FiShield, FiTrendingUp } from 'react-icons/fi';
 
 const navItems = [
+  { path: '/institutions', label: 'Institutions', icon: FiList, end: true },
   { path: '/institutions/new', label: 'Create Institution', icon: FiMapPin },
   { path: '/audit', label: 'Audit Log', icon: FiShield },
   { path: '/analytics', label: 'Analytics', icon: FiTrendingUp },
@@ -29,8 +30,8 @@ export default function SuperAdminDashboard({ onLogout }) {
         <button onClick={handleSignOut} style={{ background: '#e74c3c', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: 8, cursor: 'pointer' }}>Sign Out</button>
       </div>
       <nav style={styles.nav}>
-        {navItems.map(({ path, label, icon: Icon }) => (
-          <NavLink key={path} to={path} style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.active : {}) })}>
+        {navItems.map(({ path, label, icon: Icon, end }) => (
+          <NavLink key={path} to={path} end={end} style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.active : {}) })}>
             <Icon size={18} /> {label}
           </NavLink>
         ))}

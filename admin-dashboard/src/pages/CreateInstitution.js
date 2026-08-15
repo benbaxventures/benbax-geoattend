@@ -109,9 +109,13 @@ export default function CreateInstitution() {
       }
       setCreated(inst);
 
-      // Automatically create initial admin for the new institution
+      // Backend auto-creates the initial admin and returns its credentials.
+      // Fall back to createInitialAdmin for older backends that don't.
       const institutionCode = inst.institution_code || inst.institutionCode || inst.code;
-      if (institutionCode) {
+      if (inst.adminCredentials) {
+        setAdminCredentials(inst.adminCredentials);
+        toast.success('Institution and admin account created successfully');
+      } else if (institutionCode) {
         try {
           const adminRes = await createInitialAdmin({
             institutionCode,

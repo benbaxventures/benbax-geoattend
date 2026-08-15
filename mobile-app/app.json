@@ -20,7 +20,11 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "CAMERA",
-        "RECORD_AUDIO"
+        "RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "plugins": [
@@ -35,21 +39,15 @@
         {
           "cameraPermission": "Allow Benbax GeoAttend to access your camera for QR code scanning."
         }
-      ],
-      "expo-web-browser"
+      ]
     ],
     "extra": {
-      "GOOGLE_ANDROID_CLIENT_ID": "725872424154-kqvhr7s8r4aqnjhkdid8gf4euscd1c6i.apps.googleusercontent.com",
-      "GOOGLE_WEB_CLIENT_ID": "725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com",
-      "API_BASE_URL": "http://10.46.11.236:5000/api",
+      "API_BASE_URL": "https://geofence-app-jjpa.onrender.com/api",
       "eas": {
-        "projectId": "4a453cbb-ffe6-48dc-9c41-a1ca2c3866b8"
+        "projectId": "78e28028-39aa-427d-a03e-f7bec5eb6c77"
       }
     },
     "runtimeVersion": "2.0.0",
-    "updates": {
-      "url": "https://u.expo.dev/4a453cbb-ffe6-48dc-9c41-a1ca2c3866b8"
-    },
     "ios": {
       "bundleIdentifier": "com.geoattend.app",
       "buildNumber": "2",
@@ -60,6 +58,7 @@
         "NSCameraUsageDescription": "Benbax GeoAttend needs camera access to scan QR codes for attendance check-in.",
         "NSFaceIDUsageDescription": "Benbax GeoAttend uses Face ID to securely log you in."
       }
-    }
+    },
+    "owner": "benbax-expo"
   }
 }

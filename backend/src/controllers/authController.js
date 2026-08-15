@@ -81,7 +81,7 @@ exports.login = async (req, res) => {
 
     staff = result.rows[0];
     if (!staff.password_hash) {
-      return res.status(401).json({ error: 'Password login is not set for this account. Use Google sign-in or reset password.' });
+      return res.status(401).json({ error: 'Password login is not set for this account. Please reset your password.' });
     }
     const validPassword = await bcrypt.compare(password, staff.password_hash);
 
@@ -195,151 +195,6 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.googleLogin = async (req, res) => {
-  try {
-    const { googleId, email, firstName, lastName, profilePhoto, institutionCode, deviceId, deviceModel, osVersion, memberType } = req.body;
-    const normalizedMemberType = (memberType || 'staff').toLowerCase();
-    const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
-
-    if (!googleId || !email) {
-      return res.status(400).json({ error: 'Google ID and email are required' });
-    }
-
-    let institution;
-    let result;
-    let staff;
-
-    if (normalizedInstitutionCode) {
-      institution = await getInstitutionByCode(normalizedInstitutionCode);
-      if (!institution) {
-        return res.status(404).json({ error: 'Invalid institution code' });
-      }
-    }
-
-    // Truncate values to fit column limits safely
-    const safe = {
-      googleId: String(googleId).slice(0, 255),
-      email: String(email).slice(0, 255),
-      firstName: (firstName || 'User').slice(0, 100),
-      lastName: (lastName || '').slice(0, 100),
-      profilePhoto: profilePhoto || null,
-      staffId: ('G-' + String(googleId).slice(-8)).toUpperCase().slice(0, 50),
-      deviceId: deviceId ? String(deviceId).slice(0, 255) : null,
-      deviceModel: deviceModel ? String(deviceModel).slice(0, 255) : null,
-      osVersion: osVersion ? String(osVersion).slice(0, 50) : null,
-    };
-
-    // If institution code provided, check within that institution. Otherwise try to find an existing staff by google_id/email.
-    if (institution) {
-      result = await pool.query(
-        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
-         FROM staff s
-         JOIN institutions i ON s.institution_id = i.id
-         WHERE (s.google_id = $1 OR s.email = $2) AND s.institution_id = $3 AND s.is_active = true`,
-        [safe.googleId, safe.email, institution.id]
-      );
-
-      if (result.rows.length === 0) {
-        // Create new user under the provided institution
-        const insertResult = await pool.query(
-          `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, google_id, profile_photo_url, role, member_type)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, 'staff', $8)
-           RETURNING *`,
-          [institution.id, safe.staffId, safe.firstName, safe.lastName, safe.email, safe.googleId, safe.profilePhoto, normalizedMemberType]
-        );
-
-        // Re-fetch with institution join
-        result = await pool.query(
-          `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius
-           FROM staff s
-           JOIN institutions i ON s.institution_id = i.id
-           WHERE s.id = $1`,
-          [insertResult.rows[0].id]
-        );
-        staff = result.rows[0];
-      } else {
-        staff = result.rows[0];
-        // Link google_id if not yet linked
-        if (!staff.google_id) {
-          await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [safe.googleId, staff.id]);
-        }
-      }
-    } else {
-      // No institution code — try to find existing staff by google id or email across institutions
-      result = await pool.query(
-        `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code
-         FROM staff s
-         JOIN institutions i ON s.institution_id = i.id
-         WHERE (s.google_id = $1 OR s.email = $2) AND s.is_active = true`,
-        [safe.googleId, safe.email]
-      );
-
-      if (result.rows.length === 0) {
-        return res.status(400).json({ error: 'No existing account found — please provide your institution code to create an account.' });
-      }
-      if (result.rows.length > 1) {
-        return res.status(400).json({ error: 'Multiple accounts found — please provide your institution code.' });
-      }
-
-      staff = result.rows[0];
-      institution = { id: staff.institution_id, institution_code: staff.institution_code };
-      // If google_id missing, link it
-      if (!staff.google_id) {
-        await pool.query('UPDATE staff SET google_id = $1, updated_at = NOW() WHERE id = $2', [safe.googleId, staff.id]);
-      }
-    }
-
-    const token = jwt.sign(
-      { userId: staff.id, role: staff.role, institutionId: staff.institution_id, memberType: staff.member_type },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-    );
-
-    // Device log — non-blocking so it can't crash login
-    if (safe.deviceId) {
-      pool.query(
-        `INSERT INTO device_logs (staff_uuid, device_id, device_model, os_version, action, ip_address)
-         VALUES ($1, $2, $3, $4, 'google_login', $5)`,
-        [staff.id, safe.deviceId, safe.deviceModel, safe.osVersion, req.ip]
-      ).catch(err => console.error('Device log error:', err.message));
-    }
-
-    const subscription = await getSubscriptionPayloadSafe(staff.institution_id);
-
-    res.json({
-      token,
-      user: {
-        id: staff.id,
-        staffId: staff.staff_id,
-        firstName: staff.first_name,
-        lastName: staff.last_name,
-        email: staff.email,
-        role: staff.role,
-        department: staff.department,
-        position: staff.position,
-        memberType: staff.member_type,
-        institutionId: staff.institution_id,
-        institutionName: staff.institution_name,
-        profilePhoto: staff.profile_photo_url,
-      },
-      institution: {
-        code: institution?.institution_code || null,
-        name: staff.institution_name,
-        address: staff.inst_address,
-        city: staff.inst_city,
-        region: staff.inst_region,
-        latitude: parseFloat(staff.inst_lat),
-        longitude: parseFloat(staff.inst_lon),
-        geofenceRadius: staff.geofence_radius,
-      },
-      subscription,
-    });
-  } catch (err) {
-    console.error('Google login error:', err);
-    res.status(500).json({ error: 'Server error', debug: err.message });
-  }
-};
-
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -361,6 +216,13 @@ exports.changePassword = async (req, res) => {
 
     const newHash = await bcrypt.hash(newPassword, 12);
     await pool.query('UPDATE staff SET password_hash = $1, updated_at = NOW() WHERE id = $2', [newHash, req.user.id]);
+
+    // Clear any stored plaintext credential for this institution so the super admin
+    // can no longer hand out a stale password; they must reset it from the dashboard.
+    await pool.query(
+      'DELETE FROM institution_admin_credentials WHERE institution_id = $1',
+      [req.user.institution_id]
+    ).catch(() => {});
 
     res.json({ message: 'Password changed successfully' });
   } catch (err) {
@@ -452,6 +314,17 @@ exports.createInitialAdmin = async (req, res) => {
        RETURNING id, staff_id, first_name, last_name, email`,
       [institutionId, finalStaffId, firstName || 'Admin', lastName || 'User', email || null, phone || null, passwordHash, qrData, normalizedMemberType]
     );
+
+    // Store the plaintext credentials so the super admin can retrieve them later.
+    await pool.query(
+      `INSERT INTO institution_admin_credentials (institution_id, admin_staff_id, admin_password)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (institution_id) DO UPDATE SET
+         admin_staff_id = EXCLUDED.admin_staff_id,
+         admin_password = EXCLUDED.admin_password,
+         updated_at = NOW()`,
+      [institutionId, finalStaffId, rawPassword]
+    ).catch(err => console.error('Create initial admin: store credentials error:', err.message));
 
     // Return the plaintext password once so the super-admin can relay it securely.
     res.status(201).json({

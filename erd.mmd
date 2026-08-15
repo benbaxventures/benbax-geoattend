@@ -1,0 +1,287 @@
+erDiagram
+    INSTITUTIONS {
+        UUID id PK
+        VARCHAR name
+        VARCHAR institution_code UK
+        TEXT address
+        VARCHAR city
+        VARCHAR region
+        DECIMAL latitude
+        DECIMAL longitude
+        INTEGER geofence_radius
+        VARCHAR timezone
+        TEXT logo_url
+        VARCHAR qr_rotation_token
+        TIMESTAMP qr_rotated_at
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    STAFF {
+        UUID id PK
+        UUID institution_id FK
+        VARCHAR staff_id
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR email
+        VARCHAR phone
+        VARCHAR department
+        VARCHAR position
+        VARCHAR password_hash
+        VARCHAR qr_code_data UK
+        TEXT profile_photo_url
+        VARCHAR role
+        VARCHAR member_type
+        VARCHAR google_id UK
+        TEXT push_token
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    ATTENDANCE_RECORDS {
+        UUID id PK
+        UUID staff_uuid FK
+        UUID institution_id FK
+        TIMESTAMP check_in_time
+        TIMESTAMP check_out_time
+        DECIMAL check_in_latitude
+        DECIMAL check_in_longitude
+        DECIMAL check_out_latitude
+        DECIMAL check_out_longitude
+        VARCHAR check_in_method
+        VARCHAR check_out_method
+        VARCHAR device_id
+        BOOLEAN is_late
+        BOOLEAN is_within_geofence
+        TEXT notes
+        DATE date
+        TIMESTAMP created_at
+    }
+
+    SUBSCRIPTIONS {
+        UUID id PK
+        UUID institution_id FK
+        VARCHAR plan_name
+        VARCHAR status
+        TIMESTAMP trial_start
+        TIMESTAMP trial_end
+        TIMESTAMP current_period_end
+        VARCHAR payment_reference
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    ATTENDANCE_RULES {
+        UUID id PK
+        UUID institution_id FK
+        VARCHAR member_type
+        TIME work_start_time
+        TIME work_end_time
+        INTEGER late_threshold_minutes
+        INTEGER early_departure_minutes
+        INTEGER_ARRAY working_days
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    DEVICE_LOGS {
+        UUID id PK
+        UUID staff_uuid FK
+        VARCHAR device_id
+        VARCHAR device_model
+        VARCHAR os_version
+        VARCHAR app_version
+        VARCHAR action
+        VARCHAR ip_address
+        TIMESTAMP timestamp
+    }
+
+    LEAVE_REQUESTS {
+        UUID id PK
+        UUID staff_uuid FK
+        UUID institution_id FK
+        VARCHAR leave_type
+        DATE start_date
+        DATE end_date
+        TEXT reason
+        VARCHAR status
+        UUID reviewed_by FK
+        TIMESTAMP reviewed_at
+        TEXT review_note
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    OVERTIME_RECORDS {
+        UUID id PK
+        UUID staff_uuid FK
+        UUID institution_id FK
+        DATE date
+        INTEGER overtime_minutes
+        VARCHAR reason
+        TIMESTAMP created_at
+    }
+
+    AUDIT_LOGS {
+        UUID id PK
+        UUID institution_id FK
+        VARCHAR action
+        VARCHAR entity_type
+        VARCHAR entity_id
+        JSONB details
+        VARCHAR performed_by
+        VARCHAR ip_address
+        TIMESTAMP created_at
+    }
+
+    FRAUD_EVENTS {
+        UUID id PK
+        UUID institution_id FK
+        UUID staff_uuid FK
+        VARCHAR event_type
+        JSONB details
+        VARCHAR ip_address
+        TIMESTAMP created_at
+    }
+
+    COURSES {
+        UUID id PK
+        UUID institution_id FK
+        VARCHAR code
+        VARCHAR name
+        VARCHAR department
+        INTEGER credit_hours
+        INTEGER attendance_threshold
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    COURSE_LECTURERS {
+        UUID id PK
+        UUID course_id FK
+        UUID lecturer_id FK
+        TIMESTAMP created_at
+    }
+
+    ENROLLMENTS {
+        UUID id PK
+        UUID course_id FK
+        UUID student_id FK
+        VARCHAR semester
+        VARCHAR status
+        TIMESTAMP created_at
+    }
+
+    LECTURE_SCHEDULES {
+        UUID id PK
+        UUID course_id FK
+        UUID institution_id FK
+        INTEGER day_of_week
+        TIME start_time
+        TIME end_time
+        VARCHAR venue
+        BOOLEAN is_active
+        TIMESTAMP created_at
+    }
+
+    LECTURE_INSTANCES {
+        UUID id PK
+        UUID schedule_id FK
+        UUID course_id FK
+        UUID institution_id FK
+        DATE date
+        TIME start_time
+        TIME end_time
+        VARCHAR status
+        TIMESTAMP created_at
+    }
+
+    LECTURE_ATTENDANCE {
+        UUID id PK
+        UUID lecture_instance_id FK
+        UUID student_id FK
+        UUID course_id FK
+        TIMESTAMP check_in_time
+        BOOLEAN is_late
+        BOOLEAN is_within_geofence
+        VARCHAR method
+        TIMESTAMP created_at
+    }
+
+    GUARDIANS {
+        UUID id PK
+        UUID student_id FK
+        VARCHAR name
+        VARCHAR phone
+        VARCHAR email
+        VARCHAR relationship
+        BOOLEAN notify_on_absence
+        TIMESTAMP created_at
+    }
+
+    ABSENCE_NOTIFICATIONS {
+        UUID id PK
+        UUID student_id FK
+        UUID course_id FK
+        UUID lecture_instance_id FK
+        UUID guardian_id FK
+        VARCHAR notification_type
+        VARCHAR channel
+        TEXT message
+        TIMESTAMP sent_at
+        VARCHAR status
+    }
+
+    GEOFENCE_EVENTS {
+        UUID id PK
+        UUID institution_id FK
+        UUID staff_uuid FK
+        VARCHAR event
+        DECIMAL latitude
+        DECIMAL longitude
+        INTEGER distance_m
+        INTEGER radius_m
+        TIMESTAMP created_at
+        TIMESTAMP resolved_at
+        TEXT notes
+    }
+
+    INSTITUTIONS ||--o{ STAFF : employs
+    INSTITUTIONS ||--o{ ATTENDANCE_RECORDS : owns
+    INSTITUTIONS ||--o{ SUBSCRIPTIONS : has
+    INSTITUTIONS ||--o{ ATTENDANCE_RULES : configures
+    INSTITUTIONS ||--o{ LEAVE_REQUESTS : receives
+    INSTITUTIONS ||--o{ OVERTIME_RECORDS : tracks
+    INSTITUTIONS ||--o{ AUDIT_LOGS : logs
+    INSTITUTIONS ||--o{ FRAUD_EVENTS : flags
+    INSTITUTIONS ||--o{ COURSES : offers
+    INSTITUTIONS ||--o{ LECTURE_SCHEDULES : schedules
+    INSTITUTIONS ||--o{ LECTURE_INSTANCES : hosts
+    INSTITUTIONS ||--o{ GEOFENCE_EVENTS : records
+
+    STAFF ||--o{ ATTENDANCE_RECORDS : checks
+    STAFF ||--o{ DEVICE_LOGS : uses
+    STAFF ||--o{ LEAVE_REQUESTS : requests
+    STAFF ||--o{ LEAVE_REQUESTS : reviews
+    STAFF ||--o{ OVERTIME_RECORDS : earns
+    STAFF ||--o{ FRAUD_EVENTS : triggers
+    STAFF ||--o{ COURSE_LECTURERS : teaches
+    STAFF ||--o{ ENROLLMENTS : enrolls
+    STAFF ||--o{ LECTURE_ATTENDANCE : attends
+    STAFF ||--o{ GUARDIANS : has
+    STAFF ||--o{ ABSENCE_NOTIFICATIONS : receives
+    STAFF ||--o{ GEOFENCE_EVENTS : enters_exits
+
+    COURSES ||--o{ COURSE_LECTURERS : assigned_to
+    COURSES ||--o{ ENROLLMENTS : contains
+    COURSES ||--o{ LECTURE_SCHEDULES : scheduled_as
+    COURSES ||--o{ LECTURE_INSTANCES : occurs_as
+    COURSES ||--o{ LECTURE_ATTENDANCE : records
+    COURSES ||--o{ ABSENCE_NOTIFICATIONS : about
+
+    LECTURE_SCHEDULES |o--o{ LECTURE_INSTANCES : generates
+    LECTURE_INSTANCES ||--o{ LECTURE_ATTENDANCE : has
+    LECTURE_INSTANCES ||--o{ ABSENCE_NOTIFICATIONS : about
+    GUARDIANS |o--o{ ABSENCE_NOTIFICATIONS : receives

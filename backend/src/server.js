@@ -80,10 +80,8 @@ app.use((err, req, res, _next) => {
 const pool = require('./config/database');
 async function runAutoMigration() {
   const alters = [
-    'ALTER TABLE staff ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE',
     'ALTER TABLE staff ADD COLUMN IF NOT EXISTS push_token TEXT',
     'ALTER TABLE staff ALTER COLUMN profile_photo_url TYPE TEXT',
-    'ALTER TABLE staff ALTER COLUMN google_id TYPE VARCHAR(255)',
     'ALTER TABLE staff ALTER COLUMN staff_id TYPE VARCHAR(50)',
     'ALTER TABLE staff ALTER COLUMN first_name TYPE VARCHAR(100)',
     'ALTER TABLE staff ALTER COLUMN last_name TYPE VARCHAR(100)',
@@ -172,6 +170,16 @@ async function runAutoMigration() {
      )`,
     `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotation_token VARCHAR(255)`,
     `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotated_at TIMESTAMP`,
+    `CREATE TABLE IF NOT EXISTS institution_admin_credentials (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+      admin_staff_id VARCHAR(50) NOT NULL,
+      admin_password TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS ux_institution_admin_credentials_institution
+      ON institution_admin_credentials(institution_id)`,
   ];
   for (const sql of newTables) {
     try { await pool.query(sql); } catch (err) {

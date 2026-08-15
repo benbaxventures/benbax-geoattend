@@ -72,43 +72,6 @@ const styles = {
     marginTop: '8px',
     cursor: 'pointer',
   },
-  divider: {
-    display: 'flex',
-    alignItems: 'center',
-    margin: '20px 0',
-  },
-  dividerLine: {
-    flex: 1,
-    height: '1px',
-    background: '#e0e0e0',
-  },
-  dividerText: {
-    margin: '0 12px',
-    color: '#bdc3c7',
-    fontSize: '13px',
-    fontWeight: '600',
-  },
-  googleButton: {
-    width: '100%',
-    padding: '14px',
-    background: '#fff',
-    color: '#333',
-    border: '2px solid #e0e0e0',
-    borderRadius: '10px',
-    fontSize: '15px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '10px',
-    transition: 'background 0.2s',
-  },
-  googleIcon: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#4285F4',
-  },
   footer: { textAlign: 'center', marginTop: '24px', fontSize: '12px', color: '#95a5a6' },
 };
 
@@ -151,20 +114,6 @@ export default function Login({ onLogin }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '725872424154-gv0c4blr061adus9iuaf8htc09pjk5l8.apps.googleusercontent.com';
-    const redirectUri = encodeURIComponent(window.location.origin + '/auth/google/callback');
-    const scope = encodeURIComponent('profile email');
-    // Require institution code for Google callback
-    const codeTrim = (institutionCode || '').trim();
-    if (!codeTrim) {
-      toast.error('Please enter your institution code before using Google sign-in');
-      return;
-    }
-    try { localStorage.setItem('institutionCode', codeTrim.toUpperCase()); } catch(e){}
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
   };
 
   return (
@@ -226,17 +175,6 @@ export default function Login({ onLogin }) {
         <div style={{ marginTop: 12, padding: 12, background: '#fff3cd', borderRadius: 8, fontSize: 13, lineHeight: 1.5 }}>
           <strong>Don't have admin credentials?</strong> Contact your super administrator to create an admin account for your institution. Regular signup creates staff accounts without admin access.
         </div>
-
-        <div style={styles.divider}>
-          <div style={styles.dividerLine} />
-          <span style={styles.dividerText}>OR</span>
-          <div style={styles.dividerLine} />
-        </div>
-
-        <button style={styles.googleButton} onClick={handleGoogleLogin} type="button">
-          <span style={styles.googleIcon}>G</span>
-          Sign in with Google
-        </button>
 
         <p style={styles.footer}>Geofenced Student Attendance Management System</p>
       </div>

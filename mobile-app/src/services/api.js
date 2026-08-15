@@ -2,9 +2,15 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
+// Resolve API base URL with multiple fallbacks to support Expo dev, .env, and a sensible LAN default.
 const API_BASE_URL =
-  Constants.expoConfig?.extra?.API_BASE_URL ||
+  // Prefer explicit environment variable (works with eas build / runtime env)
   process.env.EXPO_PUBLIC_API_BASE_URL ||
+  // Then check expo config extra (app.config.js / app.json)
+  Constants.expoConfig?.extra?.API_BASE_URL ||
+  Constants.manifest?.extra?.API_BASE_URL ||
+  // Fallback to a common developer LAN address — update .env if different
+  'http://10.46.11.236:5000/api' ||
   'https://geofence-app-jjpa.onrender.com/api';
 
 const api = axios.create({
@@ -15,7 +21,6 @@ const api = axios.create({
 
 const PUBLIC_AUTH_PATHS = [
   '/auth/login',
-  '/auth/google-login',
   '/auth/register',
   '/auth/forgot-password',
 ];
@@ -110,8 +115,6 @@ api.interceptors.response.use(
 // Auth
 export const login = (identifier, password, institutionCode, memberType, deviceInfo) =>
   api.post('/auth/login', { staffId: identifier, password, institutionCode, memberType, ...deviceInfo });
-export const googleLogin = (googleData) =>
-  api.post('/auth/google-login', googleData);
 export const forgotPassword = (identifier, email, newPassword, institutionCode, memberType) =>
   api.post('/auth/forgot-password', { staffId: identifier, email, newPassword, institutionCode, memberType });
 export const refreshToken = () => api.post('/auth/refresh-token');

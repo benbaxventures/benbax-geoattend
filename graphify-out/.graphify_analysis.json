@@ -1,0 +1,544 @@
+{
+  "communities": {
+    "0": [
+      "admin_dashboard_src_services_api_js",
+      "api_activatesubscription",
+      "api_createinitialadmin",
+      "api_createinstitution",
+      "api_createstaff",
+      "api_deletestaff",
+      "api_getallinstitutions",
+      "api_getallleaves",
+      "api_getattendancereport",
+      "api_getattendancerules",
+      "api_getattendancetrends",
+      "api_getauditlogs",
+      "api_getdashboardstats",
+      "api_getdepartmentanalytics",
+      "api_getdepartments",
+      "api_getexcelexporturl",
+      "api_getfraudreport",
+      "api_getgeofenceevents",
+      "api_getinstitution",
+      "api_getinstitutionqr",
+      "api_getleavestats",
+      "api_getovertimesummary",
+      "api_getpdfexporturl",
+      "api_getrealtimeattendance",
+      "api_getschedulerstatus",
+      "api_getstaff",
+      "api_getstaffbyid",
+      "api_getstaffqrcode",
+      "api_getsubscriptionstatus",
+      "api_gettodaysummary",
+      "api_gettopabsentees",
+      "api_getweeklysummary",
+      "api_register",
+      "api_repairinstitutioncode",
+      "api_resetstaffpassword",
+      "api_resolveapibaseurl",
+      "api_reviewleave",
+      "api_updateattendancerules",
+      "api_updateinstitution",
+      "api_updatestaff"
+    ],
+    "1": [
+      "backend_src_services_emailservice_js",
+      "backend_src_services_scheduler_js",
+      "backend_src_services_smsservice_js",
+      "emailservice_gettransporter",
+      "emailservice_sendabsencealert",
+      "emailservice_sendautosuspendnotice",
+      "emailservice_senddailysummary",
+      "emailservice_sendemail",
+      "emailservice_sendweeklysummary",
+      "scheduler_autocheckout",
+      "scheduler_autosuspendinactive",
+      "scheduler_detectabsences",
+      "scheduler_rotateqrcodes",
+      "scheduler_senddailyreport",
+      "scheduler_sendweeklyreport",
+      "scheduler_startscheduler",
+      "smsservice_sendabsentalert",
+      "smsservice_sendcheckinreminder",
+      "smsservice_sendlatealert",
+      "smsservice_sendsms",
+      "smsservice_sendstudentabsentalerttoguardian",
+      "smsservice_sendstudentlatealerttoguardian"
+    ],
+    "2": [
+      "api_cancelleave",
+      "api_changepassword",
+      "api_checkin",
+      "api_checkout",
+      "api_forgotpassword",
+      "api_getmyattendance",
+      "api_getmyleaves",
+      "api_getprofile",
+      "api_gettodaystatus",
+      "api_getweeklystats",
+      "api_googlelogin",
+      "api_login",
+      "api_postgeofenceevent",
+      "api_refreshtoken",
+      "api_requestleave",
+      "mobile_app_src_services_api_js",
+      "mobile_app_src_services_offlinequeue_js",
+      "offlinequeue_addtoqueue",
+      "offlinequeue_getqueuelength",
+      "offlinequeue_isonline",
+      "offlinequeue_syncqueue"
+    ],
+    "3": [
+      "admin_dashboard_src_app_js",
+      "app_app",
+      "app_maintabs",
+      "homescreen_homescreen",
+      "i18n_i18nprovider",
+      "i18n_usei18n",
+      "loginscreen_loginscreen",
+      "mobile_app_app_js",
+      "mobile_app_src_screens_homescreen_js",
+      "mobile_app_src_screens_loginscreen_js",
+      "mobile_app_src_screens_profilescreen_js",
+      "mobile_app_src_services_i18n_js",
+      "mobile_app_src_services_theme_js",
+      "mobile_app_src_services_toast_js",
+      "profilescreen_profilescreen",
+      "theme_themeprovider",
+      "theme_usetheme",
+      "toast_toastmessage",
+      "toast_toastprovider",
+      "toast_usetoast"
+    ],
+    "4": [
+      "authcontroller_getsubscriptionpayload",
+      "authcontroller_getsubscriptionpayloadsafe",
+      "backend_src_controllers_authcontroller_js",
+      "backend_src_middleware_subscription_js",
+      "backend_src_services_subscriptionservice_js",
+      "subscription_requireactivesubscription",
+      "subscriptionservice_buildsubscriptionsnapshot",
+      "subscriptionservice_ensuretrialsubscription",
+      "subscriptionservice_getcurrentsubscription",
+      "subscriptionservice_getinstitutionbycode",
+      "subscriptionservice_normalizeinstitutioncode"
+    ],
+    "5": [
+      "mainapplication_getjsmainmodulename",
+      "mainapplication_getpackages",
+      "mainapplication_getusedevelopersupport",
+      "mainapplication_mainapplication",
+      "mainapplication_mainapplication_onconfigurationchanged",
+      "mainapplication_mainapplication_oncreate",
+      "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt"
+    ],
+    "6": [
+      "mainactivity_mainactivity",
+      "mainactivity_mainactivity_createreactactivitydelegate",
+      "mainactivity_mainactivity_getmaincomponentname",
+      "mainactivity_mainactivity_invokedefaultonbackpressed",
+      "mainactivity_mainactivity_oncreate",
+      "mobile_app_android_app_src_main_java_com_geoattend_app_mainactivity_kt"
+    ],
+    "7": [
+      "admin_dashboard_src_serviceworkerregistration_js",
+      "serviceworkerregistration_checkvalidserviceworker",
+      "serviceworkerregistration_register",
+      "serviceworkerregistration_registervalidsw",
+      "serviceworkerregistration_unregister"
+    ],
+    "8": [
+      "biometric_authenticatewithbiometric",
+      "biometric_isbiometricavailable",
+      "biometric_isbiometricenabled",
+      "biometric_setbiometricenabled",
+      "mobile_app_src_services_biometric_js"
+    ],
+    "9": [
+      "audit_auditmiddleware",
+      "audit_logaudit",
+      "audit_sanitizebody",
+      "backend_src_middleware_audit_js"
+    ],
+    "10": [
+      "auth_authenticate",
+      "auth_requireadmin",
+      "auth_requiresuperadmin",
+      "backend_src_middleware_auth_js"
+    ],
+    "11": [
+      "backend_src_utils_geofence_js",
+      "geofence_calculatedistance",
+      "geofence_iswithingeofence",
+      "geofence_toradians"
+    ],
+    "12": [
+      "backend_src_utils_qrcode_js",
+      "qrcode_generateinstitutionqr",
+      "qrcode_generateqrcode",
+      "qrcode_generateqrcodebuffer"
+    ],
+    "13": [
+      "location_calculatedistance",
+      "location_getcurrentlocation",
+      "location_requestlocationpermission",
+      "mobile_app_src_services_location_js"
+    ],
+    "14": [
+      "sem-ADMIN_SETUP.md",
+      "sem-README.md",
+      "sem-graphify-out/GRAPH_REPORT.md",
+      "sem-mobile-app/LOCAL_SETUP.md"
+    ],
+    "15": [
+      "admin_dashboard_src_components_sidebar_js",
+      "sidebar_sidebar",
+      "sidebar_useismobile"
+    ],
+    "16": [
+      "admin_dashboard_src_pages_dashboard_js",
+      "dashboard_dashboard",
+      "dashboard_useismobile"
+    ],
+    "17": [
+      "admin_dashboard_src_pages_settings_js",
+      "settings_institutionqr",
+      "settings_settings"
+    ],
+    "18": [
+      "backend_src_server_js",
+      "server_ensureadminexists",
+      "server_runautomigration"
+    ],
+    "19": [
+      "mobile_app_src_services_notifications_js",
+      "notifications_registerforpushnotifications",
+      "notifications_schedulecheckinreminder"
+    ],
+    "20": [
+      "admin_dashboard_src_pages_analytics_js",
+      "analytics_analytics"
+    ],
+    "21": [
+      "admin_dashboard_src_pages_attendancemonitor_js",
+      "attendancemonitor_attendancemonitor"
+    ],
+    "22": [
+      "admin_dashboard_src_pages_auditlog_js",
+      "auditlog_auditlog"
+    ],
+    "23": [
+      "admin_dashboard_src_pages_billing_js",
+      "billing_billing"
+    ],
+    "24": [
+      "admin_dashboard_src_pages_createinstitution_js",
+      "createinstitution_createinstitution"
+    ],
+    "25": [
+      "admin_dashboard_src_pages_googlecallback_js",
+      "googlecallback_googlecallback"
+    ],
+    "26": [
+      "admin_dashboard_src_pages_leavemanagement_js",
+      "leavemanagement_leavemanagement"
+    ],
+    "27": [
+      "admin_dashboard_src_pages_login_js",
+      "login_login"
+    ],
+    "28": [
+      "admin_dashboard_src_pages_reports_js",
+      "reports_reports"
+    ],
+    "29": [
+      "admin_dashboard_src_pages_requestleave_js",
+      "requestleave_requestleave"
+    ],
+    "30": [
+      "admin_dashboard_src_pages_staffform_js",
+      "staffform_staffform"
+    ],
+    "31": [
+      "admin_dashboard_src_pages_staffmanagement_js",
+      "staffmanagement_staffmanagement"
+    ],
+    "32": [
+      "admin_dashboard_src_pages_superadmindashboard_js",
+      "superadmindashboard_superadmindashboard"
+    ],
+    "33": [
+      "attendancecontroller_logfraudevent",
+      "backend_src_controllers_attendancecontroller_js"
+    ],
+    "34": [
+      "backend_src_controllers_geofencecontroller_js",
+      "geofencecontroller_getadminswithcontacts"
+    ],
+    "35": [
+      "backend_src_controllers_institutioncontroller_js",
+      "institutioncontroller_generateinstitutioncode"
+    ],
+    "36": [
+      "backend_src_migrations_run_js",
+      "run_runmigration"
+    ],
+    "37": [
+      "backend_src_migrations_seed_js",
+      "seed_seed"
+    ],
+    "38": [
+      "backend_src_services_pushnotificationservice_js",
+      "pushnotificationservice_sendexpopushnotifications"
+    ],
+    "39": [
+      "accounttypescreen_accounttypescreen",
+      "mobile_app_src_screens_accounttypescreen_js"
+    ],
+    "40": [
+      "billingnative_billingnative",
+      "mobile_app_src_screens_billingnative_js"
+    ],
+    "41": [
+      "historyscreen_historyscreen",
+      "mobile_app_src_screens_historyscreen_js"
+    ],
+    "42": [
+      "leaverequestscreen_leaverequestscreen",
+      "mobile_app_src_screens_leaverequestscreen_js"
+    ],
+    "43": [
+      "mobile_app_src_screens_qrscanscreen_js",
+      "qrscanscreen_qrscanscreen"
+    ],
+    "44": [
+      "mobile_app_src_screens_registerscreen_js",
+      "registerscreen_registerscreen"
+    ],
+    "45": [
+      "admin_dashboard_public_service_worker_js"
+    ],
+    "46": [
+      "admin_dashboard_src_index_js"
+    ],
+    "47": [
+      "backend_src_prismaclient_js"
+    ],
+    "48": [
+      "backend_src_config_database_js"
+    ],
+    "49": [
+      "backend_src_controllers_analyticscontroller_js"
+    ],
+    "50": [
+      "backend_src_controllers_coursecontroller_js"
+    ],
+    "51": [
+      "backend_src_controllers_leavecontroller_js"
+    ],
+    "52": [
+      "backend_src_controllers_lecturercontroller_js"
+    ],
+    "53": [
+      "backend_src_controllers_reportcontroller_js"
+    ],
+    "54": [
+      "backend_src_controllers_staffcontroller_js"
+    ],
+    "55": [
+      "backend_src_routes_analytics_js"
+    ],
+    "56": [
+      "backend_src_routes_attendance_js"
+    ],
+    "57": [
+      "backend_src_routes_auth_js"
+    ],
+    "58": [
+      "backend_src_routes_geofence_js"
+    ],
+    "59": [
+      "backend_src_routes_institution_js"
+    ],
+    "60": [
+      "backend_src_routes_leave_js"
+    ],
+    "61": [
+      "backend_src_routes_reports_js"
+    ],
+    "62": [
+      "backend_src_routes_staff_js"
+    ],
+    "63": [
+      "sem-admin-dashboard/public/icon-192.png"
+    ],
+    "64": [
+      "sem-admin-dashboard/public/icon-512.png"
+    ],
+    "65": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp"
+    ],
+    "66": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp"
+    ],
+    "67": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp"
+    ],
+    "68": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp"
+    ],
+    "69": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp"
+    ],
+    "70": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp"
+    ],
+    "71": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp"
+    ],
+    "72": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp"
+    ],
+    "73": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp"
+    ],
+    "74": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp"
+    ],
+    "75": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    ],
+    "76": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp"
+    ],
+    "77": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp"
+    ],
+    "78": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    ],
+    "79": [
+      "sem-mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp"
+    ],
+    "80": [
+      "sem-mobile-app/assets/adaptive-icon.png"
+    ],
+    "81": [
+      "sem-mobile-app/assets/icon.png"
+    ],
+    "82": [
+      "sem-mobile-app/assets/splash.png"
+    ]
+  },
+  "cohesion": {},
+  "god_nodes": [
+    {
+      "id": "emailservice_sendemail",
+      "label": "sendEmail()",
+      "degree": 6
+    },
+    {
+      "id": "smsservice_sendsms",
+      "label": "sendSMS()",
+      "degree": 6
+    },
+    {
+      "id": "authcontroller_getsubscriptionpayload",
+      "label": "getSubscriptionPayload()",
+      "degree": 5
+    },
+    {
+      "id": "mainactivity_mainactivity",
+      "label": "MainActivity",
+      "degree": 5
+    },
+    {
+      "id": "subscription_requireactivesubscription",
+      "label": "requireActiveSubscription()",
+      "degree": 4
+    },
+    {
+      "id": "scheduler_detectabsences",
+      "label": "detectAbsences()",
+      "degree": 4
+    },
+    {
+      "id": "homescreen_homescreen",
+      "label": "HomeScreen()",
+      "degree": 4
+    },
+    {
+      "id": "profilescreen_profilescreen",
+      "label": "ProfileScreen()",
+      "degree": 4
+    },
+    {
+      "id": "offlinequeue_syncqueue",
+      "label": "syncQueue()",
+      "degree": 4
+    },
+    {
+      "id": "theme_usetheme",
+      "label": "useTheme()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "getSubscriptionPayload()",
+      "target": "ensureTrialSubscription()",
+      "source_files": [
+        "backend\\src\\controllers\\authController.js",
+        "backend\\src\\services\\subscriptionService.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "getSubscriptionPayload()",
+      "target": "getCurrentSubscription()",
+      "source_files": [
+        "backend\\src\\controllers\\authController.js",
+        "backend\\src\\services\\subscriptionService.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "getSubscriptionPayload()",
+      "target": "buildSubscriptionSnapshot()",
+      "source_files": [
+        "backend\\src\\controllers\\authController.js",
+        "backend\\src\\services\\subscriptionService.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "requireActiveSubscription()",
+      "target": "ensureTrialSubscription()",
+      "source_files": [
+        "backend\\src\\middleware\\subscription.js",
+        "backend\\src\\services\\subscriptionService.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "requireActiveSubscription()",
+      "target": "getCurrentSubscription()",
+      "source_files": [
+        "backend\\src\\middleware\\subscription.js",
+        "backend\\src\\services\\subscriptionService.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    }
+  ]
+}

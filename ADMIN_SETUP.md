@@ -112,10 +112,9 @@ Staff Members
 - Verify Staff ID is typed correctly (case-sensitive)
 - Contact your super admin if credentials are lost
 
-### Google OAuth creates staff accounts, not admins
-- Google OAuth signup creates regular staff accounts
+### Google OAuth removed
+- Google sign-in has been removed; use email/Staff ID + password login only
 - Only super admin can create admin accounts
-- Use password login for admin access
 
 ### Cannot access admin dashboard
 - Only accounts with role `admin` or `super_admin` can access

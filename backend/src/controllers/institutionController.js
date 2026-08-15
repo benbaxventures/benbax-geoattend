@@ -1,5 +1,7 @@
 const pool = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const { generateInstitutionQR } = require('../utils/qrcode');
 const {
   DEFAULT_TRIAL_DAYS,
@@ -15,6 +17,36 @@ async function generateInstitutionCode() {
     if (exists.rows.length === 0) return code;
   }
   return `INST-${Date.now().toString().slice(-6)}`;
+}
+
+/** Upsert the plaintext admin credentials so the super admin can retrieve them later. */
+async function storeAdminCredentials(institutionId, staffId, password) {
+  await pool.query(
+    `INSERT INTO institution_admin_credentials (institution_id, admin_staff_id, admin_password)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (institution_id) DO UPDATE SET
+       admin_staff_id = EXCLUDED.admin_staff_id,
+       admin_password = EXCLUDED.admin_password,
+       updated_at = NOW()`,
+    [institutionId, staffId, password]
+  );
+}
+
+/** Create the initial admin account for an institution and store its credentials. */
+async function createInitialAdminCredentials(institutionId, providedPassword) {
+  const staffId = 'ADMIN' + crypto.randomBytes(3).toString('hex').toUpperCase();
+  const rawPassword = providedPassword || crypto.randomBytes(4).toString('hex');
+  const passwordHash = await bcrypt.hash(rawPassword, 12);
+  const qrData = `STAFF-${institutionId}-${staffId}`;
+
+  await pool.query(
+    `INSERT INTO staff (institution_id, staff_id, first_name, last_name, password_hash, qr_code_data, role, member_type)
+     VALUES ($1, $2, 'Admin', 'User', $3, $4, 'admin', 'staff')`,
+    [institutionId, staffId, passwordHash, qrData]
+  );
+
+  await storeAdminCredentials(institutionId, staffId, rawPassword);
+  return { staffId, password: rawPassword };
 }
 
 exports.getInstitution = async (req, res) => {
@@ -64,7 +96,35 @@ exports.updateInstitution = async (req, res) => {
 
 exports.getAllInstitutions = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM institutions ORDER BY name');
+    const result = await pool.query(`
+      SELECT
+        i.*,
+        COALESCE(sc.staff_count, 0) AS staff_count,
+        COALESCE(sc.active_staff_count, 0) AS active_staff_count,
+        COALESCE(sc.admin_count, 0) AS admin_count,
+        sub.plan_name AS subscription_plan,
+        sub.status AS subscription_status,
+        sub.trial_end AS subscription_trial_end,
+        sub.current_period_end AS subscription_period_end
+      FROM institutions i
+      LEFT JOIN (
+        SELECT
+          institution_id,
+          COUNT(*) AS staff_count,
+          COUNT(*) FILTER (WHERE is_active) AS active_staff_count,
+          COUNT(*) FILTER (WHERE role IN ('admin', 'super_admin')) AS admin_count
+        FROM staff
+        GROUP BY institution_id
+      ) sc ON sc.institution_id = i.id
+      LEFT JOIN LATERAL (
+        SELECT plan_name, status, trial_end, current_period_end
+        FROM subscriptions s
+        WHERE s.institution_id = i.id
+        ORDER BY s.created_at DESC
+        LIMIT 1
+      ) sub ON true
+      ORDER BY i.created_at DESC
+    `);
     res.json(result.rows);
   } catch (err) {
     console.error('Get all institutions error:', err);
@@ -144,7 +204,16 @@ exports.createInstitution = async (req, res) => {
       console.error('Create institution: trial subscription skipped:', subErr.message);
     }
 
-    res.status(201).json(created);
+    // Always create an initial admin account and store its credentials so the
+    // super admin can retrieve them later from the admin dashboard.
+    let adminCredentials = null;
+    try {
+      adminCredentials = await createInitialAdminCredentials(id);
+    } catch (adminErr) {
+      console.error('Create institution: initial admin auto-create failed:', adminErr.message);
+    }
+
+    res.status(201).json({ ...created, adminCredentials });
   } catch (err) {
     console.error('Create institution error:', err);
     const debug = process.env.NODE_ENV !== 'production' ? err.message : undefined;
@@ -348,6 +417,78 @@ exports.getInstitutionQR = async (req, res) => {
     });
   } catch (err) {
     console.error('Get institution QR error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Super admin: retrieve the stored admin credentials for an institution
+exports.getAdminCredentials = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inst = await pool.query(
+      'SELECT id, name, institution_code FROM institutions WHERE id = $1',
+      [id]
+    );
+    if (inst.rows.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
+    }
+
+    const creds = await pool.query(
+      'SELECT admin_staff_id, admin_password, updated_at FROM institution_admin_credentials WHERE institution_id = $1',
+      [id]
+    );
+    if (creds.rows.length === 0) {
+      return res.status(404).json({ error: 'No stored admin credentials for this institution' });
+    }
+
+    res.json({
+      institution: inst.rows[0],
+      credentials: { staffId: creds.rows[0].admin_staff_id, password: creds.rows[0].admin_password },
+      updatedAt: creds.rows[0].updated_at,
+    });
+  } catch (err) {
+    console.error('Get admin credentials error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Super admin: create (if missing) or reset the admin credentials for an institution
+exports.createOrResetAdminCredentials = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inst = await pool.query(
+      'SELECT id, name, institution_code FROM institutions WHERE id = $1',
+      [id]
+    );
+    if (inst.rows.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
+    }
+
+    const existing = await pool.query(
+      "SELECT id, staff_id FROM staff WHERE institution_id = $1 AND role IN ('admin','super_admin') ORDER BY created_at LIMIT 1",
+      [id]
+    );
+
+    const rawPassword = crypto.randomBytes(4).toString('hex');
+    const passwordHash = await bcrypt.hash(rawPassword, 12);
+    let staffId;
+
+    if (existing.rows.length > 0) {
+      staffId = existing.rows[0].staff_id;
+      await pool.query('UPDATE staff SET password_hash = $1, updated_at = NOW() WHERE id = $2', [passwordHash, existing.rows[0].id]);
+      await storeAdminCredentials(id, staffId, rawPassword);
+    } else {
+      const created = await createInitialAdminCredentials(id, rawPassword);
+      staffId = created.staffId;
+    }
+
+    res.json({
+      message: existing.rows.length > 0 ? 'Admin password reset' : 'Admin account created',
+      credentials: { staffId, password: rawPassword },
+    });
+  } catch (err) {
+    console.error('Create/reset admin credentials error:', err);
+    if (err.code === '23505') return res.status(409).json({ error: 'Staff ID already exists — try again' });
     res.status(500).json({ error: 'Server error' });
   }
 };

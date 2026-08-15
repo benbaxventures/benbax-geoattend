@@ -1,0 +1,4234 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "service-worker.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\public\\service-worker.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_public_service_worker_js"
+    },
+    {
+      "label": "App.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\App.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_app_js"
+    },
+    {
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "mobile-app\\App.js",
+      "source_location": "L76",
+      "id": "app_app"
+    },
+    {
+      "label": "index.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\index.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_index_js"
+    },
+    {
+      "label": "serviceWorkerRegistration.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_serviceworkerregistration_js"
+    },
+    {
+      "label": "register()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L7",
+      "id": "serviceworkerregistration_register"
+    },
+    {
+      "label": "registerValidSW()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L23",
+      "id": "serviceworkerregistration_registervalidsw"
+    },
+    {
+      "label": "checkValidServiceWorker()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L41",
+      "id": "serviceworkerregistration_checkvalidserviceworker"
+    },
+    {
+      "label": "unregister()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L54",
+      "id": "serviceworkerregistration_unregister"
+    },
+    {
+      "label": "Sidebar.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\components\\Sidebar.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_components_sidebar_js"
+    },
+    {
+      "label": "useIsMobile()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\components\\Sidebar.js",
+      "source_location": "L17",
+      "id": "sidebar_useismobile"
+    },
+    {
+      "label": "Sidebar()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\components\\Sidebar.js",
+      "source_location": "L111",
+      "id": "sidebar_sidebar"
+    },
+    {
+      "label": "Analytics.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Analytics.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_analytics_js"
+    },
+    {
+      "label": "Analytics()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Analytics.js",
+      "source_location": "L29",
+      "id": "analytics_analytics"
+    },
+    {
+      "label": "AttendanceMonitor.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\AttendanceMonitor.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_attendancemonitor_js"
+    },
+    {
+      "label": "AttendanceMonitor()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\AttendanceMonitor.js",
+      "source_location": "L34",
+      "id": "attendancemonitor_attendancemonitor"
+    },
+    {
+      "label": "AuditLog.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\AuditLog.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_auditlog_js"
+    },
+    {
+      "label": "AuditLog()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\AuditLog.js",
+      "source_location": "L42",
+      "id": "auditlog_auditlog"
+    },
+    {
+      "label": "Billing.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Billing.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_billing_js"
+    },
+    {
+      "label": "Billing()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Billing.js",
+      "source_location": "L11",
+      "id": "billing_billing"
+    },
+    {
+      "label": "CreateInstitution.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\CreateInstitution.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_createinstitution_js"
+    },
+    {
+      "label": "CreateInstitution()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\CreateInstitution.js",
+      "source_location": "L17",
+      "id": "createinstitution_createinstitution"
+    },
+    {
+      "label": "Dashboard.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Dashboard.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_dashboard_js"
+    },
+    {
+      "label": "useIsMobile()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Dashboard.js",
+      "source_location": "L48",
+      "id": "dashboard_useismobile"
+    },
+    {
+      "label": "Dashboard()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Dashboard.js",
+      "source_location": "L58",
+      "id": "dashboard_dashboard"
+    },
+    {
+      "label": "GoogleCallback.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\GoogleCallback.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_googlecallback_js"
+    },
+    {
+      "label": "GoogleCallback()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\GoogleCallback.js",
+      "source_location": "L6",
+      "id": "googlecallback_googlecallback"
+    },
+    {
+      "label": "LeaveManagement.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\LeaveManagement.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_leavemanagement_js"
+    },
+    {
+      "label": "LeaveManagement()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\LeaveManagement.js",
+      "source_location": "L41",
+      "id": "leavemanagement_leavemanagement"
+    },
+    {
+      "label": "Login.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Login.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_login_js"
+    },
+    {
+      "label": "Login()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Login.js",
+      "source_location": "L115",
+      "id": "login_login"
+    },
+    {
+      "label": "Reports.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Reports.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_reports_js"
+    },
+    {
+      "label": "Reports()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Reports.js",
+      "source_location": "L37",
+      "id": "reports_reports"
+    },
+    {
+      "label": "RequestLeave.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\RequestLeave.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_requestleave_js"
+    },
+    {
+      "label": "RequestLeave()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\RequestLeave.js",
+      "source_location": "L19",
+      "id": "requestleave_requestleave"
+    },
+    {
+      "label": "Settings.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Settings.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_settings_js"
+    },
+    {
+      "label": "Settings()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Settings.js",
+      "source_location": "L42",
+      "id": "settings_settings"
+    },
+    {
+      "label": "InstitutionQR()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\Settings.js",
+      "source_location": "L293",
+      "id": "settings_institutionqr"
+    },
+    {
+      "label": "StaffForm.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\StaffForm.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_staffform_js"
+    },
+    {
+      "label": "StaffForm()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\StaffForm.js",
+      "source_location": "L26",
+      "id": "staffform_staffform"
+    },
+    {
+      "label": "StaffManagement.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\StaffManagement.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_staffmanagement_js"
+    },
+    {
+      "label": "StaffManagement()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\StaffManagement.js",
+      "source_location": "L63",
+      "id": "staffmanagement_staffmanagement"
+    },
+    {
+      "label": "SuperAdminDashboard.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\SuperAdminDashboard.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_pages_superadmindashboard_js"
+    },
+    {
+      "label": "SuperAdminDashboard()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\pages\\SuperAdminDashboard.js",
+      "source_location": "L18",
+      "id": "superadmindashboard_superadmindashboard"
+    },
+    {
+      "label": "api.js",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L1",
+      "id": "admin_dashboard_src_services_api_js"
+    },
+    {
+      "label": "resolveApiBaseUrl()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L3",
+      "id": "api_resolveapibaseurl"
+    },
+    {
+      "label": "login()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L117",
+      "id": "api_login"
+    },
+    {
+      "label": "googleLogin()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L119",
+      "id": "api_googlelogin"
+    },
+    {
+      "label": "getProfile()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L124",
+      "id": "api_getprofile"
+    },
+    {
+      "label": "createInitialAdmin()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L58",
+      "id": "api_createinitialadmin"
+    },
+    {
+      "label": "getStaff()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L61",
+      "id": "api_getstaff"
+    },
+    {
+      "label": "getStaffById()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L62",
+      "id": "api_getstaffbyid"
+    },
+    {
+      "label": "createStaff()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L63",
+      "id": "api_createstaff"
+    },
+    {
+      "label": "register()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L64",
+      "id": "api_register"
+    },
+    {
+      "label": "updateStaff()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L65",
+      "id": "api_updatestaff"
+    },
+    {
+      "label": "resetStaffPassword()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L66",
+      "id": "api_resetstaffpassword"
+    },
+    {
+      "label": "getStaffQRCode()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L67",
+      "id": "api_getstaffqrcode"
+    },
+    {
+      "label": "getDepartments()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L68",
+      "id": "api_getdepartments"
+    },
+    {
+      "label": "deleteStaff()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L69",
+      "id": "api_deletestaff"
+    },
+    {
+      "label": "getInstitution()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L72",
+      "id": "api_getinstitution"
+    },
+    {
+      "label": "updateInstitution()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L73",
+      "id": "api_updateinstitution"
+    },
+    {
+      "label": "getInstitutionQR()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L74",
+      "id": "api_getinstitutionqr"
+    },
+    {
+      "label": "getAttendanceRules()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L75",
+      "id": "api_getattendancerules"
+    },
+    {
+      "label": "updateAttendanceRules()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L76",
+      "id": "api_updateattendancerules"
+    },
+    {
+      "label": "createInstitution()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L77",
+      "id": "api_createinstitution"
+    },
+    {
+      "label": "getAllInstitutions()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L78",
+      "id": "api_getallinstitutions"
+    },
+    {
+      "label": "repairInstitutionCode()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L79",
+      "id": "api_repairinstitutioncode"
+    },
+    {
+      "label": "getSubscriptionStatus()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L81",
+      "id": "api_getsubscriptionstatus"
+    },
+    {
+      "label": "activateSubscription()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L82",
+      "id": "api_activatesubscription"
+    },
+    {
+      "label": "getDashboardStats()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L85",
+      "id": "api_getdashboardstats"
+    },
+    {
+      "label": "getTodaySummary()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L86",
+      "id": "api_gettodaysummary"
+    },
+    {
+      "label": "getAttendanceReport()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L87",
+      "id": "api_getattendancereport"
+    },
+    {
+      "label": "getRealTimeAttendance()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L88",
+      "id": "api_getrealtimeattendance"
+    },
+    {
+      "label": "getWeeklySummary()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L89",
+      "id": "api_getweeklysummary"
+    },
+    {
+      "label": "getFraudReport()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L90",
+      "id": "api_getfraudreport"
+    },
+    {
+      "label": "getGeofenceEvents()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L91",
+      "id": "api_getgeofenceevents"
+    },
+    {
+      "label": "getExcelExportUrl()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L94",
+      "id": "api_getexcelexporturl"
+    },
+    {
+      "label": "getPdfExportUrl()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L98",
+      "id": "api_getpdfexporturl"
+    },
+    {
+      "label": "getAllLeaves()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L104",
+      "id": "api_getallleaves"
+    },
+    {
+      "label": "getLeaveStats()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L105",
+      "id": "api_getleavestats"
+    },
+    {
+      "label": "reviewLeave()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L106",
+      "id": "api_reviewleave"
+    },
+    {
+      "label": "requestLeave()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L139",
+      "id": "api_requestleave"
+    },
+    {
+      "label": "getMyLeaves()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L140",
+      "id": "api_getmyleaves"
+    },
+    {
+      "label": "cancelLeave()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L141",
+      "id": "api_cancelleave"
+    },
+    {
+      "label": "getAttendanceTrends()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L113",
+      "id": "api_getattendancetrends"
+    },
+    {
+      "label": "getTopAbsentees()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L114",
+      "id": "api_gettopabsentees"
+    },
+    {
+      "label": "getDepartmentAnalytics()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L115",
+      "id": "api_getdepartmentanalytics"
+    },
+    {
+      "label": "getOvertimeSummary()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L116",
+      "id": "api_getovertimesummary"
+    },
+    {
+      "label": "getAuditLogs()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L117",
+      "id": "api_getauditlogs"
+    },
+    {
+      "label": "getSchedulerStatus()",
+      "file_type": "code",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L118",
+      "id": "api_getschedulerstatus"
+    },
+    {
+      "label": "prismaClient.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\prismaClient.js",
+      "source_location": "L1",
+      "id": "backend_src_prismaclient_js"
+    },
+    {
+      "label": "server.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\server.js",
+      "source_location": "L1",
+      "id": "backend_src_server_js"
+    },
+    {
+      "label": "runAutoMigration()",
+      "file_type": "code",
+      "source_file": "backend\\src\\server.js",
+      "source_location": "L81",
+      "id": "server_runautomigration"
+    },
+    {
+      "label": "ensureAdminExists()",
+      "file_type": "code",
+      "source_file": "backend\\src\\server.js",
+      "source_location": "L184",
+      "id": "server_ensureadminexists"
+    },
+    {
+      "label": "database.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\config\\database.js",
+      "source_location": "L1",
+      "id": "backend_src_config_database_js"
+    },
+    {
+      "label": "analyticsController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\analyticsController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_analyticscontroller_js"
+    },
+    {
+      "label": "attendanceController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\attendanceController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_attendancecontroller_js"
+    },
+    {
+      "label": "logFraudEvent()",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\attendanceController.js",
+      "source_location": "L5",
+      "id": "attendancecontroller_logfraudevent"
+    },
+    {
+      "label": "authController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_authcontroller_js"
+    },
+    {
+      "label": "getSubscriptionPayload()",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L13",
+      "id": "authcontroller_getsubscriptionpayload"
+    },
+    {
+      "label": "getSubscriptionPayloadSafe()",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L20",
+      "id": "authcontroller_getsubscriptionpayloadsafe"
+    },
+    {
+      "label": "courseController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\courseController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_coursecontroller_js"
+    },
+    {
+      "label": "geofenceController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\geofenceController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_geofencecontroller_js"
+    },
+    {
+      "label": "getAdminsWithContacts()",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\geofenceController.js",
+      "source_location": "L5",
+      "id": "geofencecontroller_getadminswithcontacts"
+    },
+    {
+      "label": "institutionController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\institutionController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_institutioncontroller_js"
+    },
+    {
+      "label": "generateInstitutionCode()",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\institutionController.js",
+      "source_location": "L11",
+      "id": "institutioncontroller_generateinstitutioncode"
+    },
+    {
+      "label": "leaveController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\leaveController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_leavecontroller_js"
+    },
+    {
+      "label": "lecturerController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\lecturerController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_lecturercontroller_js"
+    },
+    {
+      "label": "reportController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\reportController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_reportcontroller_js"
+    },
+    {
+      "label": "staffController.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\controllers\\staffController.js",
+      "source_location": "L1",
+      "id": "backend_src_controllers_staffcontroller_js"
+    },
+    {
+      "label": "audit.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L1",
+      "id": "backend_src_middleware_audit_js"
+    },
+    {
+      "label": "logAudit()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L3",
+      "id": "audit_logaudit"
+    },
+    {
+      "label": "auditMiddleware()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L16",
+      "id": "audit_auditmiddleware"
+    },
+    {
+      "label": "sanitizeBody()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L43",
+      "id": "audit_sanitizebody"
+    },
+    {
+      "label": "auth.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L1",
+      "id": "backend_src_middleware_auth_js"
+    },
+    {
+      "label": "authenticate()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L4",
+      "id": "auth_authenticate"
+    },
+    {
+      "label": "requireAdmin()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L33",
+      "id": "auth_requireadmin"
+    },
+    {
+      "label": "requireSuperAdmin()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L40",
+      "id": "auth_requiresuperadmin"
+    },
+    {
+      "label": "subscription.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\subscription.js",
+      "source_location": "L1",
+      "id": "backend_src_middleware_subscription_js"
+    },
+    {
+      "label": "requireActiveSubscription()",
+      "file_type": "code",
+      "source_file": "backend\\src\\middleware\\subscription.js",
+      "source_location": "L8",
+      "id": "subscription_requireactivesubscription"
+    },
+    {
+      "label": "run.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\migrations\\run.js",
+      "source_location": "L1",
+      "id": "backend_src_migrations_run_js"
+    },
+    {
+      "label": "runMigration()",
+      "file_type": "code",
+      "source_file": "backend\\src\\migrations\\run.js",
+      "source_location": "L365",
+      "id": "run_runmigration"
+    },
+    {
+      "label": "seed.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\migrations\\seed.js",
+      "source_location": "L1",
+      "id": "backend_src_migrations_seed_js"
+    },
+    {
+      "label": "seed()",
+      "file_type": "code",
+      "source_file": "backend\\src\\migrations\\seed.js",
+      "source_location": "L6",
+      "id": "seed_seed"
+    },
+    {
+      "label": "analytics.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\analytics.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_analytics_js"
+    },
+    {
+      "label": "attendance.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\attendance.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_attendance_js"
+    },
+    {
+      "label": "auth.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\auth.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_auth_js"
+    },
+    {
+      "label": "geofence.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\geofence.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_geofence_js"
+    },
+    {
+      "label": "institution.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\institution.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_institution_js"
+    },
+    {
+      "label": "leave.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\leave.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_leave_js"
+    },
+    {
+      "label": "reports.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\reports.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_reports_js"
+    },
+    {
+      "label": "staff.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\routes\\staff.js",
+      "source_location": "L1",
+      "id": "backend_src_routes_staff_js"
+    },
+    {
+      "label": "emailService.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L1",
+      "id": "backend_src_services_emailservice_js"
+    },
+    {
+      "label": "getTransporter()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L5",
+      "id": "emailservice_gettransporter"
+    },
+    {
+      "label": "sendEmail()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L24",
+      "id": "emailservice_sendemail"
+    },
+    {
+      "label": "sendAbsenceAlert()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L46",
+      "id": "emailservice_sendabsencealert"
+    },
+    {
+      "label": "sendDailySummary()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L80",
+      "id": "emailservice_senddailysummary"
+    },
+    {
+      "label": "sendWeeklySummary()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L122",
+      "id": "emailservice_sendweeklysummary"
+    },
+    {
+      "label": "sendAutoSuspendNotice()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L161",
+      "id": "emailservice_sendautosuspendnotice"
+    },
+    {
+      "label": "pushNotificationService.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\pushNotificationService.js",
+      "source_location": "L1",
+      "id": "backend_src_services_pushnotificationservice_js"
+    },
+    {
+      "label": "sendExpoPushNotifications()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\pushNotificationService.js",
+      "source_location": "L8",
+      "id": "pushnotificationservice_sendexpopushnotifications"
+    },
+    {
+      "label": "scheduler.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L1",
+      "id": "backend_src_services_scheduler_js"
+    },
+    {
+      "label": "autoCheckOut()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L8",
+      "id": "scheduler_autocheckout"
+    },
+    {
+      "label": "detectAbsences()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L49",
+      "id": "scheduler_detectabsences"
+    },
+    {
+      "label": "sendDailyReport()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L132",
+      "id": "scheduler_senddailyreport"
+    },
+    {
+      "label": "sendWeeklyReport()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L174",
+      "id": "scheduler_sendweeklyreport"
+    },
+    {
+      "label": "autoSuspendInactive()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L217",
+      "id": "scheduler_autosuspendinactive"
+    },
+    {
+      "label": "rotateQRCodes()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L270",
+      "id": "scheduler_rotateqrcodes"
+    },
+    {
+      "label": "startScheduler()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L298",
+      "id": "scheduler_startscheduler"
+    },
+    {
+      "label": "smsService.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L1",
+      "id": "backend_src_services_smsservice_js"
+    },
+    {
+      "label": "sendSMS()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L3",
+      "id": "smsservice_sendsms"
+    },
+    {
+      "label": "sendCheckInReminder()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L66",
+      "id": "smsservice_sendcheckinreminder"
+    },
+    {
+      "label": "sendLateAlert()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L70",
+      "id": "smsservice_sendlatealert"
+    },
+    {
+      "label": "sendAbsentAlert()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L74",
+      "id": "smsservice_sendabsentalert"
+    },
+    {
+      "label": "sendStudentLateAlertToGuardian()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L78",
+      "id": "smsservice_sendstudentlatealerttoguardian"
+    },
+    {
+      "label": "sendStudentAbsentAlertToGuardian()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L82",
+      "id": "smsservice_sendstudentabsentalerttoguardian"
+    },
+    {
+      "label": "subscriptionService.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L1",
+      "id": "backend_src_services_subscriptionservice_js"
+    },
+    {
+      "label": "normalizeInstitutionCode()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L5",
+      "id": "subscriptionservice_normalizeinstitutioncode"
+    },
+    {
+      "label": "getInstitutionByCode()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L9",
+      "id": "subscriptionservice_getinstitutionbycode"
+    },
+    {
+      "label": "ensureTrialSubscription()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L20",
+      "id": "subscriptionservice_ensuretrialsubscription"
+    },
+    {
+      "label": "getCurrentSubscription()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L42",
+      "id": "subscriptionservice_getcurrentsubscription"
+    },
+    {
+      "label": "buildSubscriptionSnapshot()",
+      "file_type": "code",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L54",
+      "id": "subscriptionservice_buildsubscriptionsnapshot"
+    },
+    {
+      "label": "geofence.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L1",
+      "id": "backend_src_utils_geofence_js"
+    },
+    {
+      "label": "calculateDistance()",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L5",
+      "id": "geofence_calculatedistance"
+    },
+    {
+      "label": "toRadians()",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L19",
+      "id": "geofence_toradians"
+    },
+    {
+      "label": "isWithinGeofence()",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L26",
+      "id": "geofence_iswithingeofence"
+    },
+    {
+      "label": "qrcode.js",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L1",
+      "id": "backend_src_utils_qrcode_js"
+    },
+    {
+      "label": "generateQRCode()",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L6",
+      "id": "qrcode_generateqrcode"
+    },
+    {
+      "label": "generateQRCodeBuffer()",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L26",
+      "id": "qrcode_generateqrcodebuffer"
+    },
+    {
+      "label": "generateInstitutionQR()",
+      "file_type": "code",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L44",
+      "id": "qrcode_generateinstitutionqr"
+    },
+    {
+      "label": "App.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\App.js",
+      "source_location": "L1",
+      "id": "mobile_app_app_js"
+    },
+    {
+      "label": "MainTabs()",
+      "file_type": "code",
+      "source_file": "mobile-app\\App.js",
+      "source_location": "L29",
+      "id": "app_maintabs"
+    },
+    {
+      "label": "MainActivity.kt",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L1",
+      "id": "mobile_app_android_app_src_main_java_com_geoattend_app_mainactivity_kt"
+    },
+    {
+      "label": "MainActivity",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L13",
+      "id": "mainactivity_mainactivity"
+    },
+    {
+      "label": ".onCreate()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L14",
+      "id": "mainactivity_mainactivity_oncreate"
+    },
+    {
+      "label": ".getMainComponentName()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L26",
+      "id": "mainactivity_mainactivity_getmaincomponentname"
+    },
+    {
+      "label": ".createReactActivityDelegate()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L32",
+      "id": "mainactivity_mainactivity_createreactactivitydelegate"
+    },
+    {
+      "label": ".invokeDefaultOnBackPressed()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L48",
+      "id": "mainactivity_mainactivity_invokedefaultonbackpressed"
+    },
+    {
+      "label": "MainApplication.kt",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L1",
+      "id": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt"
+    },
+    {
+      "label": "MainApplication",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L19",
+      "id": "mainapplication_mainapplication"
+    },
+    {
+      "label": "getPackages()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L24",
+      "id": "mainapplication_getpackages"
+    },
+    {
+      "label": "getJSMainModuleName()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L30",
+      "id": "mainapplication_getjsmainmodulename"
+    },
+    {
+      "label": "getUseDeveloperSupport()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L32",
+      "id": "mainapplication_getusedevelopersupport"
+    },
+    {
+      "label": ".onCreate()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L41",
+      "id": "mainapplication_mainapplication_oncreate"
+    },
+    {
+      "label": ".onConfigurationChanged()",
+      "file_type": "code",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L52",
+      "id": "mainapplication_mainapplication_onconfigurationchanged"
+    },
+    {
+      "label": "AccountTypeScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\AccountTypeScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_accounttypescreen_js"
+    },
+    {
+      "label": "AccountTypeScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\AccountTypeScreen.js",
+      "source_location": "L6",
+      "id": "accounttypescreen_accounttypescreen"
+    },
+    {
+      "label": "BillingNative.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\BillingNative.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_billingnative_js"
+    },
+    {
+      "label": "BillingNative()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\BillingNative.js",
+      "source_location": "L53",
+      "id": "billingnative_billingnative"
+    },
+    {
+      "label": "HistoryScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\HistoryScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_historyscreen_js"
+    },
+    {
+      "label": "HistoryScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\HistoryScreen.js",
+      "source_location": "L7",
+      "id": "historyscreen_historyscreen"
+    },
+    {
+      "label": "HomeScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\HomeScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_homescreen_js"
+    },
+    {
+      "label": "HomeScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\HomeScreen.js",
+      "source_location": "L19",
+      "id": "homescreen_homescreen"
+    },
+    {
+      "label": "LeaveRequestScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\LeaveRequestScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_leaverequestscreen_js"
+    },
+    {
+      "label": "LeaveRequestScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\LeaveRequestScreen.js",
+      "source_location": "L6",
+      "id": "leaverequestscreen_leaverequestscreen"
+    },
+    {
+      "label": "LoginScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\LoginScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_loginscreen_js"
+    },
+    {
+      "label": "LoginScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\LoginScreen.js",
+      "source_location": "L35",
+      "id": "loginscreen_loginscreen"
+    },
+    {
+      "label": "ProfileScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\ProfileScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_profilescreen_js"
+    },
+    {
+      "label": "ProfileScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\ProfileScreen.js",
+      "source_location": "L15",
+      "id": "profilescreen_profilescreen"
+    },
+    {
+      "label": "QRScanScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\QRScanScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_qrscanscreen_js"
+    },
+    {
+      "label": "QRScanScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\QRScanScreen.js",
+      "source_location": "L12",
+      "id": "qrscanscreen_qrscanscreen"
+    },
+    {
+      "label": "RegisterScreen.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\RegisterScreen.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_screens_registerscreen_js"
+    },
+    {
+      "label": "RegisterScreen()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\screens\\RegisterScreen.js",
+      "source_location": "L9",
+      "id": "registerscreen_registerscreen"
+    },
+    {
+      "label": "api.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_api_js"
+    },
+    {
+      "label": "forgotPassword()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L121",
+      "id": "api_forgotpassword"
+    },
+    {
+      "label": "refreshToken()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L123",
+      "id": "api_refreshtoken"
+    },
+    {
+      "label": "changePassword()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L125",
+      "id": "api_changepassword"
+    },
+    {
+      "label": "checkIn()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L129",
+      "id": "api_checkin"
+    },
+    {
+      "label": "checkOut()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L130",
+      "id": "api_checkout"
+    },
+    {
+      "label": "getTodayStatus()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L131",
+      "id": "api_gettodaystatus"
+    },
+    {
+      "label": "getMyAttendance()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L132",
+      "id": "api_getmyattendance"
+    },
+    {
+      "label": "getWeeklyStats()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L133",
+      "id": "api_getweeklystats"
+    },
+    {
+      "label": "postGeofenceEvent()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L136",
+      "id": "api_postgeofenceevent"
+    },
+    {
+      "label": "biometric.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_biometric_js"
+    },
+    {
+      "label": "isBiometricAvailable()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L4",
+      "id": "biometric_isbiometricavailable"
+    },
+    {
+      "label": "authenticateWithBiometric()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L11",
+      "id": "biometric_authenticatewithbiometric"
+    },
+    {
+      "label": "setBiometricEnabled()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L20",
+      "id": "biometric_setbiometricenabled"
+    },
+    {
+      "label": "isBiometricEnabled()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L24",
+      "id": "biometric_isbiometricenabled"
+    },
+    {
+      "label": "i18n.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\i18n.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_i18n_js"
+    },
+    {
+      "label": "I18nProvider()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\i18n.js",
+      "source_location": "L117",
+      "id": "i18n_i18nprovider"
+    },
+    {
+      "label": "useI18n()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\i18n.js",
+      "source_location": "L140",
+      "id": "i18n_usei18n"
+    },
+    {
+      "label": "location.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_location_js"
+    },
+    {
+      "label": "requestLocationPermission()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L3",
+      "id": "location_requestlocationpermission"
+    },
+    {
+      "label": "getCurrentLocation()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L8",
+      "id": "location_getcurrentlocation"
+    },
+    {
+      "label": "calculateDistance()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L28",
+      "id": "location_calculatedistance"
+    },
+    {
+      "label": "notifications.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\notifications.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_notifications_js"
+    },
+    {
+      "label": "registerForPushNotifications()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\notifications.js",
+      "source_location": "L14",
+      "id": "notifications_registerforpushnotifications"
+    },
+    {
+      "label": "scheduleCheckInReminder()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\notifications.js",
+      "source_location": "L61",
+      "id": "notifications_schedulecheckinreminder"
+    },
+    {
+      "label": "offlineQueue.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_offlinequeue_js"
+    },
+    {
+      "label": "addToQueue()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L7",
+      "id": "offlinequeue_addtoqueue"
+    },
+    {
+      "label": "getQueueLength()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L13",
+      "id": "offlinequeue_getqueuelength"
+    },
+    {
+      "label": "syncQueue()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L18",
+      "id": "offlinequeue_syncqueue"
+    },
+    {
+      "label": "isOnline()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L54",
+      "id": "offlinequeue_isonline"
+    },
+    {
+      "label": "theme.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\theme.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_theme_js"
+    },
+    {
+      "label": "ThemeProvider()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\theme.js",
+      "source_location": "L30",
+      "id": "theme_themeprovider"
+    },
+    {
+      "label": "useTheme()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\theme.js",
+      "source_location": "L54",
+      "id": "theme_usetheme"
+    },
+    {
+      "label": "Toast.js",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L1",
+      "id": "mobile_app_src_services_toast_js"
+    },
+    {
+      "label": "ToastMessage()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L14",
+      "id": "toast_toastmessage"
+    },
+    {
+      "label": "ToastProvider()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L50",
+      "id": "toast_toastprovider"
+    },
+    {
+      "label": "useToast()",
+      "file_type": "code",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L87",
+      "id": "toast_usetoast"
+    },
+    {
+      "label": "Admin Authentication Setup Guide",
+      "file_type": "document",
+      "source_file": "ADMIN_SETUP.md",
+      "id": "sem-ADMIN_SETUP.md"
+    },
+    {
+      "label": "Benbax GeoAttend - Geofenced Attendance Management System",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "sem-README.md"
+    },
+    {
+      "label": "Graph Report - .  (2026-04-15)",
+      "file_type": "document",
+      "source_file": "graphify-out/GRAPH_REPORT.md",
+      "id": "sem-graphify-out/GRAPH_REPORT.md"
+    },
+    {
+      "label": "Mobile App Local Development Setup",
+      "file_type": "document",
+      "source_file": "mobile-app/LOCAL_SETUP.md",
+      "id": "sem-mobile-app/LOCAL_SETUP.md"
+    },
+    {
+      "label": "icon-192.png",
+      "file_type": "image",
+      "source_file": "admin-dashboard/public/icon-192.png",
+      "id": "sem-admin-dashboard/public/icon-192.png"
+    },
+    {
+      "label": "icon-512.png",
+      "file_type": "image",
+      "source_file": "admin-dashboard/public/icon-512.png",
+      "id": "sem-admin-dashboard/public/icon-512.png"
+    },
+    {
+      "label": "ic_launcher.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+      "label": "ic_launcher_foreground.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+      "label": "ic_launcher_round.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+      "label": "ic_launcher.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+      "label": "ic_launcher_foreground.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+      "label": "ic_launcher_round.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+      "label": "ic_launcher.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+      "label": "ic_launcher_foreground.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+      "label": "ic_launcher_round.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+      "label": "ic_launcher.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+      "label": "ic_launcher_foreground.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+      "label": "ic_launcher_round.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+      "label": "ic_launcher.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+      "label": "ic_launcher_foreground.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+      "label": "ic_launcher_round.webp",
+      "file_type": "image",
+      "source_file": "mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp",
+      "id": "sem-mobile-app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+      "label": "adaptive-icon.png",
+      "file_type": "image",
+      "source_file": "mobile-app/assets/adaptive-icon.png",
+      "id": "sem-mobile-app/assets/adaptive-icon.png"
+    },
+    {
+      "label": "icon.png",
+      "file_type": "image",
+      "source_file": "mobile-app/assets/icon.png",
+      "id": "sem-mobile-app/assets/icon.png"
+    },
+    {
+      "label": "splash.png",
+      "file_type": "image",
+      "source_file": "mobile-app/assets/splash.png",
+      "id": "sem-mobile-app/assets/splash.png"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\App.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_app_js",
+      "_tgt": "app_app",
+      "source": "admin_dashboard_src_app_js",
+      "target": "app_app"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\App.js",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "mobile_app_app_js",
+      "_tgt": "app_app",
+      "source": "app_app",
+      "target": "mobile_app_app_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_serviceworkerregistration_js",
+      "_tgt": "serviceworkerregistration_register",
+      "source": "admin_dashboard_src_serviceworkerregistration_js",
+      "target": "serviceworkerregistration_register"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_serviceworkerregistration_js",
+      "_tgt": "serviceworkerregistration_registervalidsw",
+      "source": "admin_dashboard_src_serviceworkerregistration_js",
+      "target": "serviceworkerregistration_registervalidsw"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_serviceworkerregistration_js",
+      "_tgt": "serviceworkerregistration_checkvalidserviceworker",
+      "source": "admin_dashboard_src_serviceworkerregistration_js",
+      "target": "serviceworkerregistration_checkvalidserviceworker"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_serviceworkerregistration_js",
+      "_tgt": "serviceworkerregistration_unregister",
+      "source": "admin_dashboard_src_serviceworkerregistration_js",
+      "target": "serviceworkerregistration_unregister"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\serviceWorkerRegistration.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "serviceworkerregistration_registervalidsw",
+      "_tgt": "serviceworkerregistration_register",
+      "source": "serviceworkerregistration_register",
+      "target": "serviceworkerregistration_registervalidsw"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\components\\Sidebar.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_components_sidebar_js",
+      "_tgt": "sidebar_useismobile",
+      "source": "admin_dashboard_src_components_sidebar_js",
+      "target": "sidebar_useismobile"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\components\\Sidebar.js",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_components_sidebar_js",
+      "_tgt": "sidebar_sidebar",
+      "source": "admin_dashboard_src_components_sidebar_js",
+      "target": "sidebar_sidebar"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\components\\Sidebar.js",
+      "source_location": "L113",
+      "weight": 1.0,
+      "_src": "sidebar_sidebar",
+      "_tgt": "sidebar_useismobile",
+      "source": "sidebar_useismobile",
+      "target": "sidebar_sidebar"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Analytics.js",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_analytics_js",
+      "_tgt": "analytics_analytics",
+      "source": "admin_dashboard_src_pages_analytics_js",
+      "target": "analytics_analytics"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\AttendanceMonitor.js",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_attendancemonitor_js",
+      "_tgt": "attendancemonitor_attendancemonitor",
+      "source": "admin_dashboard_src_pages_attendancemonitor_js",
+      "target": "attendancemonitor_attendancemonitor"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\AuditLog.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_auditlog_js",
+      "_tgt": "auditlog_auditlog",
+      "source": "admin_dashboard_src_pages_auditlog_js",
+      "target": "auditlog_auditlog"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Billing.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_billing_js",
+      "_tgt": "billing_billing",
+      "source": "admin_dashboard_src_pages_billing_js",
+      "target": "billing_billing"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\CreateInstitution.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_createinstitution_js",
+      "_tgt": "createinstitution_createinstitution",
+      "source": "admin_dashboard_src_pages_createinstitution_js",
+      "target": "createinstitution_createinstitution"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Dashboard.js",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_dashboard_js",
+      "_tgt": "dashboard_useismobile",
+      "source": "admin_dashboard_src_pages_dashboard_js",
+      "target": "dashboard_useismobile"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Dashboard.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_dashboard_js",
+      "_tgt": "dashboard_dashboard",
+      "source": "admin_dashboard_src_pages_dashboard_js",
+      "target": "dashboard_dashboard"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Dashboard.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_src": "dashboard_dashboard",
+      "_tgt": "dashboard_useismobile",
+      "source": "dashboard_useismobile",
+      "target": "dashboard_dashboard"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\GoogleCallback.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_googlecallback_js",
+      "_tgt": "googlecallback_googlecallback",
+      "source": "admin_dashboard_src_pages_googlecallback_js",
+      "target": "googlecallback_googlecallback"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\LeaveManagement.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_leavemanagement_js",
+      "_tgt": "leavemanagement_leavemanagement",
+      "source": "admin_dashboard_src_pages_leavemanagement_js",
+      "target": "leavemanagement_leavemanagement"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Login.js",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_login_js",
+      "_tgt": "login_login",
+      "source": "admin_dashboard_src_pages_login_js",
+      "target": "login_login"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Reports.js",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_reports_js",
+      "_tgt": "reports_reports",
+      "source": "admin_dashboard_src_pages_reports_js",
+      "target": "reports_reports"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\RequestLeave.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_requestleave_js",
+      "_tgt": "requestleave_requestleave",
+      "source": "admin_dashboard_src_pages_requestleave_js",
+      "target": "requestleave_requestleave"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Settings.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_settings_js",
+      "_tgt": "settings_settings",
+      "source": "admin_dashboard_src_pages_settings_js",
+      "target": "settings_settings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\Settings.js",
+      "source_location": "L293",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_settings_js",
+      "_tgt": "settings_institutionqr",
+      "source": "admin_dashboard_src_pages_settings_js",
+      "target": "settings_institutionqr"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\StaffForm.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_staffform_js",
+      "_tgt": "staffform_staffform",
+      "source": "admin_dashboard_src_pages_staffform_js",
+      "target": "staffform_staffform"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\StaffManagement.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_staffmanagement_js",
+      "_tgt": "staffmanagement_staffmanagement",
+      "source": "admin_dashboard_src_pages_staffmanagement_js",
+      "target": "staffmanagement_staffmanagement"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\pages\\SuperAdminDashboard.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_pages_superadmindashboard_js",
+      "_tgt": "superadmindashboard_superadmindashboard",
+      "source": "admin_dashboard_src_pages_superadmindashboard_js",
+      "target": "superadmindashboard_superadmindashboard"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_resolveapibaseurl",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_resolveapibaseurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_login",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_login"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_googlelogin",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_googlelogin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getprofile",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getprofile"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_createinitialadmin",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_createinitialadmin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getstaff",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getstaff"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L62",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getstaffbyid",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getstaffbyid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_createstaff",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_createstaff"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_register",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_register"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_updatestaff",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_updatestaff"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_resetstaffpassword",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_resetstaffpassword"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getstaffqrcode",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getstaffqrcode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getdepartments",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getdepartments"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_deletestaff",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_deletestaff"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getinstitution",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getinstitution"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L73",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_updateinstitution",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_updateinstitution"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getinstitutionqr",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getinstitutionqr"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getattendancerules",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getattendancerules"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_updateattendancerules",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_updateattendancerules"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_createinstitution",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_createinstitution"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getallinstitutions",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getallinstitutions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_repairinstitutioncode",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_repairinstitutioncode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getsubscriptionstatus",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getsubscriptionstatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_activatesubscription",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_activatesubscription"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getdashboardstats",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getdashboardstats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_gettodaysummary",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_gettodaysummary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getattendancereport",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getattendancereport"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getrealtimeattendance",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getrealtimeattendance"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getweeklysummary",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getweeklysummary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getfraudreport",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getfraudreport"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getgeofenceevents",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getgeofenceevents"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L94",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getexcelexporturl",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getexcelexporturl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getpdfexporturl",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getpdfexporturl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getallleaves",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getallleaves"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getleavestats",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getleavestats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L106",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_reviewleave",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_reviewleave"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L108",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_requestleave",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_requestleave"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getmyleaves",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getmyleaves"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L110",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_cancelleave",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_cancelleave"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L113",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getattendancetrends",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getattendancetrends"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_gettopabsentees",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_gettopabsentees"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getdepartmentanalytics",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getdepartmentanalytics"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L116",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getovertimesummary",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getovertimesummary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getauditlogs",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getauditlogs"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin-dashboard\\src\\services\\api.js",
+      "source_location": "L118",
+      "weight": 1.0,
+      "_src": "admin_dashboard_src_services_api_js",
+      "_tgt": "api_getschedulerstatus",
+      "source": "admin_dashboard_src_services_api_js",
+      "target": "api_getschedulerstatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_login",
+      "source": "api_login",
+      "target": "mobile_app_src_services_api_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L119",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_googlelogin",
+      "source": "api_googlelogin",
+      "target": "mobile_app_src_services_api_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L124",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_getprofile",
+      "source": "api_getprofile",
+      "target": "mobile_app_src_services_api_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L139",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_requestleave",
+      "source": "api_requestleave",
+      "target": "mobile_app_src_services_api_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L140",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_getmyleaves",
+      "source": "api_getmyleaves",
+      "target": "mobile_app_src_services_api_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L141",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_cancelleave",
+      "source": "api_cancelleave",
+      "target": "mobile_app_src_services_api_js"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\server.js",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_src": "backend_src_server_js",
+      "_tgt": "server_runautomigration",
+      "source": "backend_src_server_js",
+      "target": "server_runautomigration"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\server.js",
+      "source_location": "L184",
+      "weight": 1.0,
+      "_src": "backend_src_server_js",
+      "_tgt": "server_ensureadminexists",
+      "source": "backend_src_server_js",
+      "target": "server_ensureadminexists"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\controllers\\attendanceController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "backend_src_controllers_attendancecontroller_js",
+      "_tgt": "attendancecontroller_logfraudevent",
+      "source": "backend_src_controllers_attendancecontroller_js",
+      "target": "attendancecontroller_logfraudevent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "backend_src_controllers_authcontroller_js",
+      "_tgt": "authcontroller_getsubscriptionpayload",
+      "source": "backend_src_controllers_authcontroller_js",
+      "target": "authcontroller_getsubscriptionpayload"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "backend_src_controllers_authcontroller_js",
+      "_tgt": "authcontroller_getsubscriptionpayloadsafe",
+      "source": "backend_src_controllers_authcontroller_js",
+      "target": "authcontroller_getsubscriptionpayloadsafe"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_src": "authcontroller_getsubscriptionpayloadsafe",
+      "_tgt": "authcontroller_getsubscriptionpayload",
+      "source": "authcontroller_getsubscriptionpayload",
+      "target": "authcontroller_getsubscriptionpayloadsafe"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "authcontroller_getsubscriptionpayload",
+      "_tgt": "subscriptionservice_ensuretrialsubscription",
+      "source": "authcontroller_getsubscriptionpayload",
+      "target": "subscriptionservice_ensuretrialsubscription"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_src": "authcontroller_getsubscriptionpayload",
+      "_tgt": "subscriptionservice_getcurrentsubscription",
+      "source": "authcontroller_getsubscriptionpayload",
+      "target": "subscriptionservice_getcurrentsubscription"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\controllers\\authController.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "authcontroller_getsubscriptionpayload",
+      "_tgt": "subscriptionservice_buildsubscriptionsnapshot",
+      "source": "authcontroller_getsubscriptionpayload",
+      "target": "subscriptionservice_buildsubscriptionsnapshot"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\controllers\\geofenceController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "backend_src_controllers_geofencecontroller_js",
+      "_tgt": "geofencecontroller_getadminswithcontacts",
+      "source": "backend_src_controllers_geofencecontroller_js",
+      "target": "geofencecontroller_getadminswithcontacts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\controllers\\institutionController.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "backend_src_controllers_institutioncontroller_js",
+      "_tgt": "institutioncontroller_generateinstitutioncode",
+      "source": "backend_src_controllers_institutioncontroller_js",
+      "target": "institutioncontroller_generateinstitutioncode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_audit_js",
+      "_tgt": "audit_logaudit",
+      "source": "backend_src_middleware_audit_js",
+      "target": "audit_logaudit"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_audit_js",
+      "_tgt": "audit_auditmiddleware",
+      "source": "backend_src_middleware_audit_js",
+      "target": "audit_auditmiddleware"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\audit.js",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_audit_js",
+      "_tgt": "audit_sanitizebody",
+      "source": "backend_src_middleware_audit_js",
+      "target": "audit_sanitizebody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_auth_js",
+      "_tgt": "auth_authenticate",
+      "source": "backend_src_middleware_auth_js",
+      "target": "auth_authenticate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_auth_js",
+      "_tgt": "auth_requireadmin",
+      "source": "backend_src_middleware_auth_js",
+      "target": "auth_requireadmin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\auth.js",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_auth_js",
+      "_tgt": "auth_requiresuperadmin",
+      "source": "backend_src_middleware_auth_js",
+      "target": "auth_requiresuperadmin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\middleware\\subscription.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "backend_src_middleware_subscription_js",
+      "_tgt": "subscription_requireactivesubscription",
+      "source": "backend_src_middleware_subscription_js",
+      "target": "subscription_requireactivesubscription"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\middleware\\subscription.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "subscription_requireactivesubscription",
+      "_tgt": "subscriptionservice_ensuretrialsubscription",
+      "source": "subscription_requireactivesubscription",
+      "target": "subscriptionservice_ensuretrialsubscription"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\middleware\\subscription.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "subscription_requireactivesubscription",
+      "_tgt": "subscriptionservice_getcurrentsubscription",
+      "source": "subscription_requireactivesubscription",
+      "target": "subscriptionservice_getcurrentsubscription"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\middleware\\subscription.js",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_src": "subscription_requireactivesubscription",
+      "_tgt": "subscriptionservice_buildsubscriptionsnapshot",
+      "source": "subscription_requireactivesubscription",
+      "target": "subscriptionservice_buildsubscriptionsnapshot"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\migrations\\run.js",
+      "source_location": "L365",
+      "weight": 1.0,
+      "_src": "backend_src_migrations_run_js",
+      "_tgt": "run_runmigration",
+      "source": "backend_src_migrations_run_js",
+      "target": "run_runmigration"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\migrations\\seed.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "backend_src_migrations_seed_js",
+      "_tgt": "seed_seed",
+      "source": "backend_src_migrations_seed_js",
+      "target": "seed_seed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "backend_src_services_emailservice_js",
+      "_tgt": "emailservice_gettransporter",
+      "source": "backend_src_services_emailservice_js",
+      "target": "emailservice_gettransporter"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "backend_src_services_emailservice_js",
+      "_tgt": "emailservice_sendemail",
+      "source": "backend_src_services_emailservice_js",
+      "target": "emailservice_sendemail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_src": "backend_src_services_emailservice_js",
+      "_tgt": "emailservice_sendabsencealert",
+      "source": "backend_src_services_emailservice_js",
+      "target": "emailservice_sendabsencealert"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_src": "backend_src_services_emailservice_js",
+      "_tgt": "emailservice_senddailysummary",
+      "source": "backend_src_services_emailservice_js",
+      "target": "emailservice_senddailysummary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L122",
+      "weight": 1.0,
+      "_src": "backend_src_services_emailservice_js",
+      "_tgt": "emailservice_sendweeklysummary",
+      "source": "backend_src_services_emailservice_js",
+      "target": "emailservice_sendweeklysummary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L161",
+      "weight": 1.0,
+      "_src": "backend_src_services_emailservice_js",
+      "_tgt": "emailservice_sendautosuspendnotice",
+      "source": "backend_src_services_emailservice_js",
+      "target": "emailservice_sendautosuspendnotice"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_src": "emailservice_sendemail",
+      "_tgt": "emailservice_gettransporter",
+      "source": "emailservice_gettransporter",
+      "target": "emailservice_sendemail"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "emailservice_sendabsencealert",
+      "_tgt": "emailservice_sendemail",
+      "source": "emailservice_sendemail",
+      "target": "emailservice_sendabsencealert"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L118",
+      "weight": 1.0,
+      "_src": "emailservice_senddailysummary",
+      "_tgt": "emailservice_sendemail",
+      "source": "emailservice_sendemail",
+      "target": "emailservice_senddailysummary"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_src": "emailservice_sendweeklysummary",
+      "_tgt": "emailservice_sendemail",
+      "source": "emailservice_sendemail",
+      "target": "emailservice_sendweeklysummary"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\emailService.js",
+      "source_location": "L177",
+      "weight": 1.0,
+      "_src": "emailservice_sendautosuspendnotice",
+      "_tgt": "emailservice_sendemail",
+      "source": "emailservice_sendemail",
+      "target": "emailservice_sendautosuspendnotice"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "scheduler_detectabsences",
+      "_tgt": "emailservice_sendabsencealert",
+      "source": "emailservice_sendabsencealert",
+      "target": "scheduler_detectabsences"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L165",
+      "weight": 1.0,
+      "_src": "scheduler_senddailyreport",
+      "_tgt": "emailservice_senddailysummary",
+      "source": "emailservice_senddailysummary",
+      "target": "scheduler_senddailyreport"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L250",
+      "weight": 1.0,
+      "_src": "scheduler_autosuspendinactive",
+      "_tgt": "emailservice_sendautosuspendnotice",
+      "source": "emailservice_sendautosuspendnotice",
+      "target": "scheduler_autosuspendinactive"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\pushNotificationService.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "backend_src_services_pushnotificationservice_js",
+      "_tgt": "pushnotificationservice_sendexpopushnotifications",
+      "source": "backend_src_services_pushnotificationservice_js",
+      "target": "pushnotificationservice_sendexpopushnotifications"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_autocheckout",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_autocheckout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_detectabsences",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_detectabsences"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L132",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_senddailyreport",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_senddailyreport"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_sendweeklyreport",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_sendweeklyreport"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L217",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_autosuspendinactive",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_autosuspendinactive"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L270",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_rotateqrcodes",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_rotateqrcodes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L298",
+      "weight": 1.0,
+      "_src": "backend_src_services_scheduler_js",
+      "_tgt": "scheduler_startscheduler",
+      "source": "backend_src_services_scheduler_js",
+      "target": "scheduler_startscheduler"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_src": "scheduler_detectabsences",
+      "_tgt": "smsservice_sendabsentalert",
+      "source": "scheduler_detectabsences",
+      "target": "smsservice_sendabsentalert"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\src\\services\\scheduler.js",
+      "source_location": "L120",
+      "weight": 1.0,
+      "_src": "scheduler_detectabsences",
+      "_tgt": "smsservice_sendstudentabsentalerttoguardian",
+      "source": "scheduler_detectabsences",
+      "target": "smsservice_sendstudentabsentalerttoguardian"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "backend_src_services_smsservice_js",
+      "_tgt": "smsservice_sendsms",
+      "source": "backend_src_services_smsservice_js",
+      "target": "smsservice_sendsms"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_src": "backend_src_services_smsservice_js",
+      "_tgt": "smsservice_sendcheckinreminder",
+      "source": "backend_src_services_smsservice_js",
+      "target": "smsservice_sendcheckinreminder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_src": "backend_src_services_smsservice_js",
+      "_tgt": "smsservice_sendlatealert",
+      "source": "backend_src_services_smsservice_js",
+      "target": "smsservice_sendlatealert"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_src": "backend_src_services_smsservice_js",
+      "_tgt": "smsservice_sendabsentalert",
+      "source": "backend_src_services_smsservice_js",
+      "target": "smsservice_sendabsentalert"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_src": "backend_src_services_smsservice_js",
+      "_tgt": "smsservice_sendstudentlatealerttoguardian",
+      "source": "backend_src_services_smsservice_js",
+      "target": "smsservice_sendstudentlatealerttoguardian"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_src": "backend_src_services_smsservice_js",
+      "_tgt": "smsservice_sendstudentabsentalerttoguardian",
+      "source": "backend_src_services_smsservice_js",
+      "target": "smsservice_sendstudentabsentalerttoguardian"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "_src": "smsservice_sendcheckinreminder",
+      "_tgt": "smsservice_sendsms",
+      "source": "smsservice_sendsms",
+      "target": "smsservice_sendcheckinreminder"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_src": "smsservice_sendlatealert",
+      "_tgt": "smsservice_sendsms",
+      "source": "smsservice_sendsms",
+      "target": "smsservice_sendlatealert"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_src": "smsservice_sendabsentalert",
+      "_tgt": "smsservice_sendsms",
+      "source": "smsservice_sendsms",
+      "target": "smsservice_sendabsentalert"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_src": "smsservice_sendstudentlatealerttoguardian",
+      "_tgt": "smsservice_sendsms",
+      "source": "smsservice_sendsms",
+      "target": "smsservice_sendstudentlatealerttoguardian"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\smsService.js",
+      "source_location": "L83",
+      "weight": 1.0,
+      "_src": "smsservice_sendstudentabsentalerttoguardian",
+      "_tgt": "smsservice_sendsms",
+      "source": "smsservice_sendsms",
+      "target": "smsservice_sendstudentabsentalerttoguardian"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "backend_src_services_subscriptionservice_js",
+      "_tgt": "subscriptionservice_normalizeinstitutioncode",
+      "source": "backend_src_services_subscriptionservice_js",
+      "target": "subscriptionservice_normalizeinstitutioncode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "backend_src_services_subscriptionservice_js",
+      "_tgt": "subscriptionservice_getinstitutionbycode",
+      "source": "backend_src_services_subscriptionservice_js",
+      "target": "subscriptionservice_getinstitutionbycode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "backend_src_services_subscriptionservice_js",
+      "_tgt": "subscriptionservice_ensuretrialsubscription",
+      "source": "backend_src_services_subscriptionservice_js",
+      "target": "subscriptionservice_ensuretrialsubscription"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "backend_src_services_subscriptionservice_js",
+      "_tgt": "subscriptionservice_getcurrentsubscription",
+      "source": "backend_src_services_subscriptionservice_js",
+      "target": "subscriptionservice_getcurrentsubscription"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "backend_src_services_subscriptionservice_js",
+      "_tgt": "subscriptionservice_buildsubscriptionsnapshot",
+      "source": "backend_src_services_subscriptionservice_js",
+      "target": "subscriptionservice_buildsubscriptionsnapshot"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\services\\subscriptionService.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "subscriptionservice_getinstitutionbycode",
+      "_tgt": "subscriptionservice_normalizeinstitutioncode",
+      "source": "subscriptionservice_normalizeinstitutioncode",
+      "target": "subscriptionservice_getinstitutionbycode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "backend_src_utils_geofence_js",
+      "_tgt": "geofence_calculatedistance",
+      "source": "backend_src_utils_geofence_js",
+      "target": "geofence_calculatedistance"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "backend_src_utils_geofence_js",
+      "_tgt": "geofence_toradians",
+      "source": "backend_src_utils_geofence_js",
+      "target": "geofence_toradians"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "backend_src_utils_geofence_js",
+      "_tgt": "geofence_iswithingeofence",
+      "source": "backend_src_utils_geofence_js",
+      "target": "geofence_iswithingeofence"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "geofence_calculatedistance",
+      "_tgt": "geofence_toradians",
+      "source": "geofence_calculatedistance",
+      "target": "geofence_toradians"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\geofence.js",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_src": "geofence_iswithingeofence",
+      "_tgt": "geofence_calculatedistance",
+      "source": "geofence_calculatedistance",
+      "target": "geofence_iswithingeofence"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "backend_src_utils_qrcode_js",
+      "_tgt": "qrcode_generateqrcode",
+      "source": "backend_src_utils_qrcode_js",
+      "target": "qrcode_generateqrcode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "backend_src_utils_qrcode_js",
+      "_tgt": "qrcode_generateqrcodebuffer",
+      "source": "backend_src_utils_qrcode_js",
+      "target": "qrcode_generateqrcodebuffer"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\src\\utils\\qrcode.js",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_src": "backend_src_utils_qrcode_js",
+      "_tgt": "qrcode_generateinstitutionqr",
+      "source": "backend_src_utils_qrcode_js",
+      "target": "qrcode_generateinstitutionqr"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\App.js",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_src": "mobile_app_app_js",
+      "_tgt": "app_maintabs",
+      "source": "mobile_app_app_js",
+      "target": "app_maintabs"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\App.js",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "app_maintabs",
+      "_tgt": "theme_usetheme",
+      "source": "app_maintabs",
+      "target": "theme_usetheme"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "mobile_app_android_app_src_main_java_com_geoattend_app_mainactivity_kt",
+      "_tgt": "mainactivity_mainactivity",
+      "source": "mobile_app_android_app_src_main_java_com_geoattend_app_mainactivity_kt",
+      "target": "mainactivity_mainactivity"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "mainactivity_mainactivity",
+      "_tgt": "mainactivity_mainactivity_oncreate",
+      "source": "mainactivity_mainactivity",
+      "target": "mainactivity_mainactivity_oncreate"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "mainactivity_mainactivity",
+      "_tgt": "mainactivity_mainactivity_getmaincomponentname",
+      "source": "mainactivity_mainactivity",
+      "target": "mainactivity_mainactivity_getmaincomponentname"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "mainactivity_mainactivity",
+      "_tgt": "mainactivity_mainactivity_createreactactivitydelegate",
+      "source": "mainactivity_mainactivity",
+      "target": "mainactivity_mainactivity_createreactactivitydelegate"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainActivity.kt",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "mainactivity_mainactivity",
+      "_tgt": "mainactivity_mainactivity_invokedefaultonbackpressed",
+      "source": "mainactivity_mainactivity",
+      "target": "mainactivity_mainactivity_invokedefaultonbackpressed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "_tgt": "mainapplication_mainapplication",
+      "source": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "target": "mainapplication_mainapplication"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "_tgt": "mainapplication_getpackages",
+      "source": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "target": "mainapplication_getpackages"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "_tgt": "mainapplication_getjsmainmodulename",
+      "source": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "target": "mainapplication_getjsmainmodulename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "_tgt": "mainapplication_getusedevelopersupport",
+      "source": "mobile_app_android_app_src_main_java_com_geoattend_app_mainapplication_kt",
+      "target": "mainapplication_getusedevelopersupport"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_src": "mainapplication_mainapplication",
+      "_tgt": "mainapplication_mainapplication_oncreate",
+      "source": "mainapplication_mainapplication",
+      "target": "mainapplication_mainapplication_oncreate"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\android\\app\\src\\main\\java\\com\\geoattend\\app\\MainApplication.kt",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_src": "mainapplication_mainapplication",
+      "_tgt": "mainapplication_mainapplication_onconfigurationchanged",
+      "source": "mainapplication_mainapplication",
+      "target": "mainapplication_mainapplication_onconfigurationchanged"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\AccountTypeScreen.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_accounttypescreen_js",
+      "_tgt": "accounttypescreen_accounttypescreen",
+      "source": "mobile_app_src_screens_accounttypescreen_js",
+      "target": "accounttypescreen_accounttypescreen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\BillingNative.js",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_billingnative_js",
+      "_tgt": "billingnative_billingnative",
+      "source": "mobile_app_src_screens_billingnative_js",
+      "target": "billingnative_billingnative"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\HistoryScreen.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_historyscreen_js",
+      "_tgt": "historyscreen_historyscreen",
+      "source": "mobile_app_src_screens_historyscreen_js",
+      "target": "historyscreen_historyscreen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\HomeScreen.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_homescreen_js",
+      "_tgt": "homescreen_homescreen",
+      "source": "mobile_app_src_screens_homescreen_js",
+      "target": "homescreen_homescreen"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\HomeScreen.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "homescreen_homescreen",
+      "_tgt": "theme_usetheme",
+      "source": "homescreen_homescreen",
+      "target": "theme_usetheme"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\HomeScreen.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_src": "homescreen_homescreen",
+      "_tgt": "i18n_usei18n",
+      "source": "homescreen_homescreen",
+      "target": "i18n_usei18n"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\HomeScreen.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_src": "homescreen_homescreen",
+      "_tgt": "toast_usetoast",
+      "source": "homescreen_homescreen",
+      "target": "toast_usetoast"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\LeaveRequestScreen.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_leaverequestscreen_js",
+      "_tgt": "leaverequestscreen_leaverequestscreen",
+      "source": "mobile_app_src_screens_leaverequestscreen_js",
+      "target": "leaverequestscreen_leaverequestscreen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\LoginScreen.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_loginscreen_js",
+      "_tgt": "loginscreen_loginscreen",
+      "source": "mobile_app_src_screens_loginscreen_js",
+      "target": "loginscreen_loginscreen"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\LoginScreen.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "loginscreen_loginscreen",
+      "_tgt": "toast_usetoast",
+      "source": "loginscreen_loginscreen",
+      "target": "toast_usetoast"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\ProfileScreen.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_profilescreen_js",
+      "_tgt": "profilescreen_profilescreen",
+      "source": "mobile_app_src_screens_profilescreen_js",
+      "target": "profilescreen_profilescreen"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\ProfileScreen.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_src": "profilescreen_profilescreen",
+      "_tgt": "theme_usetheme",
+      "source": "profilescreen_profilescreen",
+      "target": "theme_usetheme"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\ProfileScreen.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "profilescreen_profilescreen",
+      "_tgt": "i18n_usei18n",
+      "source": "profilescreen_profilescreen",
+      "target": "i18n_usei18n"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\screens\\ProfileScreen.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "profilescreen_profilescreen",
+      "_tgt": "toast_usetoast",
+      "source": "profilescreen_profilescreen",
+      "target": "toast_usetoast"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\QRScanScreen.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_qrscanscreen_js",
+      "_tgt": "qrscanscreen_qrscanscreen",
+      "source": "mobile_app_src_screens_qrscanscreen_js",
+      "target": "qrscanscreen_qrscanscreen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\screens\\RegisterScreen.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "mobile_app_src_screens_registerscreen_js",
+      "_tgt": "registerscreen_registerscreen",
+      "source": "mobile_app_src_screens_registerscreen_js",
+      "target": "registerscreen_registerscreen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L121",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_forgotpassword",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_forgotpassword"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L123",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_refreshtoken",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_refreshtoken"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_changepassword",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_changepassword"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L129",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_checkin",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_checkin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L130",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_checkout",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_checkout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L131",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_gettodaystatus",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_gettodaystatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L132",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_getmyattendance",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_getmyattendance"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L133",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_getweeklystats",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_getweeklystats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\api.js",
+      "source_location": "L136",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_api_js",
+      "_tgt": "api_postgeofenceevent",
+      "source": "mobile_app_src_services_api_js",
+      "target": "api_postgeofenceevent"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "offlinequeue_syncqueue",
+      "_tgt": "api_checkin",
+      "source": "api_checkin",
+      "target": "offlinequeue_syncqueue"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_src": "offlinequeue_syncqueue",
+      "_tgt": "api_checkout",
+      "source": "api_checkout",
+      "target": "offlinequeue_syncqueue"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "offlinequeue_syncqueue",
+      "_tgt": "api_postgeofenceevent",
+      "source": "api_postgeofenceevent",
+      "target": "offlinequeue_syncqueue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_biometric_js",
+      "_tgt": "biometric_isbiometricavailable",
+      "source": "mobile_app_src_services_biometric_js",
+      "target": "biometric_isbiometricavailable"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_biometric_js",
+      "_tgt": "biometric_authenticatewithbiometric",
+      "source": "mobile_app_src_services_biometric_js",
+      "target": "biometric_authenticatewithbiometric"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_biometric_js",
+      "_tgt": "biometric_setbiometricenabled",
+      "source": "mobile_app_src_services_biometric_js",
+      "target": "biometric_setbiometricenabled"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\biometric.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_biometric_js",
+      "_tgt": "biometric_isbiometricenabled",
+      "source": "mobile_app_src_services_biometric_js",
+      "target": "biometric_isbiometricenabled"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\i18n.js",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_i18n_js",
+      "_tgt": "i18n_i18nprovider",
+      "source": "mobile_app_src_services_i18n_js",
+      "target": "i18n_i18nprovider"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\i18n.js",
+      "source_location": "L140",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_i18n_js",
+      "_tgt": "i18n_usei18n",
+      "source": "mobile_app_src_services_i18n_js",
+      "target": "i18n_usei18n"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_location_js",
+      "_tgt": "location_requestlocationpermission",
+      "source": "mobile_app_src_services_location_js",
+      "target": "location_requestlocationpermission"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_location_js",
+      "_tgt": "location_getcurrentlocation",
+      "source": "mobile_app_src_services_location_js",
+      "target": "location_getcurrentlocation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_location_js",
+      "_tgt": "location_calculatedistance",
+      "source": "mobile_app_src_services_location_js",
+      "target": "location_calculatedistance"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\location.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "location_getcurrentlocation",
+      "_tgt": "location_requestlocationpermission",
+      "source": "location_requestlocationpermission",
+      "target": "location_getcurrentlocation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\notifications.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_notifications_js",
+      "_tgt": "notifications_registerforpushnotifications",
+      "source": "mobile_app_src_services_notifications_js",
+      "target": "notifications_registerforpushnotifications"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\notifications.js",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_notifications_js",
+      "_tgt": "notifications_schedulecheckinreminder",
+      "source": "mobile_app_src_services_notifications_js",
+      "target": "notifications_schedulecheckinreminder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_offlinequeue_js",
+      "_tgt": "offlinequeue_addtoqueue",
+      "source": "mobile_app_src_services_offlinequeue_js",
+      "target": "offlinequeue_addtoqueue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_offlinequeue_js",
+      "_tgt": "offlinequeue_getqueuelength",
+      "source": "mobile_app_src_services_offlinequeue_js",
+      "target": "offlinequeue_getqueuelength"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_offlinequeue_js",
+      "_tgt": "offlinequeue_syncqueue",
+      "source": "mobile_app_src_services_offlinequeue_js",
+      "target": "offlinequeue_syncqueue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\offlineQueue.js",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_offlinequeue_js",
+      "_tgt": "offlinequeue_isonline",
+      "source": "mobile_app_src_services_offlinequeue_js",
+      "target": "offlinequeue_isonline"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\theme.js",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_theme_js",
+      "_tgt": "theme_themeprovider",
+      "source": "mobile_app_src_services_theme_js",
+      "target": "theme_themeprovider"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\theme.js",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_theme_js",
+      "_tgt": "theme_usetheme",
+      "source": "mobile_app_src_services_theme_js",
+      "target": "theme_usetheme"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_toast_js",
+      "_tgt": "toast_toastmessage",
+      "source": "mobile_app_src_services_toast_js",
+      "target": "toast_toastmessage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_toast_js",
+      "_tgt": "toast_toastprovider",
+      "source": "mobile_app_src_services_toast_js",
+      "target": "toast_toastprovider"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mobile-app\\src\\services\\Toast.js",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_src": "mobile_app_src_services_toast_js",
+      "_tgt": "toast_usetoast",
+      "source": "mobile_app_src_services_toast_js",
+      "target": "toast_usetoast"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "source_file": "README.md",
+      "_src": "sem-README.md",
+      "_tgt": "sem-ADMIN_SETUP.md",
+      "source": "sem-ADMIN_SETUP.md",
+      "target": "sem-README.md"
+    },
+    {
+      "relation": "complements",
+      "confidence": "INFERRED",
+      "source_file": "ADMIN_SETUP.md",
+      "_src": "sem-ADMIN_SETUP.md",
+      "_tgt": "sem-mobile-app/LOCAL_SETUP.md",
+      "source": "sem-ADMIN_SETUP.md",
+      "target": "sem-mobile-app/LOCAL_SETUP.md"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "source_file": "README.md",
+      "_src": "sem-README.md",
+      "_tgt": "sem-graphify-out/GRAPH_REPORT.md",
+      "source": "sem-README.md",
+      "target": "sem-graphify-out/GRAPH_REPORT.md"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "source_file": "README.md",
+      "_src": "sem-README.md",
+      "_tgt": "sem-mobile-app/LOCAL_SETUP.md",
+      "source": "sem-README.md",
+      "target": "sem-mobile-app/LOCAL_SETUP.md"
+    }
+  ]
+}

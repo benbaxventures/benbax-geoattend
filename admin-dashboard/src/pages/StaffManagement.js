@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload, FiTrash2 } from 'react-icons/fi';
-import { getStaff, getDepartments, resetStaffPassword, deleteStaff } from '../services/api';
+import { FiPlus, FiSearch, FiEdit2, FiKey, FiFilter, FiUpload, FiTrash2, FiPrinter } from 'react-icons/fi';
+import { getStaff, getDepartments, resetStaffPassword, deleteStaff, getStaffQRCode } from '../services/api';
 import api from '../services/api';
+import { printStaffQRCode } from '../utils/printQR';
 
 const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
@@ -140,6 +141,28 @@ export default function StaffManagement() {
     }
   };
 
+  const [printingId, setPrintingId] = useState(null);
+
+  const handlePrintQR = async (s) => {
+    setPrintingId(s.id);
+    try {
+      const { data } = await getStaffQRCode(s.id);
+      printStaffQRCode({
+        qrCode: data.qrCode,
+        staffId: s.staff_id,
+        firstName: s.first_name,
+        lastName: s.last_name,
+        department: s.department,
+        position: s.position,
+        institutionName: (JSON.parse(localStorage.getItem('user') || '{}')).institutionName,
+      });
+    } catch {
+      toast.error('Failed to load QR code');
+    } finally {
+      setPrintingId(null);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteModal) return;
     try {
@@ -223,6 +246,14 @@ export default function StaffManagement() {
               <td style={styles.td}><span style={styles.badge(s.is_active)}>{s.is_active ? 'Active' : 'Inactive'}</span></td>
               <td style={styles.td}>
                 <button style={styles.actionBtn} title="Edit" onClick={() => navigate(`/staff/${s.id}/edit`)}><FiEdit2 size={15} /></button>
+                <button
+                  style={{ ...styles.actionBtn, opacity: printingId === s.id ? 0.5 : 1 }}
+                  title="Print QR Code"
+                  disabled={printingId === s.id}
+                  onClick={() => handlePrintQR(s)}
+                >
+                  <FiPrinter size={15} />
+                </button>
                 <button style={styles.actionBtn} title="Reset Password" onClick={() => handleResetPassword(s.id, `${s.first_name} ${s.last_name}`)}><FiKey size={15} /></button>
                 <button style={{ ...styles.actionBtn, color: '#e74c3c' }} title="Delete" onClick={() => setDeleteModal({ id: s.id, name: `${s.first_name} ${s.last_name}`, staffId: s.staff_id })}><FiTrash2 size={15} /></button>
               </td>

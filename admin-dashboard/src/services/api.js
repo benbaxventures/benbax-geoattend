@@ -33,7 +33,6 @@ api.interceptors.response.use(
     const url = error.config?.url || '';
     const isAuthAttempt =
       url.includes('/auth/login') ||
-      url.includes('/auth/google-login') ||
       url.includes('/auth/register') ||
       url.includes('/auth/forgot-password');
 
@@ -53,7 +52,6 @@ export const login = (staffId, password, institutionCode) => {
   if (code) body.institutionCode = code.toUpperCase();
   return api.post('/auth/login', body);
 };
-export const googleLogin = (googleData) => api.post('/auth/google-login', googleData);
 export const getProfile = () => api.get('/auth/profile');
 export const createInitialAdmin = (data) => api.post('/auth/create-initial-admin', data);
 
@@ -77,6 +75,8 @@ export const updateAttendanceRules = (data, params) => api.put('/institutions/ru
 export const createInstitution = (data) => api.post('/institutions', data);
 export const getAllInstitutions = () => api.get('/institutions');
 export const repairInstitutionCode = (id) => api.post(`/institutions/${id}/repair-code`);
+export const getInstitutionAdminCredentials = (id) => api.get(`/institutions/${id}/admin-credentials`);
+export const createInstitutionAdminCredentials = (id) => api.post(`/institutions/${id}/admin-credentials`);
 // Subscriptions / Billing
 export const getSubscriptionStatus = () => api.get('/institutions/subscription');
 export const activateSubscription = (data) => api.post('/institutions/subscription/activate', data);

@@ -15,9 +15,9 @@ import Billing from './pages/Billing';
 import LeaveManagement from './pages/LeaveManagement';
 import RequestLeave from './pages/RequestLeave';
 import CreateInstitution from './pages/CreateInstitution';
+import Institutions from './pages/Institutions';
 import Analytics from './pages/Analytics';
 import AuditLog from './pages/AuditLog';
-import GoogleCallback from './pages/GoogleCallback';
 import Sidebar from './components/Sidebar';
 
 function App() {
@@ -64,7 +64,6 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/auth/google/callback" element={<GoogleCallback onLogin={handleLogin} />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </Router>
@@ -79,10 +78,11 @@ function App() {
       <Router>
         <Routes>
           <Route path="/*" element={<SuperAdminDashboard onLogout={handleLogout} />}>
+            <Route path="institutions" element={<Institutions />} />
             <Route path="institutions/new" element={<CreateInstitution />} />
             <Route path="audit" element={<AuditLog />} />
             <Route path="analytics" element={<Analytics />} />
-            <Route path="*" element={<Navigate to="/institutions/new" />} />
+            <Route path="*" element={<Navigate to="/institutions" />} />
           </Route>
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />

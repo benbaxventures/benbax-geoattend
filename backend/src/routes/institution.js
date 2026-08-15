@@ -21,5 +21,7 @@ router.put('/rules', requireAdmin, institutionController.updateAttendanceRules);
 router.get('/', requireSuperAdmin, institutionController.getAllInstitutions);
 router.post('/', requireSuperAdmin, institutionController.createInstitution);
 router.post('/:id/repair-code', requireSuperAdmin, institutionController.repairInstitutionCode);
+router.get('/:id/admin-credentials', requireSuperAdmin, institutionController.getAdminCredentials);
+router.post('/:id/admin-credentials', requireSuperAdmin, institutionController.createOrResetAdminCredentials);
 
 module.exports = router;

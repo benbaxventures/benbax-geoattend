@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { createStaff, getStaffById, updateStaff, getStaffQRCode } from '../services/api';
-import { FiArrowLeft, FiSave } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiPrinter } from 'react-icons/fi';
+import { printStaffQRCode } from '../utils/printQR';
 
 const styles = {
   header: { display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' },
@@ -21,6 +22,11 @@ const styles = {
   },
   qrSection: { marginTop: '24px', textAlign: 'center' },
   qrImg: { maxWidth: '200px', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '8px' },
+  printBtn: {
+    display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '12px',
+    padding: '10px 20px', background: '#1a5276', color: '#fff', borderRadius: '8px',
+    fontSize: '14px', fontWeight: '600',
+  },
 };
 
 export default function StaffForm() {
@@ -157,7 +163,23 @@ export default function StaffForm() {
           <div style={styles.qrSection}>
             <h3 style={{ marginBottom: '12px', fontSize: '16px', fontWeight: '600' }}>QR Code ID Card</h3>
             <img src={qrCode} alt="QR Code" style={styles.qrImg} />
-            <p style={{ marginTop: '8px', fontSize: '12px', color: '#95a5a6' }}>Print this QR code for the staff ID card</p>
+            <div>
+              <button
+                type="button"
+                style={styles.printBtn}
+                onClick={() => printStaffQRCode({
+                  qrCode,
+                  staffId: form.staffId,
+                  firstName: form.firstName,
+                  lastName: form.lastName,
+                  department: form.department,
+                  position: form.position,
+                  institutionName: (JSON.parse(localStorage.getItem('user') || '{}')).institutionName,
+                })}
+              >
+                <FiPrinter size={16} /> Print QR Code
+              </button>
+            </div>
           </div>
         )}
       </div>
