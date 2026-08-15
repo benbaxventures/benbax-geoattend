@@ -294,6 +294,45 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// Public endpoint: find a user's Staff ID using institution code + email + member type.
+exports.forgotStaffId = async (req, res) => {
+  try {
+    const { institutionCode, email, memberType } = req.body;
+    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+
+    if (!email || !institutionCode) {
+      return res.status(400).json({ error: 'Email and institution code are required' });
+    }
+
+    const institution = await pool.query(
+      'SELECT id FROM institutions WHERE institution_code = $1',
+      [institutionCode.toUpperCase()]
+    );
+
+    if (institution.rows.length === 0) {
+      return res.status(404).json({ error: 'Invalid institution code' });
+    }
+
+    const result = await pool.query(
+      'SELECT staff_id, first_name, last_name FROM staff WHERE LOWER(email) = LOWER($1) AND member_type = $2 AND institution_id = $3 AND is_active = true',
+      [email.trim(), normalizedMemberType, institution.rows[0].id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+
+    res.json({
+      staffId: result.rows[0].staff_id,
+      firstName: result.rows[0].first_name,
+      lastName: result.rows[0].last_name,
+    });
+  } catch (err) {
+    console.error('Forgot staff ID error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 exports.refreshToken = async (req, res) => {
   try {
     const staff = req.user;

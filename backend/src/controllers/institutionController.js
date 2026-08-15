@@ -2,6 +2,15 @@ const pool = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 const { generateInstitutionQR } = require('../utils/qrcode');
 
+async function generateInstitutionCode() {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = `INST-${Math.floor(100000 + Math.random() * 900000)}`;
+    const exists = await pool.query('SELECT id FROM institutions WHERE institution_code = $1', [code]);
+    if (exists.rows.length === 0) return code;
+  }
+  return `INST-${Date.now().toString().slice(-6)}`;
+}
+
 exports.getInstitution = async (req, res) => {
   try {
     const result = await pool.query(
@@ -66,12 +75,26 @@ exports.createInstitution = async (req, res) => {
     }
 
     const id = uuidv4();
+    const institutionCode = await generateInstitutionCode();
+    let created;
     const result = await pool.query(
-      `INSERT INTO institutions (id, name, address, city, region, latitude, longitude, geofence_radius)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO institutions (id, name, institution_code, address, city, region, latitude, longitude, geofence_radius)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [id, name, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
+      [id, name, institutionCode, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
     );
+
+    created = result.rows[0];
+
+    // Backfill institution_code for any rows that didn't get one
+    if (!created.institution_code) {
+      const newCode = await generateInstitutionCode();
+      const upd = await pool.query(
+        'UPDATE institutions SET institution_code = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [newCode, id]
+      );
+      if (upd.rows.length > 0) created = upd.rows[0];
+    }
 
     // Create default attendance rules
     await pool.query(
@@ -79,9 +102,35 @@ exports.createInstitution = async (req, res) => {
       [id]
     );
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(created);
   } catch (err) {
     console.error('Create institution error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.repairInstitutionCode = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Institution id is required' });
+
+    const existing = await pool.query('SELECT id, institution_code FROM institutions WHERE id = $1', [id]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
+    }
+    if (existing.rows[0].institution_code) {
+      return res.json({ message: 'Institution already has a code', institution: existing.rows[0] });
+    }
+
+    const code = await generateInstitutionCode();
+    const updated = await pool.query(
+      'UPDATE institutions SET institution_code = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [code, id]
+    );
+
+    res.json({ message: 'Institution code repaired', institution: updated.rows[0] });
+  } catch (err) {
+    console.error('Repair institution code error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

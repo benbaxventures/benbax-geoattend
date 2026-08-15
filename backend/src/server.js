@@ -123,6 +123,9 @@ async function runAutoMigration() {
     )`,
     `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotation_token VARCHAR(255)`,
     `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS qr_rotated_at TIMESTAMP`,
+    `ALTER TABLE institutions ADD COLUMN IF NOT EXISTS institution_code VARCHAR(30)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS ux_institutions_code ON institutions(institution_code)`,
+    `UPDATE institutions SET institution_code = UPPER('INST-' || SUBSTRING(REPLACE(id::text, '-', '') FROM 1 FOR 6)) WHERE institution_code IS NULL`,
   ];
   for (const sql of newTables) {
     try { await pool.query(sql); } catch (err) {
