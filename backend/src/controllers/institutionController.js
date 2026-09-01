@@ -20,8 +20,8 @@ async function generateInstitutionCode() {
 }
 
 /** Upsert the plaintext admin credentials so the super admin can retrieve them later. */
-async function storeAdminCredentials(institutionId, staffId, password) {
-  await pool.query(
+async function storeAdminCredentials(institutionId, staffId, password, client = pool) {
+  await client.query(
     `INSERT INTO institution_admin_credentials (institution_id, admin_staff_id, admin_password)
      VALUES ($1, $2, $3)
      ON CONFLICT (institution_id) DO UPDATE SET
@@ -33,19 +33,19 @@ async function storeAdminCredentials(institutionId, staffId, password) {
 }
 
 /** Create the initial admin account for an institution and store its credentials. */
-async function createInitialAdminCredentials(institutionId, providedPassword) {
+async function createInitialAdminCredentials(institutionId, providedPassword, client = pool) {
   const staffId = 'ADMIN' + crypto.randomBytes(3).toString('hex').toUpperCase();
   const rawPassword = providedPassword || crypto.randomBytes(4).toString('hex');
   const passwordHash = await bcrypt.hash(rawPassword, 12);
   const qrData = `STAFF-${institutionId}-${staffId}`;
 
-  await pool.query(
+  await client.query(
     `INSERT INTO staff (institution_id, staff_id, first_name, last_name, password_hash, qr_code_data, role, member_type)
      VALUES ($1, $2, 'Admin', 'User', $3, $4, 'admin', 'staff')`,
     [institutionId, staffId, passwordHash, qrData]
   );
 
-  await storeAdminCredentials(institutionId, staffId, rawPassword);
+  await storeAdminCredentials(institutionId, staffId, rawPassword, client);
   return { staffId, password: rawPassword };
 }
 
@@ -133,6 +133,7 @@ exports.getAllInstitutions = async (req, res) => {
 };
 
 exports.createInstitution = async (req, res) => {
+  const client = await pool.connect();
   try {
     const { name, address, city, region, latitude, longitude, geofenceRadius } = req.body;
 
@@ -141,83 +142,87 @@ exports.createInstitution = async (req, res) => {
     }
 
     const id = uuidv4();
-    const institutionCode = await generateInstitutionCode();
-    const result = await pool.query(
-      `INSERT INTO institutions (id, name, institution_code, address, city, region, latitude, longitude, geofence_radius)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
-      [id, name, institutionCode, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
-    );
 
-    // Some DB setups or triggers may null out the institution_code; ensure it's present
-    let created = result.rows[0];
-    if (!created.institution_code) {
-      // generate a unique code and update the row
-      const newCode = await generateInstitutionCode();
+    await client.query('BEGIN');
+
+    // Insert with a freshly generated code; retry on unique violation (up to 5 attempts)
+    let created = null;
+    let institutionCode = null;
+    for (let attempt = 0; attempt < 5 && !created; attempt++) {
+      institutionCode = await generateInstitutionCode();
       try {
-        const upd = await pool.query(
-          `UPDATE institutions SET institution_code = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-          [newCode, id]
+        const result = await client.query(
+          `INSERT INTO institutions (id, name, institution_code, address, city, region, latitude, longitude, geofence_radius)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+           RETURNING *`,
+          [id, name, institutionCode, address || null, city || null, region || null, latitude, longitude, geofenceRadius || 200]
         );
-        if (upd.rows.length > 0) created = upd.rows[0];
-        // Immediately re-query to verify
-        const verify = await pool.query('SELECT institution_code FROM institutions WHERE id = $1', [id]);
-        console.log('Institution code after update:', verify.rows[0]?.institution_code);
-      } catch (e) {
-        console.error('Failed to set institution_code after create:', e.message || e);
+        created = result.rows[0];
+      } catch (insertErr) {
+        // Unique violation on institution_code → retry with a new code
+        if (insertErr.code === '23505' && insertErr.constraint === 'ux_institutions_code') {
+          console.warn(`Institution code collision on attempt ${attempt + 1}, retrying...`);
+          continue;
+        }
+        throw insertErr;
       }
     }
-    // Ensure we return the latest persisted row (in case triggers/updates modified it)
-    try {
-      const fresh = await pool.query('SELECT * FROM institutions WHERE id = $1', [id]);
-      if (fresh.rows.length > 0) created = fresh.rows[0];
-    } catch (e) {
-      console.error('Failed to re-query institution after create:', e.message || e);
+
+    if (!created) {
+      await client.query('ROLLBACK');
+      return res.status(500).json({ error: 'Failed to generate a unique institution code after multiple attempts' });
     }
 
-    // Create default attendance rules (explicit conflict target for PostgreSQL)
+    // Ensure code is present (defensive against triggers/DB quirks)
+    if (!created.institution_code) {
+      const repairCode = await generateInstitutionCode();
+      const upd = await client.query(
+        `UPDATE institutions SET institution_code = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+        [repairCode, id]
+      );
+      if (upd.rows.length > 0) {
+        created = upd.rows[0];
+        console.log(`Institution ${id}: code repaired to ${repairCode}`);
+      }
+    }
+
+    // Create default attendance rules (handle missing member_type column gracefully)
     try {
-      await pool.query(
+      await client.query(
         `INSERT INTO attendance_rules (institution_id, member_type)
          VALUES ($1, 'staff'), ($1, 'student')
          ON CONFLICT (institution_id, member_type) DO NOTHING`,
         [id]
       );
     } catch (rulesErr) {
-      console.error('Create institution: attendance_rules insert:', rulesErr.message);
-      for (const mt of ['staff', 'student']) {
-        await pool.query(
-          `INSERT INTO attendance_rules (institution_id, member_type)
-           SELECT $1, $2::varchar
-           WHERE NOT EXISTS (
-             SELECT 1 FROM attendance_rules ar
-             WHERE ar.institution_id = $1 AND ar.member_type = $2
-           )`,
-          [id, mt]
-        ).catch(() => {});
+      // Fallback for older schemas without member_type
+      if (rulesErr.message.includes('member_type')) {
+        await client.query(
+          `INSERT INTO attendance_rules (institution_id)
+           VALUES ($1)
+           ON CONFLICT (institution_id) DO NOTHING`,
+          [id]
+        ).catch(() => {}); // Ignore if still fails
       }
     }
 
-    try {
-      await ensureTrialSubscription(id);
-    } catch (subErr) {
-      console.error('Create institution: trial subscription skipped:', subErr.message);
-    }
+    // Ensure trial subscription exists
+    await ensureTrialSubscription(id, client);
 
-    // Always create an initial admin account and store its credentials so the
-    // super admin can retrieve them later from the admin dashboard.
-    let adminCredentials = null;
-    try {
-      adminCredentials = await createInitialAdminCredentials(id);
-    } catch (adminErr) {
-      console.error('Create institution: initial admin auto-create failed:', adminErr.message);
-    }
+    // Always create initial admin account + store credentials
+    const adminCredentials = await createInitialAdminCredentials(id, null, client);
 
+    await client.query('COMMIT');
+
+    // Return the fully persisted record
     res.status(201).json({ ...created, adminCredentials });
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('Create institution error:', err);
     const debug = process.env.NODE_ENV !== 'production' ? err.message : undefined;
     res.status(500).json({ error: 'Server error', ...(debug && { debug }) });
+  } finally {
+    client.release();
   }
 };
 

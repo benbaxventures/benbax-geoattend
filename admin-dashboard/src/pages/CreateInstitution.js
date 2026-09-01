@@ -8,10 +8,13 @@ const styles = {
   title: { fontSize: 22, fontWeight: 700 },
   form: { background: '#fff', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   row: { display: 'flex', gap: 12, marginBottom: 12 },
-  input: { flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 14 },
+  field: { flex: 1, display: 'flex', flexDirection: 'column' },
+  label: { fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 },
+  input: { padding: '10px 12px', borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 14, width: '100%' },
   btn: (bg) => ({ padding: '8px 16px', borderRadius: 8, background: bg, color: '#fff', border: 'none', cursor: 'pointer' }),
   codeBox: { marginTop: 16, padding: 12, background: '#f6f8fa', borderRadius: 8, fontFamily: 'monospace' },
   apiHint: { marginTop: 8, fontSize: 12, color: '#7f8c8d' },
+  errorBox: { marginTop: 16, padding: 12, background: '#f8d7da', borderRadius: 8, border: '2px solid #dc3545', color: '#721c24' },
 };
 
 export default function CreateInstitution() {
@@ -87,6 +90,7 @@ export default function CreateInstitution() {
       const payload = { name, address, city, region, latitude: parseFloat(latitude), longitude: parseFloat(longitude), geofenceRadius: parseInt(geofenceRadius, 10) };
       const res = await createInstitution(payload);
       let inst = res.data;
+
       // If backend did not return an institution code, try fetching the created institution
       if (!inst.institution_code && inst.id) {
         try {
@@ -97,6 +101,7 @@ export default function CreateInstitution() {
           // ignore fetch errors
         }
       }
+
       // Still missing code? Try repairing it (super_admin only).
       if (!inst.institution_code && inst.id) {
         try {
@@ -107,6 +112,7 @@ export default function CreateInstitution() {
           // ignore repair errors; raw response will still show for debugging
         }
       }
+
       setCreated(inst);
 
       // Backend auto-creates the initial admin and returns its credentials.
@@ -177,19 +183,40 @@ export default function CreateInstitution() {
           </div>
         )}
         <div style={styles.row}>
-          <input style={styles.input} placeholder="Institution name" value={name} onChange={e => setName(e.target.value)} />
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-name">Institution Name *</label>
+            <input id="inst-name" style={styles.input} placeholder="e.g. Rising Soul Academy" value={name} onChange={e => setName(e.target.value)} />
+          </div>
         </div>
         <div style={styles.row}>
-          <input style={styles.input} placeholder="Address" value={address} onChange={e => setAddress(e.target.value)} />
-          <input style={styles.input} placeholder="City" value={city} onChange={e => setCity(e.target.value)} />
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-address">Address</label>
+            <input id="inst-address" style={styles.input} placeholder="Street address" value={address} onChange={e => setAddress(e.target.value)} />
+          </div>
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-city">City</label>
+            <input id="inst-city" style={styles.input} placeholder="e.g. Tema" value={city} onChange={e => setCity(e.target.value)} />
+          </div>
         </div>
         <div style={styles.row}>
-          <input style={styles.input} placeholder="Region" value={region} onChange={e => setRegion(e.target.value)} />
-          <input style={styles.input} placeholder="Geofence radius (meters)" value={geofenceRadius} onChange={e => setGeofenceRadius(e.target.value)} />
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-region">Region</label>
+            <input id="inst-region" style={styles.input} placeholder="e.g. Greater Accra" value={region} onChange={e => setRegion(e.target.value)} />
+          </div>
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-radius">Geofence Radius (meters)</label>
+            <input id="inst-radius" style={styles.input} type="number" min="50" max="5000" placeholder="200" value={geofenceRadius} onChange={e => setGeofenceRadius(e.target.value)} />
+          </div>
         </div>
         <div style={styles.row}>
-          <input style={styles.input} placeholder="Latitude" value={latitude} onChange={e => setLatitude(e.target.value)} />
-          <input style={styles.input} placeholder="Longitude" value={longitude} onChange={e => setLongitude(e.target.value)} />
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-lat">Latitude *</label>
+            <input id="inst-lat" style={styles.input} placeholder="e.g. 5.7076" value={latitude} onChange={e => setLatitude(e.target.value)} />
+          </div>
+          <div style={styles.field}>
+            <label style={styles.label} htmlFor="inst-lng">Longitude *</label>
+            <input id="inst-lng" style={styles.input} placeholder="e.g. -0.0033" value={longitude} onChange={e => setLongitude(e.target.value)} />
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
@@ -198,47 +225,65 @@ export default function CreateInstitution() {
         </div>
 
         {created && (
-            <div style={styles.codeBox}>
-              <div><strong>Institution created:</strong> {created.name || created.data?.name || '—'}</div>
-              <div style={{ marginTop: 8 }}>
-                <strong>Institution code:</strong>{' '}
-                <span style={{ fontFamily: 'monospace', fontSize: 16, background: '#fff3cd', padding: '4px 8px', borderRadius: 4 }}>
-                  {created.institution_code || created.institutionCode || created.code || created.data?.institution_code || 'Not returned'}
-                </span>
-              </div>
-
-              {adminCredentials && (
-                <div style={{ marginTop: 16, padding: 12, background: '#d4edda', borderRadius: 8, border: '2px solid #28a745' }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: '#155724' }}>Admin Account Created</div>
-                  <div style={{ marginBottom: 4 }}>
-                    <strong>Admin ID:</strong>{' '}
-                    <span style={{ fontFamily: 'monospace', fontSize: 15 }}>{adminCredentials.staffId}</span>
-                  </div>
-                  <div style={{ marginBottom: 8 }}>
-                    <strong>Password:</strong>{' '}
-                    <span style={{ fontFamily: 'monospace', fontSize: 15 }}>{adminCredentials.password}</span>
-                  </div>
-                  <button onClick={copyAdminCredentials} style={{ ...styles.btn('#28a745'), marginTop: 4 }}>
-                    Copy All Credentials
-                  </button>
-                  <div style={{ marginTop: 8, fontSize: 13, color: '#155724' }}>
-                    <strong>Important:</strong> Share these credentials with the institution admin. They should change the password after first login.
-                  </div>
-                </div>
-              )}
-
-              <div style={{ marginTop: 12 }}>
-                <button onClick={copyCode} style={{ ...styles.btn('#27ae60'), marginRight: 8 }}>Copy Institution Code</button>
-                <label style={{ marginLeft: 8 }}><input type="checkbox" checked={showRaw} onChange={e => setShowRaw(e.target.checked)} /> Show raw response</label>
-                {!adminCredentials && (
-                  <div style={{ marginTop: 8 }}><small style={{ color: '#856404', background: '#fff3cd', padding: 6, borderRadius: 4, display: 'inline-block' }}>Warning: No admin account was created. Users signing up with this code will be regular staff members.</small></div>
-                )}
-                {showRaw && (
-                  <pre style={{ marginTop: 8, maxHeight: 200, overflow: 'auto', background: '#fff', padding: 8 }}>{JSON.stringify(created, null, 2)}</pre>
-                )}
-              </div>
+          <div style={styles.codeBox}>
+            <div><strong>Institution created:</strong> {created.name || created.data?.name || '—'}</div>
+            <div style={{ marginTop: 8 }}>
+              <strong>Institution code:</strong>{' '}
+              <span style={{ fontFamily: 'monospace', fontSize: 16, background: created.institution_code ? '#d4edda' : '#fff3cd', padding: '4px 8px', borderRadius: 4 }}>
+                {created.institution_code || created.institutionCode || created.code || created.data?.institution_code || 'Not returned'}
+              </span>
             </div>
-          )}
+
+            {adminCredentials && (
+              <div style={{ marginTop: 16, padding: 12, background: '#d4edda', borderRadius: 8, border: '2px solid #28a745' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: '#155724' }}>Admin Account Created</div>
+                <div style={{ marginBottom: 4 }}>
+                  <strong>Admin ID:</strong>{' '}
+                  <span style={{ fontFamily: 'monospace', fontSize: 15 }}>{adminCredentials.staffId}</span>
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <strong>Password:</strong>{' '}
+                  <span style={{ fontFamily: 'monospace', fontSize: 15 }}>{adminCredentials.password}</span>
+                </div>
+                <button onClick={copyAdminCredentials} style={{ ...styles.btn('#28a745'), marginTop: 4 }}>
+                  Copy All Credentials
+                </button>
+                <div style={{ marginTop: 8, fontSize: 13, color: '#155724' }}>
+                  <strong>Important:</strong> Share these credentials with the institution admin. They should change the password after first login.
+                </div>
+              </div>
+            )}
+
+            {!adminCredentials && created.institution_code && (
+              <div style={{ marginTop: 16, padding: 12, background: '#fff3cd', borderRadius: 8, border: '2px solid #ffc107' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#856404' }}>⚠️ Admin Account Not Created</div>
+                <div style={{ fontSize: 13, color: '#856404', marginBottom: 8 }}>
+                  Institution was created but no admin credentials were generated. You can manually create them below.
+                </div>
+                <button onClick={() => createInitialAdmin({ institutionCode: created.institution_code, firstName: 'Admin', lastName: 'User' }).then(res => { setAdminCredentials(res.data.credentials); toast.success('Admin account created'); }).catch(err => toast.error('Failed to create admin: ' + (err.response?.data?.error || err.message)))} style={{ ...styles.btn('#ffc107'), color: '#000' }}>
+                  Create Admin Account Now
+                </button>
+              </div>
+            )}
+
+            {!created.institution_code && (
+              <div style={styles.errorBox}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>❌ Institution Code Missing</div>
+                <div style={{ fontSize: 13, marginBottom: 8 }}>
+                  The institution was created but no code was returned. This usually means the backend is running an older version. Please contact support or check the API health endpoint.
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginTop: 12 }}>
+              <button onClick={copyCode} style={{ ...styles.btn('#27ae60'), marginRight: 8 }}>Copy Institution Code</button>
+              <label style={{ marginLeft: 8 }}><input type="checkbox" checked={showRaw} onChange={e => setShowRaw(e.target.checked)} /> Show raw response</label>
+              {showRaw && (
+                <pre style={{ marginTop: 8, maxHeight: 200, overflow: 'auto', background: '#fff', padding: 8 }}>{JSON.stringify(created, null, 2)}</pre>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

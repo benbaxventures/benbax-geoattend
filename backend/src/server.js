@@ -49,9 +49,23 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Health check
+// Health check with build info for deploy verification
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  let gitSha = 'unknown';
+  try {
+    // Try multiple env vars (Render, Heroku, etc.) then fall back to reading .git
+    gitSha = process.env.RENDER_GIT_COMMIT
+      || process.env.SOURCE_VERSION
+      || process.env.GIT_SHA
+      || require('child_process').execSync('git rev-parse --short HEAD', { cwd: __dirname, stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim();
+  } catch (e) { /* ignore */ }
+
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    gitSha,
+    nodeEnv: process.env.NODE_ENV || 'development',
+  });
 });
 
 
@@ -148,6 +162,8 @@ async function runAutoMigration() {
     `UPDATE institutions
      SET institution_code = UPPER('INST-' || SUBSTRING(REPLACE(id::text, '-', '') FROM 1 FOR 6))
      WHERE institution_code IS NULL`,
+    `ALTER TABLE attendance_rules ADD COLUMN IF NOT EXISTS member_type VARCHAR(20) DEFAULT 'staff'`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS ux_attendance_rules_inst_member ON attendance_rules(institution_id, member_type)`,
     `CREATE TABLE IF NOT EXISTS subscriptions (
       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
       institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,

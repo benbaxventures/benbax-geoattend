@@ -17,8 +17,8 @@ async function getInstitutionByCode(institutionCode) {
   return result.rows[0] || null;
 }
 
-async function ensureTrialSubscription(institutionId) {
-  const existing = await pool.query(
+async function ensureTrialSubscription(institutionId, client = pool) {
+  const existing = await client.query(
     `SELECT id, status, trial_start, trial_end, current_period_end
      FROM subscriptions
      WHERE institution_id = $1
@@ -30,7 +30,7 @@ async function ensureTrialSubscription(institutionId) {
     return existing.rows[0];
   }
 
-  const created = await pool.query(
+  const created = await client.query(
     `INSERT INTO subscriptions (institution_id, plan_name, status, trial_start, trial_end)
      VALUES ($1, 'trial', 'trialing', NOW(), NOW() + ($2 || ' days')::INTERVAL)
      RETURNING id, plan_name, status, trial_start, trial_end, current_period_end`,
