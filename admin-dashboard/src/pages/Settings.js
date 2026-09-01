@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { FiSave, FiMapPin, FiCrosshair, FiPrinter } from 'react-icons/fi';
+import { FiSave, FiMapPin, FiCrosshair, FiPrinter, FiDownload, FiShare2 } from 'react-icons/fi';
 import { getInstitution, updateInstitution, getAttendanceRules, updateAttendanceRules, getInstitutionQR } from '../services/api';
 
 const styles = {
@@ -336,6 +336,52 @@ function InstitutionQR() {
     `);
   };
 
+  const qrFileName = () =>
+    `${(institutionName || 'institution').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase()}-checkin-qr.png`;
+
+  const downloadQR = () => {
+    if (!qrCode) return;
+    const a = document.createElement('a');
+    a.href = qrCode;
+    a.download = qrFileName();
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success('QR code downloaded');
+  };
+
+  const shareQR = async () => {
+    if (!qrCode) return;
+    try {
+      // Convert the data URI into a shareable File
+      const blob = await (await fetch(qrCode)).blob();
+      const file = new File([blob], qrFileName(), { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `${institutionName} Check-In QR Code`,
+          text: `Scan this QR code with the Benbax GeoAttend app to check in at ${institutionName}.`,
+        });
+        return;
+      }
+
+      // Fallback: copy the image itself to the clipboard
+      if (navigator.clipboard && window.ClipboardItem) {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        toast.success('QR image copied — paste it anywhere to share');
+        return;
+      }
+
+      // Final fallback: download it
+      downloadQR();
+      toast.info('Sharing not supported in this browser — QR code downloaded instead');
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // user dismissed the share sheet
+      toast.error('Failed to share QR code');
+    }
+  };
+
   return (
     <div>
       {!qrCode ? (
@@ -355,7 +401,7 @@ function InstitutionQR() {
           <img src={qrCode} alt="Institution QR" style={{ width: '250px', border: '2px solid #e0e0e0', borderRadius: '12px', padding: '8px' }} />
           <p style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50', marginTop: '12px' }}>{institutionName}</p>
           <p style={{ fontSize: '12px', color: '#95a5a6' }}>Staff scan this QR code to check in</p>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px', flexWrap: 'wrap' }}>
             <button
               onClick={printQR}
               style={{
@@ -366,6 +412,28 @@ function InstitutionQR() {
               }}
             >
               <FiPrinter size={14} /> Print QR Code
+            </button>
+            <button
+              onClick={downloadQR}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '10px 24px', background: '#27ae60', color: '#fff',
+                borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                border: 'none', cursor: 'pointer',
+              }}
+            >
+              <FiDownload size={14} /> Download
+            </button>
+            <button
+              onClick={shareQR}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '10px 24px', background: '#2980b9', color: '#fff',
+                borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                border: 'none', cursor: 'pointer',
+              }}
+            >
+              <FiShare2 size={14} /> Share
             </button>
             <button
               onClick={generateQR}
