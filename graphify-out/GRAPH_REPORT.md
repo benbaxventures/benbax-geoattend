@@ -178,7 +178,7 @@ Nodes (2): getCurrentLocation(), requestLocationPermission()
 
 ### Community 14 - "Community 14"
 Cohesion: 0.0
-Nodes (4): Admin Authentication Setup Guide, Benbax GeoAttend - Geofenced Attendance Management System, Graph Report - .  (2026-04-15), Mobile App Local Development Setup
+Nodes (4): Admin Authentication Setup Guide, Geofence - Geofenced Attendance Management System, Graph Report - .  (2026-04-15), Mobile App Local Development Setup
 
 ### Community 15 - "Community 15"
 Cohesion: 0.0

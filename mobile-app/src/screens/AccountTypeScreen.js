@@ -25,7 +25,7 @@ export default function AccountTypeScreen({ navigation, onSelected }) {
       <View style={styles.card}>
         <Text style={styles.title}>Choose Account Type</Text>
         <Text style={styles.subtitle}>
-          Select how you want to use Benbax GeoAttend on this device.
+          Select how you want to use Geofence on this device.
         </Text>
 
         <TouchableOpacity

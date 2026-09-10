@@ -1,4 +1,4 @@
-const CACHE_NAME = 'geoattend-v1';
+const CACHE_NAME = 'geofence-v1';
 const urlsToCache = [
   '/',
   '/index.html',
