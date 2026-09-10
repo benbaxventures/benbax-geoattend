@@ -14,6 +14,49 @@ body {
 
 a { text-decoration: none; color: inherit; }
 
+.auth-input {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input:focus {
+  border-color: #2980b9 !important;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.14);
+}
+
+.auth-button {
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.auth-button:hover:not(:disabled) {
+  background: #154360 !important;
+  box-shadow: 0 6px 14px rgba(21, 67, 96, 0.2);
+  transform: translateY(-1px);
+}
+
+.auth-button:focus-visible,
+.auth-toggle:focus-visible {
+  outline: 3px solid rgba(41, 128, 185, 0.35);
+  outline-offset: 2px;
+}
+
+@media (max-height: 680px) {
+  .auth-shell {
+    align-items: flex-start !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .auth-card {
+    max-height: calc(100vh - 24px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 24px 20px 18px !important;
+  }
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -39,4 +82,3 @@ input, select, textarea {
   main { overflow-x: hidden; }
   main table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
-
