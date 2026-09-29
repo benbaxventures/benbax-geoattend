@@ -20,6 +20,11 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid or inactive account' });
     }
 
+    // Staff-only system: legacy student accounts can no longer use the API
+    if (result.rows[0].member_type && result.rows[0].member_type !== 'staff') {
+      return res.status(401).json({ error: 'Only staff accounts can sign in' });
+    }
+
     req.user = result.rows[0];
     next();
   } catch (err) {

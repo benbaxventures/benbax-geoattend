@@ -14,13 +14,6 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [memberType, setMemberType] = useState('staff');
-
-  React.useEffect(() => {
-    AsyncStorage.getItem('memberType').then((mt) => {
-      setMemberType(mt === 'student' ? 'student' : 'staff');
-    }).catch(() => setMemberType('staff'));
-  }, []);
 
   React.useEffect(() => {
     AsyncStorage.getItem('institutionCode').then((code) => {
@@ -50,8 +43,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         staffId.trim().toUpperCase(),
         email.trim().toLowerCase(),
         newPassword,
-        institutionCode.trim().toUpperCase(),
-        memberType
+        institutionCode.trim().toUpperCase()
       );
       Alert.alert('Success', data.message, [
         { text: 'OK', onPress: () => navigation.goBack() },
@@ -72,7 +64,7 @@ export default function ForgotPasswordScreen({ navigation }) {
           </TouchableOpacity>
           <Text style={styles.title}>Reset Password</Text>
           <Text style={styles.subtitle}>
-            Enter your {memberType === 'student' ? 'Student' : 'Staff'} ID and email to verify your identity
+            Enter your Staff ID and email to verify your identity
           </Text>
         </View>
 
@@ -90,10 +82,10 @@ export default function ForgotPasswordScreen({ navigation }) {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</Text>
+            <Text style={styles.label}>Staff ID</Text>
             <TextInput
               style={styles.input}
-              placeholder={`Enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID`}
+              placeholder="Enter your Staff ID"
               value={staffId}
               onChangeText={setStaffId}
               autoCapitalize="characters"

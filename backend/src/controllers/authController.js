@@ -28,8 +28,7 @@ async function getSubscriptionPayloadSafe(institutionId) {
 
 exports.login = async (req, res) => {
   try {
-    const { staffId, password, institutionCode, deviceId, deviceModel, osVersion, memberType } = req.body;
-    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const { staffId, password, institutionCode, deviceId, deviceModel, osVersion } = req.body;
     const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!staffId || !password) {
@@ -51,8 +50,8 @@ exports.login = async (req, res) => {
                 i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code as inst_institution_code
          FROM staff s
          JOIN institutions i ON s.institution_id = i.id
-         WHERE s.staff_id = $1 AND s.member_type = $2 AND s.institution_id = $3 AND s.is_active = true`,
-        [staffId.toUpperCase(), normalizedMemberType, institution.id]
+         WHERE s.staff_id = $1 AND s.member_type = 'staff' AND s.institution_id = $2 AND s.is_active = true`,
+        [staffId.toUpperCase(), institution.id]
       );
       if (result.rows.length === 0) {
         return res.status(401).json({
@@ -66,8 +65,8 @@ exports.login = async (req, res) => {
         `SELECT s.*, i.name as institution_name, i.address as inst_address, i.city as inst_city, i.region as inst_region, i.latitude as inst_lat, i.longitude as inst_lon, i.geofence_radius, i.institution_code
          FROM staff s
          JOIN institutions i ON s.institution_id = i.id
-         WHERE s.staff_id = $1 AND s.member_type = $2 AND s.is_active = true AND s.role IN ('admin','super_admin')`,
-        [staffId.toUpperCase(), normalizedMemberType]
+         WHERE s.staff_id = $1 AND s.member_type = 'staff' AND s.is_active = true AND s.role IN ('admin','super_admin')`,
+        [staffId.toUpperCase()]
       );
 
       if (result.rows.length === 0) {
@@ -90,7 +89,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: staff.id, role: staff.role, institutionId: staff.institution_id, memberType: staff.member_type },
+      { userId: staff.id, role: staff.role, institutionId: staff.institution_id },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
@@ -123,7 +122,6 @@ exports.login = async (req, res) => {
         role: staff.role,
         department: staff.department,
         position: staff.position,
-        memberType: staff.member_type,
         institutionId: staff.institution_id,
         institutionName: staff.institution_name,
         profilePhoto: staff.profile_photo_url,
@@ -148,8 +146,7 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { staffId, firstName, lastName, email, phone, password, department, position, institutionCode, memberType } = req.body;
-    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const { staffId, firstName, lastName, email, phone, password, department, position, institutionCode } = req.body;
     const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!staffId || !firstName || !lastName || !password || !normalizedInstitutionCode) {
@@ -180,9 +177,9 @@ exports.register = async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data, role, member_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'staff', $11)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'staff', 'staff')
        RETURNING id`,
-      [institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null, department || null, position || null, passwordHash, qrData, normalizedMemberType]
+      [institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null, department || null, position || null, passwordHash, qrData]
     );
 
     res.status(201).json({ message: 'Registration successful. You can now login with your Staff ID and password.' });
@@ -233,8 +230,7 @@ exports.changePassword = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    const { staffId, email, newPassword, institutionCode, memberType } = req.body;
-    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const { staffId, email, newPassword, institutionCode } = req.body;
     const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!staffId || !email || !newPassword || !normalizedInstitutionCode) {
@@ -251,8 +247,8 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND member_type = $3 AND institution_id = $4 AND is_active = true',
-      [staffId.toUpperCase(), email.toLowerCase().trim(), normalizedMemberType, institution.id]
+      "SELECT id FROM staff WHERE staff_id = $1 AND email = $2 AND member_type = 'staff' AND institution_id = $3 AND is_active = true",
+      [staffId.toUpperCase(), email.toLowerCase().trim(), institution.id]
     );
 
     if (result.rows.length === 0) {
@@ -269,11 +265,10 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// Public helper: find a user's Staff ID using institution code + email + member type.
+// Public helper: find a user's Staff ID using institution code + email.
 exports.forgotStaffId = async (req, res) => {
   try {
-    const { institutionCode, email, memberType } = req.body;
-    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const { institutionCode, email } = req.body;
     const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!email || !normalizedInstitutionCode) {
@@ -286,8 +281,8 @@ exports.forgotStaffId = async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT staff_id, first_name, last_name FROM staff WHERE LOWER(email) = $1 AND member_type = $2 AND institution_id = $3 AND is_active = true',
-      [email.toLowerCase().trim(), normalizedMemberType, institution.id]
+      "SELECT staff_id, first_name, last_name FROM staff WHERE LOWER(email) = $1 AND member_type = 'staff' AND institution_id = $2 AND is_active = true",
+      [email.toLowerCase().trim(), institution.id]
     );
 
     if (result.rows.length === 0) {
@@ -308,8 +303,7 @@ exports.forgotStaffId = async (req, res) => {
 // Super-admin helper: create the initial admin for an institution and return credentials.
 exports.createInitialAdmin = async (req, res) => {
   try {
-    const { institutionCode, staffId, firstName, lastName, email, phone, memberType } = req.body;
-    const normalizedMemberType = (memberType || 'staff').toLowerCase();
+    const { institutionCode, staffId, firstName, lastName, email, phone } = req.body;
     const normalizedInstitutionCode = normalizeInstitutionCode(institutionCode);
 
     if (!normalizedInstitutionCode) {
@@ -346,9 +340,9 @@ exports.createInitialAdmin = async (req, res) => {
 
     const insertResult = await pool.query(
       `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, password_hash, qr_code_data, role, member_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'admin', $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'admin', 'staff')
        RETURNING id, staff_id, first_name, last_name, email`,
-      [institutionId, finalStaffId, firstName || 'Admin', lastName || 'User', email || null, phone || null, passwordHash, qrData, normalizedMemberType]
+      [institutionId, finalStaffId, firstName || 'Admin', lastName || 'User', email || null, phone || null, passwordHash, qrData]
     );
 
     // Store the plaintext credentials so the super admin can retrieve them later.
@@ -383,7 +377,6 @@ exports.refreshToken = async (req, res) => {
         userId: staff.userId || staff.id,
         role: staff.role,
         institutionId: staff.institution_id || staff.institutionId,
-        memberType: staff.member_type || staff.memberType,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }

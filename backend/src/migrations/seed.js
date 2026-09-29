@@ -37,7 +37,7 @@ async function seed() {
     // Create default attendance rules
     await client.query(`
       INSERT INTO attendance_rules (institution_id, member_type)
-      VALUES ($1, 'staff'), ($1, 'student')
+      VALUES ($1, 'staff')
       ON CONFLICT DO NOTHING
     `, [institutionId]);
 

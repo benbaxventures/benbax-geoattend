@@ -59,14 +59,13 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ totalStaff: 0, presentToday: 0, lateToday: 0, absentToday: 0 });
   const [weekly, setWeekly] = useState([]);
   const [todaySummary, setTodaySummary] = useState({ present: 0, late: 0, absent: 0 });
-  const [memberType, setMemberType] = useState('staff');
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    getDashboardStats({ memberType }).then(r => setStats(r.data)).catch(() => {});
-    getWeeklySummary({ memberType }).then(r => setWeekly(r.data)).catch(() => {});
-    getTodaySummary({ memberType }).then(r => setTodaySummary(r.data)).catch(() => {});
-  }, [memberType]);
+    getDashboardStats().then(r => setStats(r.data)).catch(() => {});
+    getWeeklySummary().then(r => setWeekly(r.data)).catch(() => {});
+    getTodaySummary().then(r => setTodaySummary(r.data)).catch(() => {});
+  }, []);
 
   const statValues = [stats.totalStaff, stats.presentToday, stats.lateToday, stats.absentToday];
 
@@ -105,17 +104,11 @@ export default function Dashboard() {
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>Dashboard</h1>
-        <div style={{ marginTop: 8 }}>
-          <select value={memberType} onChange={(e) => setMemberType(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e0e0e0', background: '#fff' }}>
-            <option value="staff">Staff</option>
-            <option value="student">Student</option>
-          </select>
-        </div>
         <p style={styles.date}>{new Date().toLocaleDateString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Today Summary ({memberType})</h3>
+        <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Today's Staff Summary</h3>
         <div style={{ display: 'flex', gap: 16, fontSize: 15 }}>
           <span><strong>{todaySummary.present || 0}</strong> present</span>
           <span><strong>{todaySummary.late || 0}</strong> late</span>

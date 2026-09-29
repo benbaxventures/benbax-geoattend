@@ -21,18 +21,15 @@ import HomeScreen from './src/screens/HomeScreen';
 import QRScanScreen from './src/screens/QRScanScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
-import AccountTypeScreen from './src/screens/AccountTypeScreen';
 import LeaveRequestScreen from './src/screens/LeaveRequestScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function MainTabs({ onLogout, memberType }) {
+function MainTabs({ onLogout }) {
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 10);
   const { theme } = require('./src/services/theme').useTheme();
-
-  const checkInLabel = memberType === 'student' ? 'Student Check-In' : 'Staff Check-In';
 
   return (
     <Tab.Navigator
@@ -53,7 +50,7 @@ function MainTabs({ onLogout, memberType }) {
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{
-        tabBarLabel: checkInLabel,
+        tabBarLabel: 'Staff Check-In',
         tabBarIcon: ({ color, size }) => <Ionicons name="location" size={size} color={color} />,
       }} />
       <Tab.Screen name="QRScan" component={QRScanScreen} options={{
@@ -77,17 +74,11 @@ function MainTabs({ onLogout, memberType }) {
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [memberType, setMemberType] = useState(null);
 
   useEffect(() => {
     AsyncStorage.getItem('token').then(async (token) => {
-      // Load preferred account type (student/staff)
-      try {
-        const storedMemberType = await AsyncStorage.getItem('memberType');
-        setMemberType(storedMemberType || null);
-      } catch {
-        setMemberType(null);
-      }
+      // Staff-only app: drop the account-type preference left by older builds
+      AsyncStorage.removeItem('memberType').catch(() => {});
 
       if (token) {
         // Check biometric — but always keep user logged in
@@ -126,37 +117,25 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isLoggedIn ? (
             <Stack.Screen name="Main">
-              {() => <MainTabs onLogout={() => setIsLoggedIn(false)} memberType={memberType} />}
+              {() => <MainTabs onLogout={() => setIsLoggedIn(false)} />}
             </Stack.Screen>
           ) : (
-            !memberType ? (
-              <Stack.Screen name="AccountType">
+            <>
+              <Stack.Screen name="Login">
                 {(props) => (
-                  <AccountTypeScreen
+                  <LoginScreen
                     {...props}
-                    onSelected={(mt) => setMemberType(mt)}
+                    onLogin={() => setIsLoggedIn(true)}
+                    onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
+                    onForgotStaffId={() => props.navigation.navigate('ForgotStaffId')}
+                    onRegister={() => props.navigation.navigate('Register')}
                   />
                 )}
               </Stack.Screen>
-            ) : (
-              <>
-                <Stack.Screen name="Login">
-                  {(props) => (
-                    <LoginScreen
-                      {...props}
-                      onLogin={() => setIsLoggedIn(true)}
-                      onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
-                      onForgotStaffId={() => props.navigation.navigate('ForgotStaffId')}
-                      onRegister={() => props.navigation.navigate('Register')}
-                      memberType={memberType}
-                    />
-                  )}
-                </Stack.Screen>
-                <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-                <Stack.Screen name="ForgotStaffId" component={ForgotStaffIdScreen} />
-                <Stack.Screen name="Register" component={RegisterScreen} />
-              </>
-            )
+              <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+              <Stack.Screen name="ForgotStaffId" component={ForgotStaffIdScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+            </>
           )}
           {isLoggedIn && <Stack.Screen name="LeaveRequest" component={LeaveRequestScreen} />}
         </Stack.Navigator>

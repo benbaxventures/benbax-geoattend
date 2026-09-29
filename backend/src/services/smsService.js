@@ -75,19 +75,9 @@ const sendAbsentAlert = async (phone, name, date) => {
   return sendSMS(phone, `${name}, you were absent on ${date}. If this is an error, please contact your admin. - Benbax GeoAttend`);
 };
 
-const sendStudentLateAlertToGuardian = async (phone, studentName, time) => {
-  return sendSMS(phone, `Alert: ${studentName} checked in late at ${time}. - Benbax GeoAttend`);
-};
-
-const sendStudentAbsentAlertToGuardian = async (phone, studentName, date) => {
-  return sendSMS(phone, `Alert: ${studentName} is absent on ${date}. - Benbax GeoAttend`);
-};
-
 module.exports = {
   sendSMS,
   sendCheckInReminder,
   sendLateAlert,
   sendAbsentAlert,
-  sendStudentLateAlertToGuardian,
-  sendStudentAbsentAlertToGuardian,
 };

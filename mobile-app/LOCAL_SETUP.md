@@ -9,7 +9,7 @@ The mobile app was trying to connect to the Render backend (https://geofence-app
 Added `EXPO_PUBLIC_API_BASE_URL` to use your local backend instead of Render.
 
 ### 2. ✅ SafeAreaView Warning Fixed
-Updated `AccountTypeScreen.js` to use `react-native-safe-area-context` instead of deprecated `react-native` SafeAreaView.
+Screens use `react-native-safe-area-context` instead of the deprecated `react-native` SafeAreaView.
 
 ---
 

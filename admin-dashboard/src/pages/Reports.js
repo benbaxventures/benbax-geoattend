@@ -107,17 +107,12 @@ export default function Reports() {
   const [departments, setDepartments] = useState([]);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', department: '', staffId: '' });
   const [period, setPeriod] = useState('');
-  const [memberType, setMemberType] = useState('staff');
   const [todaySummary, setTodaySummary] = useState({ present: 0, late: 0, absent: 0 });
 
   useEffect(() => {
     getDepartments().then(r => setDepartments(r.data)).catch(() => {});
     fetchReport();
   }, []);
-
-  useEffect(() => {
-    fetchReport();
-  }, [memberType]);
 
   const handlePeriodChange = (value) => {
     setPeriod(value);
@@ -132,7 +127,6 @@ export default function Reports() {
   const fetchReport = () => {
     const params = {};
     Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
-    params.memberType = memberType;
     getAttendanceReport(params)
       .then(r => setRecords(r.data.records))
       .catch(() => toast.error('Failed to load report'));
@@ -145,7 +139,7 @@ export default function Reports() {
       .then(r => setGeofenceEvents(r.data.events || []))
       .catch(() => {});
 
-    getTodaySummary({ memberType })
+    getTodaySummary()
       .then(r => setTodaySummary(r.data))
       .catch(() => {});
   };
@@ -154,7 +148,6 @@ export default function Reports() {
     const token = localStorage.getItem('token');
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v); });
-    params.append('memberType', memberType);
 
     const url = `${API_BASE}/reports/export/${format}?${params.toString()}`;
     // Open in new tab with auth header via fetch
@@ -170,7 +163,7 @@ export default function Reports() {
   };
 
   const handleWhatsAppShare = () => {
-    const text = `Benbax GeoAttend Report (${memberType})
+    const text = `Benbax GeoAttend Staff Report
 Today: ${todaySummary.present || 0} present, ${todaySummary.late || 0} late, ${todaySummary.absent || 0} absent.
 Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${filters.department || 'all'}.`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -195,13 +188,6 @@ Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${f
       </div>
 
       <div style={styles.filters}>
-        <div style={styles.field}>
-          <label style={styles.label}>Member Type</label>
-          <select style={styles.select} value={memberType} onChange={e => setMemberType(e.target.value)}>
-            <option value="staff">Staff</option>
-            <option value="student">Student</option>
-          </select>
-        </div>
         <div style={styles.field}>
           <label style={styles.label}>Period</label>
           <select
@@ -246,10 +232,10 @@ Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${f
           </select>
         </div>
         <div style={styles.field}>
-          <label style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</label>
+          <label style={styles.label}>Staff ID</label>
           <input
             style={styles.input}
-            placeholder={memberType === 'student' ? 'e.g. STD001' : 'e.g. STF001'}
+            placeholder="e.g. STF001"
             value={filters.staffId}
             onChange={e => setFilters(f => ({ ...f, staffId: e.target.value }))}
           />
@@ -263,7 +249,7 @@ Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${f
         <thead>
           <tr>
             <th style={styles.th}>Date</th>
-            <th style={styles.th}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</th>
+            <th style={styles.th}>Staff ID</th>
             <th style={styles.th}>Name</th>
             <th style={styles.th}>Department</th>
             <th style={styles.th}>Check In</th>
@@ -337,7 +323,7 @@ Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${f
           <thead>
             <tr>
               <th style={styles.th}>Time</th>
-              <th style={styles.th}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</th>
+              <th style={styles.th}>Staff ID</th>
               <th style={styles.th}>Name</th>
               <th style={styles.th}>Department</th>
               <th style={styles.th}>Event</th>

@@ -4,7 +4,7 @@ function escapeHtml(value) {
   }[c]));
 }
 
-// Opens a print-friendly ID card window for a staff/student QR code.
+// Opens a print-friendly ID card window for a staff QR code.
 export function printStaffQRCode({ qrCode, staffId, firstName, lastName, department, position, institutionName }) {
   if (!qrCode) return;
   if (!/^data:image\/(png|jpeg);base64,/.test(qrCode)) return;

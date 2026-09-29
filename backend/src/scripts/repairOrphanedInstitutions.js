@@ -80,7 +80,7 @@ async function repairInstitution(inst) {
     try {
       await client.query(
         `INSERT INTO attendance_rules (institution_id, member_type)
-         VALUES ($1, 'staff'), ($1, 'student')
+         VALUES ($1, 'staff')
          ON CONFLICT (institution_id, member_type) DO NOTHING`,
         [inst.id]
       );

@@ -1,16 +1,15 @@
 const cron = require('node-cron');
 const pool = require('../config/database');
 const { sendAbsenceAlert, sendDailySummary, sendWeeklySummary, sendAutoSuspendNotice } = require('./emailService');
-const { sendAbsentAlert, sendStudentAbsentAlertToGuardian } = require('./smsService');
+const { sendAbsentAlert } = require('./smsService');
 
 // ─── AUTO CHECK-OUT ─────────────────────────────────────────────────────────
 // Runs every day at the institution's work_end_time (default: 5:30 PM)
 async function autoCheckOut() {
   console.log('[Scheduler] Running auto check-out...');
   try {
-    // Only auto-checkout staff/lecturer-type daily attendance
     const rules = await pool.query(
-      "SELECT institution_id, work_end_time FROM attendance_rules WHERE member_type IN ('staff','lecturer')"
+      "SELECT institution_id, work_end_time FROM attendance_rules WHERE member_type = 'staff'"
     );
     const today = new Date().toISOString().split('T')[0];
 
@@ -67,7 +66,7 @@ async function detectAbsences() {
       const absent = await pool.query(`
         SELECT s.id, s.staff_id, s.first_name, s.last_name, s.department, s.email, s.phone
         FROM staff s
-        WHERE s.institution_id = $1 AND s.member_type IN ('staff','lecturer') AND s.is_active = true
+        WHERE s.institution_id = $1 AND s.member_type = 'staff' AND s.is_active = true
           AND s.id NOT IN (SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2)
           AND s.id NOT IN (
             SELECT staff_uuid FROM leave_requests
@@ -102,26 +101,7 @@ async function detectAbsences() {
         }
       }
 
-      // Parent notifications for absent students
-      const absentStudents = await pool.query(`
-        SELECT s.id, s.staff_id, s.first_name, s.last_name
-        FROM staff s
-        WHERE s.institution_id = $1 AND s.member_type = 'student' AND s.is_active = true
-          AND s.id NOT IN (SELECT staff_uuid FROM attendance_records WHERE institution_id = $1 AND date = $2)
-      `, [inst.id, todayDate]);
-
-      for (const student of absentStudents.rows) {
-        const guardians = await pool.query(
-          `SELECT phone FROM guardians WHERE student_id = $1 AND phone IS NOT NULL AND notify_on_absence = true`,
-          [student.id]
-        );
-        const studentName = `${student.first_name} ${student.last_name}`;
-        for (const g of guardians.rows) {
-          await sendStudentAbsentAlertToGuardian(g.phone, studentName, todayDate);
-        }
-      }
-
-      console.log(`[Scheduler] ${absent.rows.length} staff absence(s), ${absentStudents.rows.length} student absence(s) for ${inst.name}`);
+      console.log(`[Scheduler] ${absent.rows.length} staff absence(s) for ${inst.name}`);
     }
   } catch (err) {
     console.error('[Scheduler] Absence detection error:', err.message);
@@ -137,9 +117,9 @@ async function sendDailyReport() {
 
     for (const inst of institutions.rows) {
       const [totalResult, presentResult, lateResult, autoCheckoutResult, overtimeResult] = await Promise.all([
-        pool.query('SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true', [inst.id]),
-        pool.query('SELECT COUNT(DISTINCT staff_uuid) FROM attendance_records WHERE institution_id = $1 AND date = $2', [inst.id, today]),
-        pool.query('SELECT COUNT(DISTINCT staff_uuid) FROM attendance_records WHERE institution_id = $1 AND date = $2 AND is_late = true', [inst.id, today]),
+        pool.query("SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND member_type = 'staff' AND is_active = true", [inst.id]),
+        pool.query("SELECT COUNT(DISTINCT ar.staff_uuid) FROM attendance_records ar JOIN staff s ON s.id = ar.staff_uuid AND s.member_type = 'staff' WHERE ar.institution_id = $1 AND ar.date = $2", [inst.id, today]),
+        pool.query("SELECT COUNT(DISTINCT ar.staff_uuid) FROM attendance_records ar JOIN staff s ON s.id = ar.staff_uuid AND s.member_type = 'staff' WHERE ar.institution_id = $1 AND ar.date = $2 AND ar.is_late = true", [inst.id, today]),
         pool.query("SELECT COUNT(*) FROM attendance_records WHERE institution_id = $1 AND date = $2 AND notes LIKE '%Auto check-out%'", [inst.id, today]),
         pool.query('SELECT COUNT(*) FROM overtime_records WHERE institution_id = $1 AND date = $2', [inst.id, today]).catch(() => ({ rows: [{ count: 0 }] })),
       ]);
@@ -177,16 +157,17 @@ async function sendWeeklyReport() {
     const institutions = await pool.query('SELECT id, name FROM institutions');
 
     for (const inst of institutions.rows) {
-      const totalStaff = await pool.query('SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true', [inst.id]);
+      const totalStaff = await pool.query("SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND member_type = 'staff' AND is_active = true", [inst.id]);
       const total = parseInt(totalStaff.rows[0].count);
 
       const weekData = await pool.query(`
-        SELECT date,
-          COUNT(DISTINCT staff_uuid) as present,
-          COUNT(DISTINCT CASE WHEN is_late THEN staff_uuid END) as late
-        FROM attendance_records
-        WHERE institution_id = $1 AND date >= CURRENT_DATE - INTERVAL '7 days' AND date <= CURRENT_DATE
-        GROUP BY date ORDER BY date
+        SELECT ar.date,
+          COUNT(DISTINCT ar.staff_uuid) as present,
+          COUNT(DISTINCT CASE WHEN ar.is_late THEN ar.staff_uuid END) as late
+        FROM attendance_records ar
+        JOIN staff s ON s.id = ar.staff_uuid AND s.member_type = 'staff'
+        WHERE ar.institution_id = $1 AND ar.date >= CURRENT_DATE - INTERVAL '7 days' AND ar.date <= CURRENT_DATE
+        GROUP BY ar.date ORDER BY ar.date
       `, [inst.id]);
 
       const data = weekData.rows.map(d => ({
@@ -205,7 +186,7 @@ async function sendWeeklyReport() {
 
       if (adminEmails.length > 0 && data.length > 0) {
         const weekRange = `${data[0].date} - ${data[data.length - 1].date}`;
-        await sendWeeklyReport({ adminEmails, weekData: data, institutionName: inst.name, weekRange });
+        await sendWeeklySummary({ adminEmails, weekData: data, institutionName: inst.name, weekRange });
       }
     }
   } catch (err) {
@@ -225,6 +206,7 @@ async function autoSuspendInactive() {
       FROM staff s
       WHERE s.is_active = true
         AND s.role = 'staff'
+        AND s.member_type = 'staff'
         AND s.id NOT IN (
           SELECT DISTINCT staff_uuid FROM attendance_records
           WHERE date >= CURRENT_DATE - $1::INTEGER

@@ -1,6 +1,5 @@
 const pool = require('../config/database');
 const { isWithinGeofence } = require('../utils/geofence');
-const { sendStudentLateAlertToGuardian } = require('../services/smsService');
 
 async function logFraudEvent({ institutionId, staffUuid, eventType, details, ipAddress }) {
   try {
@@ -100,8 +99,8 @@ exports.checkIn = async (req, res) => {
 
     // Check if late
     const rules = await pool.query(
-      'SELECT work_start_time, late_threshold_minutes FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
-      [institutionId, req.user.member_type || 'staff']
+      "SELECT work_start_time, late_threshold_minutes FROM attendance_rules WHERE institution_id = $1 AND member_type = 'staff'",
+      [institutionId]
     );
 
     let isLate = false;
@@ -131,25 +130,6 @@ exports.checkIn = async (req, res) => {
          VALUES ($1, $2, 'check_in', $3)`,
         [staffUuid, deviceId, req.ip]
       );
-    }
-
-    // Notify guardians when a student checks in late
-    if (isLate && req.user.member_type === 'student') {
-      try {
-        const guardians = await pool.query(
-          `SELECT name, phone
-           FROM guardians
-           WHERE student_id = $1 AND phone IS NOT NULL AND notify_on_absence = true`,
-          [staffUuid]
-        );
-        const studentName = `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() || req.user.staff_id;
-        const time = new Date().toLocaleTimeString();
-        for (const g of guardians.rows) {
-          await sendStudentLateAlertToGuardian(g.phone, studentName, time);
-        }
-      } catch (notifyErr) {
-        console.error('Late guardian SMS error:', notifyErr.message);
-      }
     }
 
     res.status(201).json({
@@ -216,8 +196,8 @@ exports.checkOut = async (req, res) => {
     // Track overtime if checking out after work end time
     try {
       const rules = await pool.query(
-        'SELECT work_end_time FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
-        [req.user.institution_id, req.user.member_type || 'staff']
+        "SELECT work_end_time FROM attendance_rules WHERE institution_id = $1 AND member_type = 'staff'",
+        [req.user.institution_id]
       );
       if (rules.rows.length > 0) {
         const now = new Date();
@@ -356,8 +336,8 @@ exports.getWeeklyStats = async (req, res) => {
 
     // Get working days this month from rules
     const rulesResult = await pool.query(
-      `SELECT working_days FROM attendance_rules WHERE institution_id = $1 AND member_type = $2`,
-      [req.user.institution_id, req.user.member_type || 'staff']
+      `SELECT working_days FROM attendance_rules WHERE institution_id = $1 AND member_type = 'staff'`,
+      [req.user.institution_id]
     );
     const workingDays = rulesResult.rows[0]?.working_days || [1, 2, 3, 4, 5];
 

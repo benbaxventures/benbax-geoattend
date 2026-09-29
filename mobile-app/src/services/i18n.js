@@ -4,11 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const translations = {
   en: {
     // Login
-    staffId: 'Student ID',
+    staffId: 'Staff ID',
     password: 'Password',
     signIn: 'Sign In',
     forgotPassword: 'Forgot Password?',
-    enterStaffId: 'Enter your Student ID',
+    enterStaffId: 'Enter your Staff ID',
     enterPassword: 'Enter your password',
     loginFailed: 'Login Failed',
     // Home
@@ -52,7 +52,7 @@ const translations = {
     // General
     or: 'OR',
     poweredBy: 'Powered by Benbax software developers',
-    geofencedSystem: 'Geofenced Student Attendance System',
+    geofencedSystem: 'Geofenced Staff Attendance System',
     language: 'Language',
   },
   tw: {

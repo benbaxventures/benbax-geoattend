@@ -105,18 +105,17 @@ exports.recordEvent = async (req, res) => {
 
       if (allowAlert) {
         const staffResult = await pool.query(
-          `SELECT staff_id, first_name, last_name, member_type
+          `SELECT staff_id, first_name, last_name
            FROM staff
            WHERE id = $1`,
           [staffUuid]
         );
         const staff = staffResult.rows[0];
-        const name = `${staff?.first_name || ''} ${staff?.last_name || ''}`.trim() || staff?.staff_id || 'Member';
+        const name = `${staff?.first_name || ''} ${staff?.last_name || ''}`.trim() || staff?.staff_id || 'Staff member';
         const idLabel = staff?.staff_id || '';
-        const typeLabel = staff?.member_type || 'staff';
 
         const admins = await getAdminsWithContacts(institutionId);
-        const message = `ALERT: ${name} (${idLabel}, ${typeLabel}) left ${inst.name} geofence at ${new Date().toLocaleTimeString()}. Distance ${geofenceCheck.distance}m (radius ${geofenceCheck.radius}m).`;
+        const message = `ALERT: ${name} (Staff ID ${idLabel}) left ${inst.name} geofence at ${new Date().toLocaleTimeString()}. Distance ${geofenceCheck.distance}m (radius ${geofenceCheck.radius}m).`;
 
         // SMS to admins where phone is available
         for (const admin of admins) {

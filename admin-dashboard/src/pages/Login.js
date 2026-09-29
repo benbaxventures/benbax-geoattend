@@ -176,7 +176,7 @@ export default function Login({ onLogin }) {
           <strong>Don't have admin credentials?</strong> Contact your super administrator to create an admin account for your institution. Regular signup creates staff accounts without admin access.
         </div>
 
-        <p style={styles.footer}>Geofenced Student Attendance Management System</p>
+        <p style={styles.footer}>Geofenced Staff Attendance Management System</p>
       </div>
     </div>
   );

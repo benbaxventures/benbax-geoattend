@@ -18,7 +18,6 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState([]);
-  const [memberType, setMemberType] = useState('staff');
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioEnabled, setBioEnabled] = useState(false);
   const [hasSavedCreds, setHasSavedCreds] = useState(false);
@@ -27,12 +26,6 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
     AsyncStorage.getItem('recentAccounts').then(stored => {
       if (stored) setRecentAccounts(JSON.parse(stored));
     }).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    AsyncStorage.getItem('memberType').then((mt) => {
-      setMemberType(mt === 'student' ? 'student' : 'staff');
-    }).catch(() => setMemberType('staff'));
   }, []);
 
   useEffect(() => {
@@ -46,12 +39,12 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
     isBiometricEnabled().then(setBioEnabled).catch(() => setBioEnabled(false));
   }, []);
 
-  // Autofill saved credentials for the selected account type
+  // Autofill saved staff credentials
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const creds = await getCredentials(memberType);
+        const creds = await getCredentials();
         if (cancelled) return;
         if (creds?.identifier) setStaffId(creds.identifier);
         if (creds?.password) setPassword(creds.password);
@@ -61,12 +54,12 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
       }
     })();
     return () => { cancelled = true; };
-  }, [memberType]);
+  }, []);
 
   const handleLogin = async () => {
     const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
     if (!staffId.trim() || !password) {
-      toast.error(`Please enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID and password`);
+      toast.error('Please enter your Staff ID and password');
       return;
     }
 
@@ -83,7 +76,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
         deviceInfo = { deviceId: 'unknown', deviceModel: 'unknown', osVersion: 'unknown' };
       }
 
-      const { data } = await login(staffId.trim().toUpperCase(), password, normalizedInstitutionCode, memberType, deviceInfo);
+      const { data } = await login(staffId.trim().toUpperCase(), password, normalizedInstitutionCode, deviceInfo);
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
@@ -92,7 +85,6 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
 
       // Save credentials securely for next login autofill / biometric login
       await saveCredentials({
-        memberType,
         identifier: staffId.trim().toUpperCase(),
         password,
       });
@@ -129,7 +121,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
         return;
       }
 
-      const creds = await getCredentials(memberType);
+      const creds = await getCredentials();
       if (!creds) {
         toast.error('No saved credentials found. Sign in once with password first.');
         return;
@@ -152,7 +144,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
       }
 
       const normalizedInstitutionCode = institutionCode.trim().toUpperCase();
-      const { data } = await login(creds.identifier.trim().toUpperCase(), creds.password, normalizedInstitutionCode, memberType, deviceInfo);
+      const { data } = await login(creds.identifier.trim().toUpperCase(), creds.password, normalizedInstitutionCode, deviceInfo);
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
@@ -176,9 +168,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
             <Text style={styles.iconText}>G</Text>
           </View>
           <Text style={styles.appName}>Benbax GeoAttend</Text>
-          <Text style={styles.subtitle}>
-            {memberType === 'student' ? 'Student Attendance System' : 'Staff Attendance System'}
-          </Text>
+          <Text style={styles.subtitle}>Staff Attendance System</Text>
         </View>
 
         {recentAccounts.length > 0 && (
@@ -220,10 +210,10 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'}</Text>
+            <Text style={styles.label}>Staff ID</Text>
             <TextInput
               style={styles.input}
-              placeholder={`Enter your ${memberType === 'student' ? 'Student' : 'Staff'} ID`}
+              placeholder="Enter your Staff ID"
               value={staffId}
               onChangeText={setStaffId}
               autoCapitalize="characters"
@@ -264,7 +254,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => onForgotStaffId && onForgotStaffId()}>
-            <Text style={styles.forgotText}>Forgot {memberType === 'student' ? 'Student' : 'Staff'} ID?</Text>
+            <Text style={styles.forgotText}>Forgot Staff ID?</Text>
           </TouchableOpacity>
 
           {bioAvailable && bioEnabled && hasSavedCreds && (
@@ -278,7 +268,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
           <Text style={styles.registerLink}>Don't have an account? Sign Up</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footer}>Geofenced Student Attendance System</Text>
+        <Text style={styles.footer}>Geofenced Staff Attendance System</Text>
         <Text style={styles.powered}>Powered by Benbax software developers</Text>
       </KeyboardAvoidingView>
     </SafeAreaView>

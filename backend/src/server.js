@@ -223,7 +223,7 @@ async function ensureAdminExists() {
       institutionId = ins.rows[0].id;
       await pool.query(
         `INSERT INTO attendance_rules (institution_id, member_type)
-         VALUES ($1, 'staff'), ($1, 'student')
+         VALUES ($1, 'staff')
          ON CONFLICT DO NOTHING`,
         [institutionId]
       );

@@ -13,13 +13,8 @@ export default function RegisterScreen({ navigation }) {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [memberType, setMemberType] = useState('staff');
 
   React.useEffect(() => {
-    AsyncStorage.getItem('memberType').then((mt) => {
-      setMemberType(mt === 'student' ? 'student' : 'staff');
-    }).catch(() => setMemberType('staff'));
-
     AsyncStorage.getItem('institutionCode').then((code) => {
       if (code) update('institutionCode', String(code).toUpperCase());
     }).catch(() => {});
@@ -55,7 +50,6 @@ export default function RegisterScreen({ navigation }) {
         password,
         department: form.department.trim() || undefined,
         position: form.position.trim() || undefined,
-        memberType,
       });
 
       Alert.alert('Success', data.message, [
@@ -73,9 +67,7 @@ export default function RegisterScreen({ navigation }) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>
-            Register as a new {memberType === 'student' ? 'student' : 'staff'} member
-          </Text>
+          <Text style={styles.subtitle}>Register as a new staff member</Text>
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
@@ -92,10 +84,10 @@ export default function RegisterScreen({ navigation }) {
 
             <View style={styles.row}>
               <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Text style={styles.label}>{memberType === 'student' ? 'Student ID' : 'Staff ID'} *</Text>
+                <Text style={styles.label}>Staff ID *</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder={memberType === 'student' ? 'e.g. STD001' : 'e.g. STF001'}
+                  placeholder="e.g. STF001"
                   value={form.staffId}
                   onChangeText={v => update('staffId', v)}
                   autoCapitalize="characters"
@@ -167,7 +159,7 @@ export default function RegisterScreen({ navigation }) {
                 <Text style={styles.label}>Position</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g. Lecturer"
+                  placeholder="e.g. Accountant"
                   value={form.position}
                   onChangeText={v => update('position', v)}
                   placeholderTextColor="#bdc3c7"

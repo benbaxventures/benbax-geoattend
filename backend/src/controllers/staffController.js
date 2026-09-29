@@ -5,14 +5,14 @@ const { generateQRCode } = require('../utils/qrcode');
 
 exports.getAllStaff = async (req, res) => {
   try {
-    const { page = 1, limit = 50, search, department, status, memberType } = req.query;
+    const { page = 1, limit = 50, search, department, status } = req.query;
     const offset = (page - 1) * limit;
     const institutionId = req.user.institution_id;
 
     let query = `
       SELECT s.id, s.staff_id, s.first_name, s.last_name, s.email, s.phone,
-             s.department, s.position, s.role, s.is_active, s.profile_photo_url, s.member_type, s.created_at
-      FROM staff s WHERE s.institution_id = $1`;
+             s.department, s.position, s.role, s.is_active, s.profile_photo_url, s.created_at
+      FROM staff s WHERE s.institution_id = $1 AND s.member_type = 'staff'`;
     const params = [institutionId];
     let paramIndex = 2;
 
@@ -31,13 +31,8 @@ exports.getAllStaff = async (req, res) => {
     } else if (status === 'inactive') {
       query += ' AND s.is_active = false';
     }
-    if (memberType) {
-      query += ` AND s.member_type = $${paramIndex}`;
-      params.push(memberType);
-      paramIndex++;
-    }
 
-    const countQuery = query.replace(/SELECT .* FROM/, 'SELECT COUNT(*) FROM');
+    const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) FROM');
     const countResult = await pool.query(countQuery, params);
 
     query += ` ORDER BY s.last_name, s.first_name LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
@@ -80,7 +75,7 @@ exports.getStaffById = async (req, res) => {
 
 exports.createStaff = async (req, res) => {
   try {
-    const { staffId, firstName, lastName, email, phone, department, position, role, password, memberType } = req.body;
+    const { staffId, firstName, lastName, email, phone, department, position, role, password } = req.body;
     const institutionId = req.user.institution_id;
 
     if (!staffId || !firstName || !lastName || !password) {
@@ -103,10 +98,10 @@ exports.createStaff = async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO staff (id, institution_id, staff_id, first_name, last_name, email, phone, department, position, role, password_hash, qr_code_data, member_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-       RETURNING id, staff_id, first_name, last_name, email, phone, department, position, role, qr_code_data, member_type, created_at`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'staff')
+       RETURNING id, staff_id, first_name, last_name, email, phone, department, position, role, qr_code_data, created_at`,
       [id, institutionId, staffId.toUpperCase(), firstName, lastName, email || null, phone || null,
-       department || null, position || null, role || 'staff', passwordHash, qrCodeData, memberType || 'staff']
+       department || null, position || null, role || 'staff', passwordHash, qrCodeData]
     );
 
     res.status(201).json(result.rows[0]);
@@ -205,7 +200,7 @@ exports.getStaffQRCode = async (req, res) => {
 exports.getDepartments = async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT DISTINCT department FROM staff WHERE institution_id = $1 AND department IS NOT NULL ORDER BY department',
+      "SELECT DISTINCT department FROM staff WHERE institution_id = $1 AND member_type = 'staff' AND department IS NOT NULL ORDER BY department",
       [req.user.institution_id]
     );
     res.json(result.rows.map(r => r.department));
@@ -243,9 +238,9 @@ exports.bulkImport = async (req, res) => {
 
         await pool.query(
           `INSERT INTO staff (institution_id, staff_id, first_name, last_name, email, phone, department, position, password_hash, qr_code_data, member_type)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'staff')
            ON CONFLICT (institution_id, staff_id) DO NOTHING`,
-          [institutionId, s.staffId.toUpperCase(), s.firstName, s.lastName, s.email || null, s.phone || null, s.department || null, s.position || null, passwordHash, qrData, s.memberType || 'staff']
+          [institutionId, s.staffId.toUpperCase(), s.firstName, s.lastName, s.email || null, s.phone || null, s.department || null, s.position || null, passwordHash, qrData]
         );
         results.success++;
       } catch (err) {

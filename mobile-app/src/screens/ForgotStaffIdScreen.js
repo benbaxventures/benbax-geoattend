@@ -9,15 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function ForgotStaffIdScreen({ navigation }) {
   const [institutionCode, setInstitutionCode] = useState('');
   const [email, setEmail] = useState('');
-  const [memberType, setMemberType] = useState('staff');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-
-  React.useEffect(() => {
-    AsyncStorage.getItem('memberType').then((mt) => {
-      setMemberType(mt === 'student' ? 'student' : 'staff');
-    }).catch(() => setMemberType('staff'));
-  }, []);
 
   React.useEffect(() => {
     AsyncStorage.getItem('institutionCode').then((code) => {
@@ -36,8 +29,7 @@ export default function ForgotStaffIdScreen({ navigation }) {
     try {
       const { data } = await findStaffByEmail(
         institutionCode.trim().toUpperCase(),
-        email.trim().toLowerCase(),
-        memberType
+        email.trim().toLowerCase()
       );
       setResult(data);
     } catch (err) {
@@ -59,9 +51,9 @@ export default function ForgotStaffIdScreen({ navigation }) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={styles.backBtn}>← Back to Login</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Forgot Your ID?</Text>
+          <Text style={styles.title}>Forgot Your Staff ID?</Text>
           <Text style={styles.subtitle}>
-            Enter your institution code and registered email to retrieve your {memberType === 'student' ? 'Student' : 'Staff'} ID
+            Enter your institution code and registered email to retrieve your Staff ID
           </Text>
         </View>
 
@@ -91,23 +83,9 @@ export default function ForgotStaffIdScreen({ navigation }) {
             />
           </View>
 
-          <View style={styles.memberTypeRow}>
-            {['staff', 'student'].map((mt) => (
-              <TouchableOpacity
-                key={mt}
-                style={[styles.memberTypeBtn, memberType === mt && styles.memberTypeBtnActive]}
-                onPress={() => setMemberType(mt)}
-              >
-                <Text style={[styles.memberTypeText, memberType === mt && styles.memberTypeTextActive]}>
-                  {mt === 'staff' ? 'Staff' : 'Student'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
           {result && (
             <View style={styles.resultBox}>
-              <Text style={styles.resultLabel}>Your {memberType === 'student' ? 'Student' : 'Staff'} ID</Text>
+              <Text style={styles.resultLabel}>Your Staff ID</Text>
               <Text style={styles.resultId}>{result.staffId}</Text>
               <Text style={styles.resultName}>
                 {result.firstName} {result.lastName}
@@ -153,14 +131,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: '#e0e0e0', borderRadius: 10,
     padding: 12, fontSize: 14, color: '#2c3e50',
   },
-  memberTypeRow: { flexDirection: 'row', marginBottom: 16 },
-  memberTypeBtn: {
-    flex: 1, borderWidth: 1.5, borderColor: '#e0e0e0', borderRadius: 10,
-    padding: 12, alignItems: 'center', marginHorizontal: 3,
-  },
-  memberTypeBtnActive: { backgroundColor: '#1a5276', borderColor: '#1a5276' },
-  memberTypeText: { fontSize: 14, fontWeight: '600', color: '#7f8c8d' },
-  memberTypeTextActive: { color: '#fff' },
   resultBox: {
     backgroundColor: '#eaf2f8', borderRadius: 10, padding: 16, marginBottom: 16,
   },

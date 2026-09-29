@@ -49,7 +49,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
             department: user.department || '-',
             position: user.position || '-',
             institution_name: user.institutionName || '-',
-            member_type: user.memberType || 'student',
           });
         }
       } catch {}
@@ -145,34 +144,12 @@ export default function ProfileScreen({ navigation, onLogout }) {
   };
 
   const handleSwitchAccount = () => {
-    Alert.alert('Switch Account', 'Sign out and switch to a different student account on this device?', [
+    Alert.alert('Switch Account', 'Sign out and switch to a different staff account on this device?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Switch',
         onPress: async () => {
           await saveToRecentAccounts();
-          await AsyncStorage.multiRemove(['token', 'user', 'institution']);
-          if (onLogout) onLogout();
-        },
-      },
-    ]);
-  };
-
-  const handleChangeAccountType = () => {
-    Alert.alert('Change Account Type', 'Switch between Student and Staff mode? You will be signed out.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Student',
-        onPress: async () => {
-          await AsyncStorage.setItem('memberType', 'student');
-          await AsyncStorage.multiRemove(['token', 'user', 'institution']);
-          if (onLogout) onLogout();
-        },
-      },
-      {
-        text: 'Staff',
-        onPress: async () => {
-          await AsyncStorage.setItem('memberType', 'staff');
           await AsyncStorage.multiRemove(['token', 'user', 'institution']);
           if (onLogout) onLogout();
         },
@@ -252,16 +229,11 @@ export default function ProfileScreen({ navigation, onLogout }) {
               <InfoRow label="Department" value={profile.department} />
               <InfoRow label="Position" value={profile.position} />
               <InfoRow label="Institution" value={profile.institution_name} />
-              <InfoRow label="Type" value={(profile.member_type || 'staff').charAt(0).toUpperCase() + (profile.member_type || 'staff').slice(1)} />
               <InfoRow label="Role" value={profile.role} />
             </View>
 
             <TouchableOpacity style={[styles.passwordBtn, { backgroundColor: theme.card }]} onPress={() => setShowPasswordForm(!showPasswordForm)}>
               <Text style={[styles.passwordBtnText, { color: theme.primary }]}>{t('changePassword')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.passwordBtn, { backgroundColor: theme.card }]} onPress={handleChangeAccountType}>
-              <Text style={[styles.passwordBtnText, { color: theme.primary }]}>Change Account Type</Text>
             </TouchableOpacity>
 
             {showPasswordForm && (

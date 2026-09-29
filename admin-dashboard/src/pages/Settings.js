@@ -43,7 +43,6 @@ export default function Settings() {
   const [inst, setInst] = useState({ name: '', address: '', city: '', region: '', latitude: '', longitude: '', geofence_radius: 200 });
   const [rules, setRules] = useState({ work_start_time: '08:00', work_end_time: '17:00', late_threshold_minutes: 15, early_departure_minutes: 30, working_days: [1,2,3,4,5] });
   const [gettingLocation, setGettingLocation] = useState(false);
-  const [rulesMemberType, setRulesMemberType] = useState('staff');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
 
   const useCurrentLocation = () => {
@@ -94,12 +93,8 @@ export default function Settings() {
 
   useEffect(() => {
     getInstitution().then(r => setInst(r.data)).catch(() => {});
-    getAttendanceRules({ memberType: rulesMemberType }).then(r => { if (r.data && r.data.id) setRules(r.data); }).catch(() => {});
+    getAttendanceRules().then(r => { if (r.data && r.data.id) setRules(r.data); }).catch(() => {});
   }, []);
-
-  useEffect(() => {
-    getAttendanceRules({ memberType: rulesMemberType }).then(r => { if (r.data && r.data.id) setRules(r.data); }).catch(() => {});
-  }, [rulesMemberType]);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 900);
@@ -126,8 +121,7 @@ export default function Settings() {
         lateThresholdMinutes: parseInt(rules.late_threshold_minutes, 10),
         earlyDepartureMinutes: parseInt(rules.early_departure_minutes, 10),
         workingDays: rules.working_days,
-        memberType: rulesMemberType,
-      }, { memberType: rulesMemberType });
+      });
       toast.success('Attendance rules saved');
     } catch { toast.error('Failed to save'); }
   };
@@ -206,39 +200,7 @@ export default function Settings() {
         </div>
 
         <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Attendance Rules</h3>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-            <button
-              onClick={() => setRulesMemberType('staff')}
-              style={{
-                padding: '8px 14px',
-                borderRadius: '8px',
-                border: '1px solid #e0e0e0',
-                background: rulesMemberType === 'staff' ? '#1a5276' : '#fff',
-                color: rulesMemberType === 'staff' ? '#fff' : '#2c3e50',
-                fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer',
-              }}
-            >
-              Staff Rules
-            </button>
-            <button
-              onClick={() => setRulesMemberType('student')}
-              style={{
-                padding: '8px 14px',
-                borderRadius: '8px',
-                border: '1px solid #e0e0e0',
-                background: rulesMemberType === 'student' ? '#1a5276' : '#fff',
-                color: rulesMemberType === 'student' ? '#fff' : '#2c3e50',
-                fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer',
-              }}
-            >
-              Student Rules
-            </button>
-          </div>
+          <h3 style={styles.cardTitle}>Staff Attendance Rules</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div style={styles.field}>
               <label style={styles.label}>Work Start Time</label>

@@ -36,7 +36,7 @@ export default function StaffForm() {
 
   const [form, setForm] = useState({
     staffId: '', firstName: '', lastName: '', email: '', phone: '',
-    department: '', position: '', role: 'staff', memberType: 'student', password: '', isActive: true,
+    department: '', position: '', role: 'staff', password: '', isActive: true,
   });
   const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function StaffForm() {
         setForm({
           staffId: s.staff_id, firstName: s.first_name, lastName: s.last_name,
           email: s.email || '', phone: s.phone || '', department: s.department || '',
-          position: s.position || '', role: s.role, memberType: s.member_type || 'staff', password: '', isActive: s.is_active,
+          position: s.position || '', role: s.role, password: '', isActive: s.is_active,
         });
       }).catch(() => toast.error('Failed to load staff'));
 
@@ -89,27 +89,20 @@ export default function StaffForm() {
     <div>
       <div style={styles.header}>
         <button style={styles.backBtn} onClick={() => navigate('/staff')}><FiArrowLeft size={20} /></button>
-        <h1 style={styles.title}>{isEdit ? 'Edit Student' : 'Add New Student'}</h1>
+        <h1 style={styles.title}>{isEdit ? 'Edit Staff' : 'Add New Staff'}</h1>
       </div>
 
       <div style={styles.card}>
         <form onSubmit={handleSubmit}>
           <div style={styles.grid}>
             <div style={styles.field}>
-              <label style={styles.label}>Student ID *</label>
-              <input style={styles.input} name="staffId" value={form.staffId} onChange={handleChange} required disabled={isEdit} placeholder="e.g. STU001 or 01234567" />
-            </div>
-            <div style={styles.field}>
-              <label style={styles.label}>Member Type</label>
-              <select style={styles.select} name="memberType" value={form.memberType} onChange={handleChange}>
-                <option value="staff">Staff</option>
-                <option value="student">Student</option>
-              </select>
+              <label style={styles.label}>Staff ID *</label>
+              <input style={styles.input} name="staffId" value={form.staffId} onChange={handleChange} required disabled={isEdit} placeholder="e.g. STF001" />
             </div>
             <div style={styles.field}>
               <label style={styles.label}>Role</label>
               <select style={styles.select} name="role" value={form.role} onChange={handleChange}>
-                <option value="staff">Member</option>
+                <option value="staff">Staff</option>
                 <option value="admin">Admin</option>
                 <option value="super_admin">Super Admin</option>
               </select>
@@ -131,12 +124,12 @@ export default function StaffForm() {
               <input style={styles.input} name="phone" value={form.phone} onChange={handleChange} placeholder="+233..." />
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Programme</label>
-              <input style={styles.input} name="department" value={form.department} onChange={handleChange} placeholder="e.g. Computer Science" />
+              <label style={styles.label}>Department</label>
+              <input style={styles.input} name="department" value={form.department} onChange={handleChange} placeholder="e.g. Finance" />
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Level / Year</label>
-              <input style={styles.input} name="position" value={form.position} onChange={handleChange} placeholder="e.g. Level 200" />
+              <label style={styles.label}>Position</label>
+              <input style={styles.input} name="position" value={form.position} onChange={handleChange} placeholder="e.g. Accountant" />
             </div>
             {!isEdit && (
               <div style={styles.field}>

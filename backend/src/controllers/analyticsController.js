@@ -7,21 +7,22 @@ exports.getAttendanceTrends = async (req, res) => {
     const { days = 30 } = req.query;
 
     const totalStaff = await pool.query(
-      'SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND is_active = true',
+      "SELECT COUNT(*) FROM staff WHERE institution_id = $1 AND member_type = 'staff' AND is_active = true",
       [institutionId]
     );
     const total = parseInt(totalStaff.rows[0].count);
 
     const result = await pool.query(`
       SELECT
-        date,
-        COUNT(DISTINCT staff_uuid) as present,
-        COUNT(DISTINCT CASE WHEN is_late THEN staff_uuid END) as late,
-        ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(check_out_time, NOW()) - check_in_time)) / 3600)::numeric, 1) as avg_hours
-      FROM attendance_records
-      WHERE institution_id = $1 AND date >= CURRENT_DATE - $2::INTEGER
-      GROUP BY date
-      ORDER BY date
+        ar.date,
+        COUNT(DISTINCT ar.staff_uuid) as present,
+        COUNT(DISTINCT CASE WHEN ar.is_late THEN ar.staff_uuid END) as late,
+        ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(ar.check_out_time, NOW()) - ar.check_in_time)) / 3600)::numeric, 1) as avg_hours
+      FROM attendance_records ar
+      JOIN staff s ON s.id = ar.staff_uuid AND s.member_type = 'staff'
+      WHERE ar.institution_id = $1 AND ar.date >= CURRENT_DATE - $2::INTEGER
+      GROUP BY ar.date
+      ORDER BY ar.date
     `, [institutionId, parseInt(days)]);
 
     const trends = result.rows.map(r => ({
@@ -49,8 +50,8 @@ exports.getTopAbsentees = async (req, res) => {
 
     // Get working days count
     const rules = await pool.query(
-      'SELECT working_days FROM attendance_rules WHERE institution_id = $1 AND member_type = $2',
-      [institutionId, (req.query.memberType || 'staff').toLowerCase()]
+      "SELECT working_days FROM attendance_rules WHERE institution_id = $1 AND member_type = 'staff'",
+      [institutionId]
     );
     const workingDays = rules.rows[0]?.working_days || [1, 2, 3, 4, 5];
 
@@ -63,14 +64,14 @@ exports.getTopAbsentees = async (req, res) => {
     }
 
     const result = await pool.query(`
-      SELECT s.id, s.staff_id, s.first_name, s.last_name, s.department, s.member_type,
+      SELECT s.id, s.staff_id, s.first_name, s.last_name, s.department,
              COUNT(ar.id) as days_present,
              COUNT(CASE WHEN ar.is_late THEN 1 END) as days_late
       FROM staff s
       LEFT JOIN attendance_records ar ON ar.staff_uuid = s.id
         AND ar.date >= CURRENT_DATE - $2::INTEGER
-      WHERE s.institution_id = $1 AND s.is_active = true
-      GROUP BY s.id, s.staff_id, s.first_name, s.last_name, s.department, s.member_type
+      WHERE s.institution_id = $1 AND s.member_type = 'staff' AND s.is_active = true
+      GROUP BY s.id, s.staff_id, s.first_name, s.last_name, s.department
       ORDER BY COUNT(ar.id) ASC
       LIMIT 20
     `, [institutionId, parseInt(days)]);
@@ -108,7 +109,7 @@ exports.getDepartmentStats = async (req, res) => {
       FROM staff s
       LEFT JOIN attendance_records ar ON ar.staff_uuid = s.id
         AND ar.date >= CURRENT_DATE - $2::INTEGER
-      WHERE s.institution_id = $1 AND s.is_active = true AND s.department IS NOT NULL
+      WHERE s.institution_id = $1 AND s.member_type = 'staff' AND s.is_active = true AND s.department IS NOT NULL
       GROUP BY s.department
       ORDER BY s.department
     `, [institutionId, parseInt(days)]);
@@ -141,7 +142,7 @@ exports.getOvertimeSummary = async (req, res) => {
              ROUND(AVG(o.overtime_minutes)::numeric, 0) as avg_overtime_minutes
       FROM overtime_records o
       JOIN staff s ON o.staff_uuid = s.id
-      WHERE o.institution_id = $1 AND o.date >= CURRENT_DATE - $2::INTEGER
+      WHERE o.institution_id = $1 AND s.member_type = 'staff' AND o.date >= CURRENT_DATE - $2::INTEGER
       GROUP BY s.staff_id, s.first_name, s.last_name, s.department
       ORDER BY SUM(o.overtime_minutes) DESC
       LIMIT 20

@@ -113,10 +113,10 @@ api.interceptors.response.use(
 );
 
 // Auth
-export const login = (identifier, password, institutionCode, memberType, deviceInfo) =>
-  api.post('/auth/login', { staffId: identifier, password, institutionCode, memberType, ...deviceInfo });
-export const forgotPassword = (identifier, email, newPassword, institutionCode, memberType) =>
-  api.post('/auth/forgot-password', { staffId: identifier, email, newPassword, institutionCode, memberType });
+export const login = (staffId, password, institutionCode, deviceInfo) =>
+  api.post('/auth/login', { staffId, password, institutionCode, ...deviceInfo });
+export const forgotPassword = (staffId, email, newPassword, institutionCode) =>
+  api.post('/auth/forgot-password', { staffId, email, newPassword, institutionCode });
 export const refreshToken = () => api.post('/auth/refresh-token');
 export const getProfile = () => api.get('/auth/profile');
 export const changePassword = (currentPassword, newPassword) =>
@@ -137,7 +137,7 @@ export const requestLeave = (data) => api.post('/leave', data);
 export const getMyLeaves = () => api.get('/leave/my');
 export const cancelLeave = (id) => api.put(`/leave/${id}/cancel`);
 
-export const findStaffByEmail = (institutionCode, email, memberType) =>
-  api.post('/auth/forgot-staff-id', { institutionCode, email, memberType });
+export const findStaffByEmail = (institutionCode, email) =>
+  api.post('/auth/forgot-staff-id', { institutionCode, email });
 
 export default api;
