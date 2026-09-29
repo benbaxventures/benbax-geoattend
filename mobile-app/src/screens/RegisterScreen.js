@@ -217,7 +217,7 @@ export default function RegisterScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.footer}>Powered by Geofence</Text>
+          <Text style={styles.footer}>Powered by Benbax software developers</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

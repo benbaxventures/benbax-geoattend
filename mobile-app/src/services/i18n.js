@@ -51,7 +51,7 @@ const translations = {
     scanQR: 'Scan your staff ID card QR code',
     // General
     or: 'OR',
-     poweredBy: 'Powered by Geofence',
+    poweredBy: 'Powered by Benbax software developers',
     geofencedSystem: 'Geofenced Student Attendance System',
     language: 'Language',
   },
@@ -104,7 +104,7 @@ const translations = {
     scanQR: 'Scan wo ID card QR code',
     // General
     or: 'ANAASƐ',
-     poweredBy: 'Geofence na ɛyɛɛ',
+    poweredBy: 'Benbax software developers na ɛyɛɛ',
     geofencedSystem: 'Geofence Abrabɔ Nhyehyɛe',
     language: 'Kasa',
   },

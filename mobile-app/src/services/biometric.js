@@ -10,7 +10,7 @@ export const isBiometricAvailable = async () => {
 
 export const authenticateWithBiometric = async () => {
   const result = await LocalAuthentication.authenticateAsync({
-    promptMessage: 'Login to Geofence',
+    promptMessage: 'Login to Benbax GeoAttend',
     cancelLabel: 'Use Password',
     disableDeviceFallback: true,
   });

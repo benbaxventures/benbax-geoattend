@@ -3,7 +3,7 @@ const https = require('https');
 const sendSMS = async (to, message) => {
   const provider = process.env.SMS_PROVIDER || 'none';
   const apiKey = process.env.SMS_API_KEY;
-  const senderId = process.env.SMS_SENDER_ID || 'Geofence';
+  const senderId = process.env.SMS_SENDER_ID || 'Benbax GeoAttend';
 
   if (provider === 'none' || !apiKey) {
     console.log(`[SMS MOCK] To: ${to} | Message: ${message}`);
@@ -64,23 +64,23 @@ const sendSMS = async (to, message) => {
 };
 
 const sendCheckInReminder = async (phone, name) => {
-  return sendSMS(phone, `Hi ${name}, this is a reminder to check in at work today. - Geofence`);
+  return sendSMS(phone, `Hi ${name}, this is a reminder to check in at work today. - Benbax GeoAttend`);
 };
 
 const sendLateAlert = async (phone, name, time) => {
-  return sendSMS(phone, `${name}, you checked in late today at ${time}. Please ensure punctuality. - Geofence`);
+  return sendSMS(phone, `${name}, you checked in late today at ${time}. Please ensure punctuality. - Benbax GeoAttend`);
 };
 
 const sendAbsentAlert = async (phone, name, date) => {
-  return sendSMS(phone, `${name}, you were absent on ${date}. If this is an error, please contact your admin. - Geofence`);
+  return sendSMS(phone, `${name}, you were absent on ${date}. If this is an error, please contact your admin. - Benbax GeoAttend`);
 };
 
 const sendStudentLateAlertToGuardian = async (phone, studentName, time) => {
-  return sendSMS(phone, `Alert: ${studentName} checked in late at ${time}. - Geofence`);
+  return sendSMS(phone, `Alert: ${studentName} checked in late at ${time}. - Benbax GeoAttend`);
 };
 
 const sendStudentAbsentAlertToGuardian = async (phone, studentName, date) => {
-  return sendSMS(phone, `Alert: ${studentName} is absent on ${date}. - Geofence`);
+  return sendSMS(phone, `Alert: ${studentName} is absent on ${date}. - Benbax GeoAttend`);
 };
 
 module.exports = {

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Geofence",
+    "name": "Benbax GeoAttend",
     "slug": "geoattend",
     "version": "2.0.0",
     "scheme": "com.geoattend.app",
@@ -31,20 +31,20 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Geofence to use your location for attendance check-in."
+          "locationAlwaysAndWhenInUsePermission": "Allow Benbax GeoAttend to use your location for attendance check-in."
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Geofence to access your camera for QR code scanning."
+          "cameraPermission": "Allow Benbax GeoAttend to access your camera for QR code scanning."
         }
       ]
     ],
     "extra": {
       "API_BASE_URL": "https://geofence-app-jjpa.onrender.com/api",
       "eas": {
-        "projectId": "6835079a-9aa4-49f4-9ac0-1cff2f2a5af3"
+        "projectId": "78e28028-39aa-427d-a03e-f7bec5eb6c77"
       }
     },
     "runtimeVersion": "2.0.0",
@@ -53,12 +53,12 @@
       "buildNumber": "2",
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Geofence needs your location to verify you are within your institution's geofence for attendance check-in.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Geofence needs your location to verify you are within your institution's geofence for attendance check-in.",
-        "NSCameraUsageDescription": "Geofence needs camera access to scan QR codes for attendance check-in.",
-        "NSFaceIDUsageDescription": "Geofence uses Face ID to securely log you in."
+        "NSLocationWhenInUseUsageDescription": "Benbax GeoAttend needs your location to verify you are within your institution's geofence for attendance check-in.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Benbax GeoAttend needs your location to verify you are within your institution's geofence for attendance check-in.",
+        "NSCameraUsageDescription": "Benbax GeoAttend needs camera access to scan QR codes for attendance check-in.",
+        "NSFaceIDUsageDescription": "Benbax GeoAttend uses Face ID to securely log you in."
       }
     },
-    "owner": "a03"
+    "owner": "benbax-expo"
   }
 }

@@ -170,7 +170,7 @@ export default function Reports() {
   };
 
   const handleWhatsAppShare = () => {
-    const text = `Geofence Report (${memberType})
+    const text = `Benbax GeoAttend Report (${memberType})
 Today: ${todaySummary.present || 0} present, ${todaySummary.late || 0} late, ${todaySummary.absent || 0} absent.
 Filters: ${filters.startDate || 'all'} to ${filters.endDate || 'all'}, Dept: ${filters.department || 'all'}.`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
