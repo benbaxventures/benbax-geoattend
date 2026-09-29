@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -170,12 +170,7 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboard}>
-        <ScrollView
-          contentContainerStyle={styles.inner}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.inner}>
         <View style={styles.logoSection}>
           <View style={styles.iconCircle}>
             <Text style={styles.iconText}>G</Text>
@@ -285,7 +280,6 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
 
         <Text style={styles.footer}>Geofenced Student Attendance System</Text>
         <Text style={styles.powered}>Powered by Geofence</Text>
-        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -293,45 +287,44 @@ export default function LoginScreen({ onLogin, onForgotPassword, onForgotStaffId
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1a5276' },
-  keyboard: { flex: 1 },
-  inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 16 },
-  logoSection: { alignItems: 'center', marginBottom: 20 },
+  inner: { flex: 1, justifyContent: 'center', padding: 24 },
+  logoSection: { alignItems: 'center', marginBottom: 40 },
   iconCircle: {
-    width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+    width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center', justifyContent: 'center', marginBottom: 16,
   },
-  iconText: { fontSize: 30, fontWeight: '700', color: '#fff' },
-  appName: { fontSize: 26, fontWeight: '700', color: '#fff', marginBottom: 4 },
+  iconText: { fontSize: 36, fontWeight: '700', color: '#fff' },
+  appName: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 4 },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.7)' },
   form: {
-    backgroundColor: '#fff', borderRadius: 14, padding: 18,
+    backgroundColor: '#fff', borderRadius: 16, padding: 24,
     shadowColor: '#000', shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15, shadowRadius: 20, elevation: 10,
   },
-  inputContainer: { marginBottom: 12 },
-  label: { fontSize: 12, fontWeight: '600', color: '#7f8c8d', marginBottom: 4 },
+  inputContainer: { marginBottom: 16 },
+  label: { fontSize: 13, fontWeight: '600', color: '#7f8c8d', marginBottom: 6 },
   input: {
     borderWidth: 1.5, borderColor: '#e0e0e0', borderRadius: 10,
-    padding: 11, fontSize: 14, color: '#2c3e50',
+    padding: 14, fontSize: 15, color: '#2c3e50',
   },
   passwordContainer: {
     flexDirection: 'row', alignItems: 'center',
     borderWidth: 1.5, borderColor: '#e0e0e0', borderRadius: 10,
   },
   passwordInput: {
-    flex: 1, padding: 11, fontSize: 14, color: '#2c3e50',
+    flex: 1, padding: 14, fontSize: 15, color: '#2c3e50',
   },
-  eyeButton: { padding: 11 },
-  eyeIcon: { fontSize: 18 },
+  eyeButton: { padding: 14 },
+  eyeIcon: { fontSize: 20 },
   button: {
-    backgroundColor: '#1a5276', borderRadius: 10, padding: 13,
-    alignItems: 'center', marginTop: 4,
+    backgroundColor: '#1a5276', borderRadius: 10, padding: 16,
+    alignItems: 'center', marginTop: 8,
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  biometricLink: { marginTop: 10, alignItems: 'center' },
+  biometricLink: { marginTop: 14, alignItems: 'center' },
   biometricLinkText: { color: '#1a5276', fontSize: 14, fontWeight: '700' },
-  recentSection: { marginBottom: 12 },
+  recentSection: { marginBottom: 16 },
   recentTitle: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   recentList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   recentItem: {
@@ -347,8 +340,8 @@ const styles = StyleSheet.create({
   recentAvatarText: { fontSize: 12, fontWeight: '700', color: '#fff' },
   recentName: { fontSize: 12, fontWeight: '600', color: '#fff' },
   recentId: { fontSize: 10, color: 'rgba(255,255,255,0.6)' },
-  forgotText: { textAlign: 'right', color: '#1a5276', fontSize: 13, fontWeight: '500', marginTop: 6 },
-  footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 16 },
-  registerLink: { textAlign: 'center', color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 14, marginBottom: 12 },
-  powered: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 10, marginTop: 4 },
+  forgotText: { textAlign: 'right', color: '#1a5276', fontSize: 13, fontWeight: '500', marginTop: 8 },
+  footer: { textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 32 },
+  registerLink: { textAlign: 'center', color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 20, marginBottom: Platform.OS === 'android' ? 56 : 20 },
+  powered: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 8 },
 });

@@ -10,40 +10,27 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     background: 'linear-gradient(135deg, #1a5276 0%, #2980b9 100%)',
-    padding: '16px',
-    overflowY: 'auto',
+    padding: '20px',
   },
   card: {
     background: '#fff',
-    borderRadius: '18px',
-    padding: '28px 30px 22px',
+    borderRadius: '16px',
+    padding: '48px 40px',
     width: '100%',
-    maxWidth: '440px',
-    maxHeight: 'calc(100vh - 32px)',
-    overflowY: 'auto',
+    maxWidth: '420px',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
   },
   logo: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    marginBottom: '4px',
+    gap: '10px',
+    marginBottom: '8px',
     color: '#1a5276',
   },
-  title: { fontSize: '24px', fontWeight: '700' },
-  subtitle: { textAlign: 'center', color: '#7f8c8d', marginBottom: '20px', fontSize: '13px' },
-  helper: {
-    marginBottom: '16px',
-    padding: '10px 12px',
-    background: '#f2f8fb',
-    border: '1px solid #dcecf4',
-    borderRadius: '10px',
-    color: '#46606f',
-    fontSize: '12px',
-    lineHeight: 1.4,
-  },
-  inputGroup: { position: 'relative', marginBottom: '14px' },
+  title: { fontSize: '28px', fontWeight: '700' },
+  subtitle: { textAlign: 'center', color: '#7f8c8d', marginBottom: '32px', fontSize: '14px' },
+  inputGroup: { position: 'relative', marginBottom: '20px' },
   inputIcon: {
     position: 'absolute',
     left: '14px',
@@ -53,10 +40,11 @@ const styles = {
   },
   input: {
     width: '100%',
-    padding: '12px 44px',
-    border: '1.5px solid #dfe7ec',
-    borderRadius: '9px',
-    fontSize: '14px',
+    padding: '14px 44px 14px 44px',
+    border: '2px solid #e0e0e0',
+    borderRadius: '10px',
+    fontSize: '15px',
+    transition: 'border-color 0.2s',
     boxSizing: 'border-box',
   },
   eyeButton: {
@@ -74,27 +62,17 @@ const styles = {
   },
   button: {
     width: '100%',
-    padding: '12px',
+    padding: '14px',
     background: '#1a5276',
     color: '#fff',
     border: 'none',
-    borderRadius: '9px',
-    fontSize: '15px',
+    borderRadius: '10px',
+    fontSize: '16px',
     fontWeight: '600',
-    marginTop: '2px',
+    marginTop: '8px',
     cursor: 'pointer',
   },
-  accessNotice: {
-    marginTop: '14px',
-    padding: '9px 11px',
-    background: '#fff8e6',
-    border: '1px solid #f4df9b',
-    borderRadius: '9px',
-    color: '#6b5b2a',
-    fontSize: '12px',
-    lineHeight: 1.4,
-  },
-  footer: { textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#95a5a6' },
+  footer: { textAlign: 'center', marginTop: '24px', fontSize: '12px', color: '#95a5a6' },
 };
 
 export default function Login({ onLogin }) {
@@ -106,8 +84,7 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const normalizedStaffId = staffId.trim();
-    if (!normalizedStaffId || !password) {
+    if (!staffId || !password) {
       toast.error('Please enter Staff ID and password');
       return;
     }
@@ -116,7 +93,7 @@ export default function Login({ onLogin }) {
     try {
       const codeTrim = institutionCode.trim();
       // Super admin (ADMIN001) can login without institution code
-      const { data } = await login(normalizedStaffId.toUpperCase(), password, codeTrim || undefined);
+      const { data } = await login(staffId, password, codeTrim || undefined);
       localStorage.setItem('token', data.token);
       const resolvedCode = data.institution?.code || codeTrim;
       if (resolvedCode) localStorage.setItem('institutionCode', String(resolvedCode).toUpperCase());
@@ -140,79 +117,63 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="auth-shell" style={styles.container}>
-      <div className="auth-card" style={styles.card}>
+    <div style={styles.container}>
+      <div style={styles.card}>
         <div style={styles.logo}>
-          <FiMapPin size={28} />
+          <FiMapPin size={32} />
           <span style={styles.title}>Geofence</span>
         </div>
         <p style={styles.subtitle}>Admin Dashboard - Sign in to continue</p>
 
-        <form onSubmit={handleSubmit} aria-label="Admin sign-in">
-          <div role="note" style={styles.helper}>
-            <strong>Sign-in tip:</strong> Super admins leave Institution Code blank. Institution admins use the code provided by their super admin.
+        <form onSubmit={handleSubmit}>
+          <div style={{ fontSize: 12, color: '#2c3e50', marginBottom: 12, padding: 10, background: '#e8f5e9', borderRadius: 8, lineHeight: 1.5 }}>
+            <strong style={{ color: '#27ae60' }}>Super Admin (ADMIN001):</strong> Leave institution code empty to login<br/>
+            <strong style={{ color: '#3498db', marginTop: 4, display: 'inline-block' }}>Institution Admins:</strong> Enter your institution code and credentials provided by super admin
           </div>
           <div style={styles.inputGroup}>
             <FiMapPin style={styles.inputIcon} size={18} />
             <input
-              className="auth-input"
               style={styles.input}
               type="text"
-              name="institutionCode"
               placeholder="Institution Code (optional for ADMIN001)"
               value={institutionCode}
               onChange={(e) => setInstitutionCode(e.target.value.toUpperCase())}
-              autoComplete="organization"
-              aria-label="Institution Code"
             />
           </div>
           <div style={styles.inputGroup}>
             <FiUser style={styles.inputIcon} size={18} />
             <input
-              className="auth-input"
               style={styles.input}
               type="text"
-              name="staffId"
               placeholder="Admin ID"
               value={staffId}
               onChange={(e) => setStaffId(e.target.value)}
-              autoComplete="username"
-              aria-label="Admin ID"
-              required
             />
           </div>
           <div style={styles.inputGroup}>
             <FiLock style={styles.inputIcon} size={18} />
             <input
-              className="auth-input"
               style={styles.input}
               type={showPassword ? 'text' : 'password'}
-              name="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              aria-label="Password"
-              required
             />
             <button
               type="button"
-              className="auth-toggle"
               style={styles.eyeButton}
               onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              aria-pressed={showPassword}
             >
               {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
             </button>
           </div>
-          <button className="auth-button" style={{ ...styles.button, opacity: loading ? 0.7 : 1 }} disabled={loading} type="submit" aria-busy={loading}>
+          <button style={{ ...styles.button, opacity: loading ? 0.7 : 1 }} disabled={loading} type="submit">
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div role="note" style={styles.accessNotice}>
-          <strong>Admin access only.</strong> Need an account? Contact your super administrator.
+        <div style={{ marginTop: 12, padding: 12, background: '#fff3cd', borderRadius: 8, fontSize: 13, lineHeight: 1.5 }}>
+          <strong>Don't have admin credentials?</strong> Contact your super administrator to create an admin account for your institution. Regular signup creates staff accounts without admin access.
         </div>
 
         <p style={styles.footer}>Geofenced Student Attendance Management System</p>
